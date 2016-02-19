@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="false"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
+
+    <ImageView
+        android:id="@+id/imgPlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="5dp"
+        android:src="@mipmap/ic_play" />
+
+    <LinearLayout
+        android:id="@+id/llSoundInfor"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:layout_toLeftOf="@+id/ll"
+        android:layout_toRightOf="@+id/imgPlay"
+        android:orientation="vertical"
+        android:background="@drawable/selector_sound_info"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/tvSoundName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="Noi"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvSoundAuthor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:text="Oc cho"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:orientation="horizontal">
+        <RelativeLayout
+            android:id="@+id/rlFavorite"
+            android:background="@drawable/selector_sound_info"
+            android:layout_width="wrap_content"
+            android:padding="7dp"
+            android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/imgFavorite"
+                android:layout_width="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/favorite_unselected" />
+
+        </RelativeLayout>
+        <RelativeLayout
+            android:background="@drawable/selector_sound_info"
+            android:id="@+id/rlOption"
+            android:paddingLeft="6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/imgOption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@mipmap/ic_action_navigation_more_vert" />
+        </RelativeLayout>
+
+    </LinearLayout>
+</RelativeLayout>

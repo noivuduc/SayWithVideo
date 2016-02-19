@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/addToSoundBoard" android:title="Add to Soundboard"/>
+    <item android:id="@+id/shareIT" android:title="Share it"/>
+    <item android:id="@+id/report" android:title="Report"/>
+    <item android:id="@+id/improve" android:title="Improve" />
+</menu>

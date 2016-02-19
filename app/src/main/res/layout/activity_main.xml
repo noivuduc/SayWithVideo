@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <datn.bkdn.com.saywithvideo.utils.PagerSlidingTabStrip
+        android:id="@+id/tab"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:pstsActivateTextColor="#f2d05e"
+        app:pstsDeactivateTextColor="#FFCCCCCC"
+        app:pstsDividerColor="@android:color/transparent"
+        app:pstsIndicatorHeight="4dp"
+        app:pstsUnderlineHeight="0dp"
+        app:pstsTabBackground="@android:color/secondary_text_light_nodisable"
+        app:pstsIndicatorColor="#f2d05e"
+        app:pstsShouldExpand="true"
+        app:pstsTabSwitch="true"
+        app:pstsTextAllCaps="false"/>
+    <LinearLayout
+        android:id="@+id/ll"
+        android:orientation="horizontal"
+        android:layout_below="@+id/tab"
+        android:background="@mipmap/shadow"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"/>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tab"
+        />
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="25dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@mipmap/ic_settings"/>
+    </android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>
+

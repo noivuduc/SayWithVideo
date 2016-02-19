@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/byName" android:title="Sort by name"/>
+    <item android:id="@+id/byDate" android:title="Sort by upload date"/>
+    <item android:id="@+id/byPlays" android:title="Sort by plays"/>
+</menu>
