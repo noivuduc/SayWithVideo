@@ -1,5 +1,6 @@
 package datn.bkdn.com.saywithvideo.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import datn.bkdn.com.saywithvideo.R;
+import datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity;
 import datn.bkdn.com.saywithvideo.adapter.ListSoundAdapter;
 import datn.bkdn.com.saywithvideo.model.Sound;
 
@@ -21,7 +23,8 @@ import datn.bkdn.com.saywithvideo.model.Sound;
  * Created by Admin on 2/18/2016.
  */
 public class SoundFragment extends Fragment {
-    private int currentPos=-1;
+    private int currentPos = -1;
+
     public static SoundFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -49,7 +52,7 @@ public class SoundFragment extends Fragment {
                 Sound sound = sounds.get(pos);
                 switch (v.getId()) {
                     case R.id.imgPlay:
-                        if(currentPos != -1 && pos!=currentPos){
+                        if (currentPos != -1 && pos != currentPos) {
                             sounds.get(currentPos).setIsPlaying(false);
                         }
                         currentPos = pos;
@@ -61,7 +64,7 @@ public class SoundFragment extends Fragment {
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
-                        //:TODO
+                        startActivity(new Intent(getContext(), CaptureVideoActivity.class));
                         break;
                     case R.id.rlOption:
                         createPopupMenu(v);
@@ -74,9 +77,9 @@ public class SoundFragment extends Fragment {
         return v;
     }
 
-    private void createPopupMenu(View v){
-        PopupMenu menu = new PopupMenu(getContext(),v);
-        menu.getMenuInflater().inflate(R.menu.popup_menu,menu.getMenu());
+    private void createPopupMenu(View v) {
+        PopupMenu menu = new PopupMenu(getContext(), v);
+        menu.getMenuInflater().inflate(R.menu.popup_menu, menu.getMenu());
         menu.show();
     }
 }

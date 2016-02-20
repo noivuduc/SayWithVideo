@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="datn.bkdn.com.saywithvideo">
 
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -18,7 +22,8 @@
         <activity android:name=".activity.SoundActivity" />
         <activity android:name=".activity.SoundBoardActivity" />
         <activity android:name=".activity.FavoriteActivity" />
-        <activity android:name=".activity.SettingActivity"></activity>
+        <activity android:name=".activity.SettingActivity" />
+        <activity android:name=".activity.CaptureVideoActivity"></activity>
     </application>
 
 </manifest>
