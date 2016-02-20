@@ -21,7 +21,7 @@ import datn.bkdn.com.saywithvideo.model.Sound;
  * Created by Admin on 2/18/2016.
  */
 public class SoundFragment extends Fragment {
-
+    private int currentPos=-1;
     public static SoundFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -49,8 +49,12 @@ public class SoundFragment extends Fragment {
                 Sound sound = sounds.get(pos);
                 switch (v.getId()) {
                     case R.id.imgPlay:
-                    sound.setIsPlaying(!sound.isPlaying());
-                    adapter.notifyDataSetChanged();
+                        if(currentPos != -1 && pos!=currentPos){
+                            sounds.get(currentPos).setIsPlaying(false);
+                        }
+                        currentPos = pos;
+                        sound.setIsPlaying(!sound.isPlaying());
+                        adapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
                         sound.setIsFavorite(!sound.isFavorite());

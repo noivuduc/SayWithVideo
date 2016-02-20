@@ -24,6 +24,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     private EditText tvSearch;
     private ListView lvSound;
     private ImageView imgSort;
+    private int currentPos=-1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +41,10 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                 Sound sound = sounds.get(pos);
                 switch (v.getId()) {
                     case R.id.imgPlay:
+                        if(currentPos != -1 && pos!=currentPos){
+                            sounds.get(currentPos).setIsPlaying(false);
+                        }
+                        currentPos = pos;
                         sound.setIsPlaying(!sound.isPlaying());
                         adapter.notifyDataSetChanged();
                         break;
