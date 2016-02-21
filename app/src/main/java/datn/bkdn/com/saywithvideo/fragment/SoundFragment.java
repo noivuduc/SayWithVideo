@@ -13,11 +13,14 @@ import android.widget.PopupMenu;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity;
 import datn.bkdn.com.saywithvideo.adapter.ListSoundAdapter;
+import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.model.Sound;
+import io.realm.RealmResults;
 
 /**
  * Created by Admin on 2/18/2016.
@@ -41,11 +44,14 @@ public class SoundFragment extends Fragment {
 
         ListView lvSound = (ListView) v.findViewById(R.id.lvSound);
 
-        final List<Sound> sounds = new ArrayList<>();
+        final RealmResults<Sound> sounds = RealmUtils.getRealmUtils(getContext()).getAllSound(getContext());
         for (int i = 0; i < 20; i++) {
-            sounds.add(new Sound(i, "Sound Noi Oc Cho " + i, "Author Noi Oc Cho " + i));
+
+            String uuid = UUID.randomUUID().toString();
+            Sound sound = new Sound(uuid, "name "+i, "author "+i, false);
+            RealmUtils.getRealmUtils(getContext()).addNewSound(getContext(),sound);
         }
-        final ListSoundAdapter adapter = new ListSoundAdapter(getContext(), sounds);
+        final ListSoundAdapter adapter = new ListSoundAdapter(getContext(),sounds ,false);
         adapter.setPlayButtonClicked(new ListSoundAdapter.OnItemClicked() {
             @Override
             public void onClick(int pos, View v) {
@@ -60,7 +66,15 @@ public class SoundFragment extends Fragment {
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
-                        sound.setIsFavorite(!sound.isFavorite());
+                        if(!sound.isFavorite()){
+                            RealmUtils.getRealmUtils(getContext()).addNewSound(getContext(),sound);
+                            RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), sound.getId());
+                        }else
+                        {
+                            RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(),sound.getId());
+
+                        }
+
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:

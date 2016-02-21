@@ -15,7 +15,9 @@ import java.util.List;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter;
 import datn.bkdn.com.saywithvideo.adapter.ListSoundAdapter;
+import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.model.Sound;
+import io.realm.RealmResults;
 
 public class FavoriteActivity extends AppCompatActivity implements View.OnClickListener{
     private ListSoundAdapter adapter;
@@ -25,16 +27,14 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     private ListView lvSound;
     private ImageView imgSort;
     private int currentPos=-1;
+    private RealmResults<Sound> sounds;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite);
         init();
-        final List<Sound> sounds = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            sounds.add(new Sound(i, "Sound Tien Oc Cho " + i, "Author Tien Oc Cho " + i,true));
-        }
-        adapter = new ListSoundAdapter(this, sounds);
+        sounds = RealmUtils.getRealmUtils(this).getFavoriteSound(this);
+        adapter = new ListSoundAdapter(this,sounds ,false);
         adapter.setPlayButtonClicked(new ListSoundAdapter.OnItemClicked() {
             @Override
             public void onClick(int pos, View v) {
@@ -49,7 +49,8 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
-                        sounds.remove(sound);
+                            RealmUtils.getRealmUtils(FavoriteActivity.this).updateFavorite(FavoriteActivity.this,sound.getId());
+                            sounds = RealmUtils.getRealmUtils(FavoriteActivity.this).getFavoriteSound(FavoriteActivity.this);
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:

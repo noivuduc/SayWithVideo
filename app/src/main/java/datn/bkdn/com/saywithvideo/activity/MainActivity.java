@@ -9,6 +9,7 @@ import android.view.View;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.MainPagerAdapter;
+import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.utils.PagerSlidingTabStrip;
 
 public class MainActivity extends AppCompatActivity {

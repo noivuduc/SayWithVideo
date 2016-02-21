@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:id="@+id/rlTop"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#f1ce08"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:id="@+id/rlBack"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
+
+            <ImageView
+                android:id="@+id/imgBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/ic_action_arrow_back" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rlSearch"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@+id/rlSort"
+            android:layout_toRightOf="@+id/rlBack"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:text="Add sound"
+                android:background="@null"
+                android:textColor="#fff" />
+        </RelativeLayout>
+
+    </RelativeLayout>
+    <LinearLayout
+        android:id="@+id/llRecord"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:paddingLeft="30dp"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:paddingRight="30dp"
+            android:background="#aa85e6"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/abc_ic_voice_search_api_mtrl_alpha"/>
+            <TextView
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:textStyle="bold"
+                android:layout_height="wrap_content"
+                android:text="Record a sound"
+                android:textSize="15sp"
+                android:textColor="@android:color/white"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/llImport"
+            android:layout_marginTop="20dp"
+            android:paddingLeft="30dp"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:paddingRight="30dp"
+            android:background="#aa85e6"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/ic_import_white"/>
+            <TextView
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:textStyle="bold"
+                android:layout_height="wrap_content"
+                android:text="Import a sound"
+                android:textSize="15sp"
+                android:textColor="@android:color/white"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>

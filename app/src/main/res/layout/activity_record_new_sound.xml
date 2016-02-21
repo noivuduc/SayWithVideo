@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:id="@+id/rlTop"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#f1ce08"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:id="@+id/rlBack"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
+
+            <ImageView
+                android:id="@+id/imgBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/ic_action_arrow_back" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rlSearch"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@+id/rlSort"
+            android:layout_toRightOf="@+id/rlBack"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:text="Record a sound"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:background="@null"
+                android:textColor="#fff" />
+        </RelativeLayout>
+
+    </RelativeLayout>
+    <TextView
+        android:id="@+id/tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="15sp"
+        android:text="Tab 'Start' to record your sound"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/rlTop"
+        android:layout_marginTop="30dp"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="15sp"
+        android:textColor="@android:color/holo_blue_dark"
+        android:text="4.5 secs"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/tv"
+        android:layout_marginTop="30dp"
+        />
+    <RelativeLayout
+        android:id="@+id/rlStartRecord"
+        android:background="@drawable/selector_button_record_a_sound"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/imgRecord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="40dp"
+            android:src="@mipmap/ic_mic"/>
+        <TextView
+            android:id="@+id/tvStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:textColor="#fff"
+            android:text="Start"
+            android:textStyle="bold"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/imgRecord"/>
+    </RelativeLayout>
+</RelativeLayout>

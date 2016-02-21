@@ -1,36 +1,69 @@
 package datn.bkdn.com.saywithvideo.model;
 
+import io.realm.RealmObject;
+
 /**
  * Created by Admin on 2/18/2016.
  */
-public class Sound {
+public class Sound extends RealmObject{
 
-    private int id;
+    private String id;
     private String name;
     private String author;
     private boolean isPlaying;
     private boolean isFavorite;
     private int plays;
+    private String linkDown;
+    private String linkOnDisk;
     private String dateOfCreate;
-    public Sound(int id, String name, String author) {
+
+    public Sound() {
+    }
+
+    public Sound(String id, String name, String author) {
         this.id = id;
         this.name = name;
         this.author = author;
 
     }
 
-    public Sound(int id, String name, String author, String dateOfCreate) {
+    public Sound(String id, String name, String author, String dateOfCreate) {
         this.id = id;
         this.name = name;
         this.author = author;
         this.dateOfCreate = dateOfCreate;
     }
 
-    public Sound(int id, String name, String author, boolean isFavorite) {
+    public Sound(String id, String name, String author, boolean isFavorite) {
         this.id = id;
         this.name = name;
         this.author = author;
         this.isFavorite = isFavorite;
+    }
+
+    public Sound(String id, String name, String author, String linkDown, String linkOnDisk, String dateOfCreate) {
+        this.id = id;
+        this.name = name;
+        this.author = author;
+        this.linkDown = linkDown;
+        this.linkOnDisk = linkOnDisk;
+        this.dateOfCreate = dateOfCreate;
+    }
+
+    public String getLinkDown() {
+        return linkDown;
+    }
+
+    public void setLinkDown(String linkDown) {
+        this.linkDown = linkDown;
+    }
+
+    public String getLinkOnDisk() {
+        return linkOnDisk;
+    }
+
+    public void setLinkOnDisk(String linkOnDisk) {
+        this.linkOnDisk = linkOnDisk;
     }
 
     public boolean isPlaying() {
@@ -81,11 +114,11 @@ public class Sound {
         this.author = author;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 }

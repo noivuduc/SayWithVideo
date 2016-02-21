@@ -1,5 +1,6 @@
 package datn.bkdn.com.saywithvideo.activity;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -21,6 +22,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private ListMySoundAdapter adapter;
     private RelativeLayout rlBack;
     private RelativeLayout rlSort;
+    private TextView tvAddSound;
     private EditText tvSearch;
     private ListView listView;
     private ImageView imgSort;
@@ -32,7 +34,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         init();
         final List<Sound> sounds = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            sounds.add(new Sound(i, "Sound of Tien Oc Cho " + i, "Author Noi Oc Cho " + i,"21/2/2016"));
+            sounds.add(new Sound(""+i, "Sound of Tien Oc Cho " + i, "Author Noi Oc Cho " + i,"21/2/2016"));
         }
         adapter = new ListMySoundAdapter(this,sounds);
         listView.setAdapter(adapter);
@@ -66,12 +68,14 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         rlSort = (RelativeLayout) findViewById(R.id.rlSort);
         imgSort = (ImageView) findViewById(R.id.imgSort);
         tvSearch = (EditText) findViewById(R.id.edtSearch);
+        tvAddSound = (TextView) findViewById(R.id.tvAddsound);
         setEvent();
     }
 
     private void setEvent(){
         rlBack.setOnClickListener(this);
         rlSort.setOnClickListener(this);
+        tvAddSound.setOnClickListener(this);
         tvSearch.setOnClickListener(this);
     }
 
@@ -103,6 +107,9 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             case R.id.edtSearch:
                 tvSearch.setFocusable(true);
                 tvSearch.setFocusableInTouchMode(true);
+                break;
+            case R.id.tvAddsound:
+                startActivity(new Intent(SoundActivity.this,AddSoundActivity.class));
                 break;
         }
     }

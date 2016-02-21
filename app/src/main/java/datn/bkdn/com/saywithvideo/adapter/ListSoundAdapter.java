@@ -14,11 +14,13 @@ import java.util.List;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.model.Sound;
+import io.realm.RealmBaseAdapter;
+import io.realm.RealmResults;
 
 /**
  * Created by Admin on 2/18/2016.
  */
-public class ListSoundAdapter extends ArrayAdapter<Sound>{
+public class ListSoundAdapter extends RealmBaseAdapter<Sound> {
 
     public interface OnItemClicked{
         void onClick(int pos, View v);
@@ -30,8 +32,8 @@ public class ListSoundAdapter extends ArrayAdapter<Sound>{
         this.itemClicked = playButtonClicked;
     }
 
-    public ListSoundAdapter(Context context, List<Sound> sounds) {
-        super(context, -1, sounds);
+    public ListSoundAdapter(Context context, RealmResults<Sound> sounds,boolean autoUpdate) {
+        super(context, sounds,autoUpdate);
     }
 
     @Override
@@ -39,7 +41,7 @@ public class ListSoundAdapter extends ArrayAdapter<Sound>{
 
         ViewHolder viewHolder;
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_list_sound, parent, false);
+            convertView = inflater.inflate(R.layout.item_list_sound, parent, false);
             viewHolder = new ViewHolder();
             viewHolder.tvSoundName = (TextView) convertView.findViewById(R.id.tvSoundName);
             viewHolder.tvSoundAuthor = (TextView) convertView.findViewById(R.id.tvSoundAuthor);
@@ -87,7 +89,7 @@ public class ListSoundAdapter extends ArrayAdapter<Sound>{
                 }
             }
         });
-        Sound sound = getItem(position);
+        Sound sound = realmResults.get(position);
         viewHolder.imgFavorite.setImageResource(sound.isFavorite()?R.mipmap.favorite_selected:R.mipmap.favorite_unselected);
         viewHolder.imgPlayPause.setImageResource(sound.isPlaying()?R.mipmap.ic_pause:R.mipmap.ic_play);
         viewHolder.tvSoundName.setText(sound.getName());
@@ -107,4 +109,7 @@ public class ListSoundAdapter extends ArrayAdapter<Sound>{
         private RelativeLayout rlFavorite;
     }
 
+    public RealmResults<Sound> getRealmResults(){
+        return realmResults;
+    }
 }

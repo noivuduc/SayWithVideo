@@ -11,9 +11,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Set;
+
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.activity.FavoriteActivity;
 import datn.bkdn.com.saywithvideo.activity.MainActivity;
+import datn.bkdn.com.saywithvideo.activity.RecordNewSoundActivity;
 import datn.bkdn.com.saywithvideo.activity.SettingActivity;
 import datn.bkdn.com.saywithvideo.activity.SoundActivity;
 import datn.bkdn.com.saywithvideo.activity.SoundBoardActivity;

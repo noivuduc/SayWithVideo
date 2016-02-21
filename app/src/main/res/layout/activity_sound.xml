@@ -71,7 +71,7 @@
         android:id="@+id/llMid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/tvBot"
+        android:layout_above="@+id/tvAddsound"
         android:layout_below="@+id/rlTop">
 
         <ListView
@@ -81,7 +81,7 @@
     </RelativeLayout>
 
     <TextView
-        android:id="@+id/tvBot"
+        android:id="@+id/tvAddsound"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
