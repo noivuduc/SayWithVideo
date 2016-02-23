@@ -63,8 +63,18 @@ public class RealmUtils {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                Sound sound = realm.where(Sound.class).equalTo("id",id).findFirst();
+                Sound sound = realm.where(Sound.class).equalTo("id", id).findFirst();
                 sound.setIsFavorite(!sound.isFavorite());
+            }
+        });
+    }
+
+    public void updatePlaying(Context context, final String id){
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Sound sound = realm.where(Sound.class).equalTo("id",id).findFirst();
+                sound.setIsPlaying(!sound.isPlaying());
             }
         });
     }

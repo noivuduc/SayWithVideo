@@ -1,6 +1,8 @@
 package datn.bkdn.com.saywithvideo.fragment;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +23,7 @@ import datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity;
 import datn.bkdn.com.saywithvideo.adapter.ListSoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.model.Sound;
+import datn.bkdn.com.saywithvideo.utils.Mp3Tools;
 import io.realm.RealmResults;
 
 /**
@@ -27,7 +31,9 @@ import io.realm.RealmResults;
  */
 public class SoundFragment extends Fragment {
     private int currentPos = -1;
-
+    private RealmResults<Sound> sounds;
+    private MediaPlayer player;
+    private ListSoundAdapter adapter;
     public static SoundFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -41,17 +47,9 @@ public class SoundFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.from(getContext()).inflate(R.layout.fragment_sound, container, false);
-
         ListView lvSound = (ListView) v.findViewById(R.id.lvSound);
-
-        final RealmResults<Sound> sounds = RealmUtils.getRealmUtils(getContext()).getAllSound(getContext());
-        for (int i = 0; i < 20; i++) {
-
-            String uuid = UUID.randomUUID().toString();
-            Sound sound = new Sound(uuid, "name "+i, "author "+i, false);
-            RealmUtils.getRealmUtils(getContext()).addNewSound(getContext(),sound);
-        }
-        final ListSoundAdapter adapter = new ListSoundAdapter(getContext(),sounds ,false);
+        sounds = RealmUtils.getRealmUtils(getContext()).getAllSound(getContext());
+        adapter = new ListSoundAdapter(getContext(),sounds ,false);
         adapter.setPlayButtonClicked(new ListSoundAdapter.OnItemClicked() {
             @Override
             public void onClick(int pos, View v) {
@@ -59,21 +57,27 @@ public class SoundFragment extends Fragment {
                 switch (v.getId()) {
                     case R.id.imgPlay:
                         if (currentPos != -1 && pos != currentPos) {
-                            sounds.get(currentPos).setIsPlaying(false);
+                            Sound sound1 = sounds.get(currentPos);
+                            if (sound1.isPlaying()) {
+                                RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), sounds.get(currentPos).getId());
+                                player.stop();
+                            }
                         }
                         currentPos = pos;
-                        sound.setIsPlaying(!sound.isPlaying());
+                        if (sound.isPlaying()) {
+                            player.stop();
+                            player.reset();
+                        } else {
+                            playMp3(sound.getLinkOnDisk());
+                        }
+                        RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), sounds.get(pos).getId());
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
-                        if(!sound.isFavorite()){
-                            RealmUtils.getRealmUtils(getContext()).addNewSound(getContext(),sound);
-                            RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), sound.getId());
-                        }else
-                        {
-                            RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(),sound.getId());
-
+                        if (!sound.isFavorite()) {
+                            RealmUtils.getRealmUtils(getContext()).addNewSound(getContext(), sound);
                         }
+                        RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), sound.getId());
 
                         adapter.notifyDataSetChanged();
                         break;
@@ -91,6 +95,29 @@ public class SoundFragment extends Fragment {
         return v;
     }
 
+    public void playMp3(String path)  {
+        if(player==null) {
+            player = new MediaPlayer();
+        }else
+        {
+            player.reset();
+        }
+        try {
+            player.setDataSource(path);
+            player.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        player.start();
+        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                Log.d("stop", "stop");
+                RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), sounds.get(currentPos).getId());
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
     private void createPopupMenu(View v) {
         PopupMenu menu = new PopupMenu(getContext(), v);
         menu.getMenuInflater().inflate(R.menu.popup_menu, menu.getMenu());

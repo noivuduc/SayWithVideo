@@ -1,7 +1,9 @@
 package datn.bkdn.com.saywithvideo.activity;
 
+import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -9,6 +11,7 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +27,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     private RelativeLayout rlBack;
     private RelativeLayout rlSort;
     private EditText tvSearch;
+    private MediaPlayer player;
     private ListView lvSound;
     private ImageView imgSort;
     private int currentPos=-1;
@@ -41,11 +45,23 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                 Sound sound = sounds.get(pos);
                 switch (v.getId()) {
                     case R.id.imgPlay:
-                        if(currentPos != -1 && pos!=currentPos){
-                            sounds.get(currentPos).setIsPlaying(false);
+                        if (currentPos != -1 && pos != currentPos) {
+                            Sound sound1 = sounds.get(currentPos);
+                            if(sound1.isPlaying()) {
+                                RealmUtils.getRealmUtils(FavoriteActivity.this).updatePlaying(FavoriteActivity.this, sounds.get(currentPos).getId());
+                                player.stop();
+                            }
                         }
                         currentPos = pos;
-                        sound.setIsPlaying(!sound.isPlaying());
+                        if(sound.isPlaying()){
+                            player.stop();
+                            player.reset();
+                        }
+                        else
+                        {
+                            playMp3(sound.getLinkOnDisk());
+                        }
+                        RealmUtils.getRealmUtils(FavoriteActivity.this).updatePlaying(FavoriteActivity.this, sounds.get(pos).getId());
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
@@ -65,6 +81,26 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         lvSound.setAdapter(adapter);
 
     }
+
+    public void playMp3(String path)  {
+        player = new MediaPlayer();
+        try {
+            player.setDataSource(path);
+            player.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        player.start();
+        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                Log.d("stop", "stop");
+                RealmUtils.getRealmUtils(FavoriteActivity.this).updatePlaying(FavoriteActivity.this, sounds.get(currentPos).getId());
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
+
     private void init(){
         lvSound = (ListView) findViewById(R.id.lvSoundFavorite);
         rlBack = (RelativeLayout) findViewById(R.id.rlBack);
