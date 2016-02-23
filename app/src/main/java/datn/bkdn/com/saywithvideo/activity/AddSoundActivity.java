@@ -14,6 +14,7 @@ public class AddSoundActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        /* noi oc cho*/
         setContentView(R.layout.activity_add_sound);
         llRecord = (LinearLayout) findViewById(R.id.llRecord);
         llImport = (LinearLayout) findViewById(R.id.llImport);
