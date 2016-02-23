@@ -1,5 +1,8 @@
 package datn.bkdn.com.saywithvideo.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
@@ -22,6 +25,13 @@ public class User extends RealmObject{
         this.pass = pass;
         this.name = name;
         this.email = email;
+    }
+
+    protected User(Parcel in) {
+        id = in.readString();
+        email = in.readString();
+        name = in.readString();
+        pass = in.readString();
     }
 
     public String getId() {
@@ -55,4 +65,5 @@ public class User extends RealmObject{
     public void setPass(String pass) {
         this.pass = pass;
     }
+
 }

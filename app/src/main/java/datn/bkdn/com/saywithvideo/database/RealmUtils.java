@@ -88,7 +88,15 @@ public class RealmUtils {
 
     public RealmResults<Sound> getFavoriteSound(Context context){
         realm = RealmManager.getRealm(context);
-        RealmResults<Sound> sounds = realm.where(Sound.class).equalTo("isFavorite",true).findAll();
+        RealmResults<Sound> sounds = realm.where(Sound.class).equalTo("isFavorite", true).findAll();
         return sounds;
+    }
+
+    public User checkisValidAccount(Context context, String email, String pass){
+        realm = RealmManager.getRealm(context);
+        RealmResults<User> users = realm.where(User.class).equalTo("email",email).equalTo("pass",pass).findAll();
+        if(users.size()>0) return users.get(0);
+        else
+            return null;
     }
 }
