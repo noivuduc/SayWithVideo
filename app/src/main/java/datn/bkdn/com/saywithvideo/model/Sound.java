@@ -5,7 +5,7 @@ import io.realm.RealmObject;
 /**
  * Created by Admin on 2/18/2016.
  */
-public class Sound extends RealmObject{
+public class Sound extends RealmObject {
 
     private String id;
     private String name;
@@ -16,6 +16,15 @@ public class Sound extends RealmObject{
     private String linkDown;
     private String linkOnDisk;
     private String dateOfCreate;
+    private String idUser;
+
+    public String getIdUser() {
+        return idUser;
+    }
+
+    public void setIdUser(String idUser) {
+        this.idUser = idUser;
+    }
 
     public Sound() {
     }

@@ -84,7 +84,17 @@
                 android:visibility="gone"
                 android:src="@mipmap/ic_action_remove"/>
         </LinearLayout>
-
+        <TextView
+            android:id="@+id/tvregister"
+            android:textSize="13sp"
+            android:textColor="#44c9e7"
+            android:textStyle="italic"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            android:text="I don't have any account. Register?"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
     <TextView
         android:layout_below="@+id/lll"

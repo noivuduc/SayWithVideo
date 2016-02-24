@@ -3,6 +3,9 @@ package datn.bkdn.com.saywithvideo.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.UUID;
+
+import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
@@ -13,7 +16,6 @@ import io.realm.annotations.Required;
 public class User extends RealmObject{
     @PrimaryKey
     private String id;
-    @Required
     private String email;
     private String name;
     private String pass;
@@ -25,14 +27,9 @@ public class User extends RealmObject{
         this.pass = pass;
         this.name = name;
         this.email = email;
+        this.id = UUID.randomUUID().toString();
     }
 
-    protected User(Parcel in) {
-        id = in.readString();
-        email = in.readString();
-        name = in.readString();
-        pass = in.readString();
-    }
 
     public String getId() {
         return id;

@@ -13,9 +13,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
-        <activity android:name=".activity.MainActivity">
-
-        </activity>
+        <activity android:name=".activity.MainActivity"></activity>
         <activity android:name=".activity.SoundActivity" />
         <activity android:name=".activity.SoundBoardActivity" />
         <activity android:name=".activity.FavoriteActivity" />
@@ -32,6 +30,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.RegisterActivity"></activity>
     </application>
 
 </manifest>

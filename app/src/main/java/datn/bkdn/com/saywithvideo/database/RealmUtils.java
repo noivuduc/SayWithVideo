@@ -42,17 +42,6 @@ public class RealmUtils {
 
     }
 
-    public void addNewUser(Context context, String name, String pass, String email) {
-        User user = new User(pass, name, email);
-        String uuid = UUID.randomUUID().toString();
-        user.setId(uuid);
-        Realm realm = Realm.getInstance(context);
-
-        realm.beginTransaction();
-        realm.copyToRealm(user);
-        realm.commitTransaction();
-//        RealmResults<User> users = realm.allObjects(User.class);
-    }
 
     public void deleteSound(Context context,String id) {
         realm = RealmManager.getRealm(context);
@@ -79,6 +68,12 @@ public class RealmUtils {
         });
     }
 
+    public RealmResults<Sound> getSoundOfUser(Context context, String id){
+        realm = RealmManager.getRealm(context);
+        RealmResults<Sound> sounds = realm.where(Sound.class).equalTo("idUser",id).findAll();
+        return sounds;
+    }
+
     public RealmResults<Sound> getAllSound(Context context) {
         realm = RealmManager.getRealm(context);
         RealmResults<Sound> sounds = realm.where(Sound.class).findAll();
@@ -94,9 +89,38 @@ public class RealmUtils {
 
     public User checkisValidAccount(Context context, String email, String pass){
         realm = RealmManager.getRealm(context);
-        RealmResults<User> users = realm.where(User.class).equalTo("email",email).equalTo("pass",pass).findAll();
+        RealmResults<User> users = realm.where(User.class).equalTo("email", email).equalTo("pass",pass).findAll();
         if(users.size()>0) return users.get(0);
         else
             return null;
+    }
+
+    public boolean checkExistsEmail(Context context, String email){
+        realm = RealmManager.getRealm(context);
+        RealmResults<User> users = realm.where(User.class).equalTo("email",email).findAll();
+        if(users.size()>0) return true;
+        return false;
+    }
+
+    public RealmResults<User> getUserWithEmail(Context context, String email){
+        realm = RealmManager.getRealm(context);
+        RealmResults<User> users3 = realm.where(User.class).findAll();
+        Log.d("size",users3.size()+"");
+        RealmResults<User> users = realm.where(User.class).equalTo("email",email).findAll();
+        Log.d("size",users.size()+"");
+        return users;
+    }
+
+    public boolean addUser(Context context, String name, String pass, String email){
+        try {
+            realm = RealmManager.getRealm(context);
+            User user = new User(pass,name,email);
+            realm.beginTransaction();
+            realm.copyToRealm(user);
+            realm.commitTransaction();
+            return true;
+        }catch (Exception e){
+            return false;
+        }
     }
 }

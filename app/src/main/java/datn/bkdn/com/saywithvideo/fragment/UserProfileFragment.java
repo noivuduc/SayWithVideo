@@ -20,6 +20,8 @@ import datn.bkdn.com.saywithvideo.activity.RecordNewSoundActivity;
 import datn.bkdn.com.saywithvideo.activity.SettingActivity;
 import datn.bkdn.com.saywithvideo.activity.SoundActivity;
 import datn.bkdn.com.saywithvideo.activity.SoundBoardActivity;
+import datn.bkdn.com.saywithvideo.database.RealmUtils;
+import datn.bkdn.com.saywithvideo.utils.Utils;
 
 /**
  * Created by Admin on 2/18/2016.
@@ -28,7 +30,16 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
 
     private boolean isVolume;
     private ImageView imgVolume;
-
+    private LinearLayout lnSound;
+    private LinearLayout lnSoundboards;
+    private LinearLayout lnFavorites;
+    private LinearLayout llCreateDub;
+    private TextView tvCreateDub;
+    private TextView tvUserName;
+    private TextView numFavorite;
+    private TextView numSound;
+    private TextView numSoundBoard;
+    private ImageView imgBackgroundVideo;
     public static UserProfileFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -42,15 +53,23 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.from(getContext()).inflate(R.layout.fragment_user_profile, container, false);
-        LinearLayout lnSound = (LinearLayout) v.findViewById(R.id.lnSounds);
-        LinearLayout lnSoundboards = (LinearLayout) v.findViewById(R.id.lnSoundboards);
-        LinearLayout lnFavorites = (LinearLayout) v.findViewById(R.id.lnFavorites);
-        LinearLayout llCreateDub = (LinearLayout) v.findViewById(R.id.llCreateDub);
-        TextView tvCreateDub = (TextView) v.findViewById(R.id.tvCreateDub);
-        TextView tvUserName = (TextView) v.findViewById(R.id.tvNameUser);
-        imgVolume = (ImageView) v.findViewById(R.id.imgVolume);
-        ImageView imgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
 
+        lnSound = (LinearLayout) v.findViewById(R.id.lnSounds);
+        lnSoundboards = (LinearLayout) v.findViewById(R.id.lnSoundboards);
+        lnFavorites = (LinearLayout) v.findViewById(R.id.lnFavorites);
+        llCreateDub = (LinearLayout) v.findViewById(R.id.llCreateDub);
+        tvCreateDub = (TextView) v.findViewById(R.id.tvCreateDub);
+        tvUserName = (TextView) v.findViewById(R.id.tvNameUser);
+        numFavorite = (TextView) v.findViewById(R.id.tvNumberSoundFavorite);
+        numSound = (TextView) v.findViewById(R.id.tvNumberSound);
+        numSoundBoard = (TextView) v.findViewById(R.id.tvNumberSoundBoards);
+        imgVolume = (ImageView) v.findViewById(R.id.imgVolume);
+        imgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
+        init();
+        return v;
+    }
+
+    private void init(){
         lnSound.setOnClickListener(this);
         lnSoundboards.setOnClickListener(this);
         lnFavorites.setOnClickListener(this);
@@ -58,8 +77,16 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         tvCreateDub.setOnClickListener(this);
         imgVolume.setOnClickListener(this);
         llCreateDub.setOnClickListener(this);
+    }
 
-        return v;
+    @Override
+    public void onResume() {
+        super.onResume();
+        tvUserName.setText(Utils.getCurrentUserName(getContext()));
+        int num = RealmUtils.getRealmUtils(getContext()).getFavoriteSound(getContext()).size();
+        int numsound = RealmUtils.getRealmUtils(getContext()).getSoundOfUser(getContext(),Utils.getCurrentUserID(getContext())).size();
+        numFavorite.setText(""+num);
+        numSound.setText(numsound + "");
     }
 
     @Override

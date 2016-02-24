@@ -14,11 +14,13 @@ import java.util.List;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.model.Sound;
+import io.realm.RealmBaseAdapter;
+import io.realm.RealmResults;
 
 /**
  * Created by Admin on 2/18/2016.
  */
-public class ListMySoundAdapter extends ArrayAdapter<Sound>{
+public class ListMySoundAdapter extends RealmBaseAdapter<Sound> {
 
     public interface OnItemClicked{
         void onClick(int pos, View v);
@@ -30,8 +32,8 @@ public class ListMySoundAdapter extends ArrayAdapter<Sound>{
         this.itemClicked = playButtonClicked;
     }
 
-    public ListMySoundAdapter(Context context, List<Sound> sounds) {
-        super(context, -1, sounds);
+    public ListMySoundAdapter(Context context, RealmResults<Sound> sounds) {
+        super(context, sounds,true);
     }
 
     @Override
@@ -39,7 +41,7 @@ public class ListMySoundAdapter extends ArrayAdapter<Sound>{
 
         ViewHolder viewHolder;
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_list_mysound, parent, false);
+            convertView = inflater.inflate(R.layout.item_list_mysound, parent, false);
             viewHolder = new ViewHolder();
             viewHolder.tvSoundName = (TextView) convertView.findViewById(R.id.tvSoundName);
             viewHolder.tvPlays = (TextView) convertView.findViewById(R.id.tvPlays);

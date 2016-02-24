@@ -1,8 +1,10 @@
 package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -11,12 +13,16 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter;
+import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.model.Sound;
+import datn.bkdn.com.saywithvideo.utils.Utils;
+import io.realm.RealmResults;
 
 public class SoundActivity extends AppCompatActivity implements View.OnClickListener {
     private ListMySoundAdapter adapter;
@@ -24,18 +30,18 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private RelativeLayout rlSort;
     private TextView tvAddSound;
     private EditText tvSearch;
+    private MediaPlayer player;
     private ListView listView;
     private ImageView imgSort;
+    private RealmResults<Sound> sounds;
     private int currentPos=-1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sound);
         init();
-        final List<Sound> sounds = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            sounds.add(new Sound(""+i, "Sound of Tien Oc Cho " + i, "Author Noi Oc Cho " + i,"21/2/2016"));
-        }
+        String id = Utils.getCurrentUserID(this);
+        sounds = RealmUtils.getRealmUtils(this).getSoundOfUser(this,id);
         adapter = new ListMySoundAdapter(this,sounds);
         listView.setAdapter(adapter);
 
@@ -46,11 +52,23 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                 Sound sound = sounds.get(pos);
                 switch (v.getId()){
                     case R.id.imgPlay:
-                        if(currentPos != -1 && pos!=currentPos){
-                            sounds.get(currentPos).setIsPlaying(false);
+                        if (currentPos != -1 && pos != currentPos) {
+                            Sound sound1 = sounds.get(currentPos);
+                            if(sound1.isPlaying()) {
+                                RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, sounds.get(currentPos).getId());
+                                player.stop();
+                            }
                         }
                         currentPos = pos;
-                        sound.setIsPlaying(!sound.isPlaying());
+                        if(sound.isPlaying()){
+                            player.stop();
+                            player.reset();
+                        }
+                        else
+                        {
+                            playMp3(sound.getLinkOnDisk());
+                        }
+                        RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, sounds.get(pos).getId());
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
@@ -61,7 +79,24 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             }
         });
     }
-
+    public void playMp3(String path)  {
+        player = new MediaPlayer();
+        try {
+            player.setDataSource(path);
+            player.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        player.start();
+        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                Log.d("stop", "stop");
+                RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, sounds.get(currentPos).getId());
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
     private void init(){
         listView = (ListView) findViewById(R.id.lvMySound);
         rlBack = (RelativeLayout) findViewById(R.id.rlBack);

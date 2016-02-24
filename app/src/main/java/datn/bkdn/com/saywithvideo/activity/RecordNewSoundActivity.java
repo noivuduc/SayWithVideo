@@ -32,6 +32,8 @@ import java.util.UUID;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.model.Sound;
+import datn.bkdn.com.saywithvideo.model.User;
+import datn.bkdn.com.saywithvideo.utils.Utils;
 
 import static datn.bkdn.com.saywithvideo.R.drawable.selector_button_record_a_sound_pressed;
 
@@ -83,7 +85,10 @@ public class RecordNewSoundActivity extends Activity
     }
 
     private void createSound(){
-        Sound sound = new Sound(idSound,"my sound","noi","",mFileName,new Date().toString());
+        String name = Utils.getCurrentUserName(this);
+        String id = Utils.getCurrentUserID(this);
+        Sound sound = new Sound(idSound,"sound of "+name,name,"",mFileName,new Date().toString());
+        sound.setIdUser(id);
         RealmUtils.getRealmUtils(this).addNewSound(this,sound);
     }
 

@@ -33,6 +33,7 @@ public class SoundFragment extends Fragment {
     private int currentPos = -1;
     private RealmResults<Sound> sounds;
     private MediaPlayer player;
+    private ListView lvSound;
     private ListSoundAdapter adapter;
     public static SoundFragment newInstance() {
 
@@ -47,7 +48,11 @@ public class SoundFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.from(getContext()).inflate(R.layout.fragment_sound, container, false);
-        ListView lvSound = (ListView) v.findViewById(R.id.lvSound);
+        lvSound = (ListView) v.findViewById(R.id.lvSound);
+        return v;
+    }
+
+    private void init(){
         sounds = RealmUtils.getRealmUtils(getContext()).getAllSound(getContext());
         adapter = new ListSoundAdapter(getContext(),sounds ,false);
         adapter.setPlayButtonClicked(new ListSoundAdapter.OnItemClicked() {
@@ -91,8 +96,12 @@ public class SoundFragment extends Fragment {
             }
         });
         lvSound.setAdapter(adapter);
+    }
 
-        return v;
+    @Override
+    public void onResume() {
+        super.onResume();
+        init();
     }
 
     public void playMp3(String path)  {
