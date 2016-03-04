@@ -11,7 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:layout_alignParentTop="true"
-        android:background="#00f"></RelativeLayout>
+        android:background="#fff">
+
+        <datn.bkdn.com.saywithvideo.custom.VisualizerView
+            android:id="@+id/visualizerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/rlSureface"
@@ -32,9 +38,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:background="#60000000"
-            android:gravity="center_horizontal">
+            android:gravity="right">
 
             <RelativeLayout
+                android:id="@+id/rlSwitchCamera"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/selector_sound_info"
@@ -43,19 +50,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@mipmap/ic_action_camera_front" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/selector_sound_info"
-                android:padding="10dp">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@mipmap/ic_action_camera_front" />
+                    android:src="@mipmap/ic_switch_camera" />
             </RelativeLayout>
         </LinearLayout>
     </RelativeLayout>
@@ -83,6 +78,7 @@
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/rlBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"

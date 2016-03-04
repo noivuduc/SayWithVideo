@@ -1,114 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    android:layout_height="match_parent">
+
     <LinearLayout
         android:id="@+id/lll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp"
-        android:src="@mipmap/ic_person"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#494848"
-        android:text="Login to Dubsmash"
-        android:textSize="17sp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="17dp"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#aeabab"
-        android:gravity="center"
-        android:text="Please enter your Dubsmash username or email and password below"
-        android:textSize="13sp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="15dp"
-        />
-        <LinearLayout
-            android:layout_marginTop="15dp"
+        android:orientation="vertical">
+
+        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:src="@mipmap/ic_person" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="17dp"
+            android:text="Login to Dubsmash"
+            android:textColor="#494848"
+            android:textSize="17sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:gravity="center"
+            android:text="Please enter your Dubsmash username or email and password below"
+            android:textColor="#aeabab"
+            android:textSize="13sp" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
             android:orientation="horizontal">
+
             <EditText
                 android:id="@+id/edtEmail"
-                android:hint="Enter your email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/imgClearEmail"
                 android:background="@null"
-                android:textSize="16sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:gravity="center"
+                android:hint="Enter your email"
+                android:singleLine="true"
+                android:textSize="20sp" />
+
             <ImageView
                 android:id="@+id/imgClearEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:layout_marginLeft="5dp"
-                android:visibility="gone"
-                android:src="@mipmap/ic_action_remove"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_marginTop="15dp"
-            android:layout_width="wrap_content"
+                android:src="@mipmap/ic_action_remove"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
             android:orientation="horizontal">
+
             <EditText
                 android:id="@+id/edtpass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/imgClearPass"
+                android:background="@null"
+                android:gravity="center"
                 android:hint="Enter password"
                 android:password="true"
-                android:background="@null"
-                android:textSize="16sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:singleLine="true"
+                android:textSize="20sp" />
+
             <ImageView
                 android:id="@+id/imgClearPass"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:layout_marginLeft="5dp"
-                android:visibility="gone"
-                android:src="@mipmap/ic_action_remove"/>
-        </LinearLayout>
+                android:src="@mipmap/ic_action_remove"
+                android:visibility="gone" />
+        </RelativeLayout>
+
         <TextView
             android:id="@+id/tvregister"
-            android:textSize="13sp"
-            android:textColor="#44c9e7"
-            android:textStyle="italic"
-            android:layout_gravity="center"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="10dp"
-            android:text="I don't have any account. Register?"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:text="I don't have any account. Register?"
+            android:textColor="#44c9e7"
+            android:textSize="13sp"
+            android:textStyle="italic" />
+
     </LinearLayout>
-    <TextView
-        android:layout_below="@+id/lll"
-        android:id="@+id/tvLogin"
-        android:visibility="invisible"
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:background="#779df5"
-        android:gravity="center"
-        android:text="Log in"
-        android:textColor="#fff"
-        android:textSize="18sp"
-        android:textStyle="bold"/>
-    </RelativeLayout>
+        android:layout_height="match_parent"
+        android:layout_below="@+id/lll">
+
+        <TextView
+            android:id="@+id/tvLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom"
+            android:background="#779df5"
+            android:gravity="center"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
+            android:text="Log in"
+            android:textColor="#fff"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:visibility="invisible" />
     </ScrollView>
 </RelativeLayout>

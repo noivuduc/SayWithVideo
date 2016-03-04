@@ -1,5 +1,6 @@
 package datn.bkdn.com.saywithvideo.model;
 
+import io.realm.RealmList;
 import io.realm.RealmObject;
 
 /**
@@ -17,6 +18,7 @@ public class Sound extends RealmObject {
     private String linkOnDisk;
     private String dateOfCreate;
     private String idUser;
+    private RealmList<User> listFavorite;
 
     public String getIdUser() {
         return idUser;
@@ -57,6 +59,14 @@ public class Sound extends RealmObject {
         this.linkDown = linkDown;
         this.linkOnDisk = linkOnDisk;
         this.dateOfCreate = dateOfCreate;
+    }
+
+    public RealmList<User> getListFavorite() {
+        return listFavorite;
+    }
+
+    public void setListFavorite(RealmList<User> listFavorite) {
+        this.listFavorite = listFavorite;
     }
 
     public String getLinkDown() {

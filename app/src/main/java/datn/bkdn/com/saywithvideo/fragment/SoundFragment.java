@@ -79,15 +79,17 @@ public class SoundFragment extends Fragment {
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
-                        if (!sound.isFavorite()) {
-                            RealmUtils.getRealmUtils(getContext()).addNewSound(getContext(), sound);
-                        }
+//                        if (!sound.isFavorite()) {
+//                            RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), sound.getId());
+//                        }
                         RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), sound.getId());
 
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
-                        startActivity(new Intent(getContext(), CaptureVideoActivity.class));
+                        Intent intent= new Intent(getContext(), CaptureVideoActivity.class);
+                        intent.putExtra("FilePath",sound.getLinkOnDisk());
+                        startActivity(intent);
                         break;
                     case R.id.rlOption:
                         createPopupMenu(v);
