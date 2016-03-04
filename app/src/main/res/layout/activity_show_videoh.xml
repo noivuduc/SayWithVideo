@@ -33,20 +33,20 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp">
 
-        <VideoView
-            android:id="@+id/videoView"
+        <TextureView
+            android:id="@+id/playback_video"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </RelativeLayout>
+
     <TextView
         android:id="@+id/tvShare"
-        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:background="#0077ff"
+        android:gravity="center"
         android:text="Share it"
         android:textColor="#fff"
-        android:textSize="17sp"
-        android:gravity="center"
-        android:background="#0077ff">
-    </TextView>
+        android:textSize="17sp"></TextView>
 </RelativeLayout>

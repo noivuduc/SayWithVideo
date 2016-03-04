@@ -5,13 +5,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.media.AudioManager;
-import android.media.CamcorderProfile;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.audiofx.Visualizer;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -60,8 +58,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         init();
 
         filePath = getIntent().getStringExtra("FilePath");
-//        Log.d("Tien", filePath);
-//        filePath = Constant.AUDIO_DIRECTORY_PATH + "abc.m4a";
+        Log.d("filePath", filePath);
         mMediaPlayer = new MediaPlayer();
         try {
             mMediaPlayer.setDataSource(filePath);
@@ -86,8 +83,9 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mPreview = new CameraPreview(this, mCamera);
         FrameLayout preview = (FrameLayout) findViewById(R.id.cameraPreview);
         preview.addView(mPreview);
-
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        Log.d("mPreview", mPreview.getWidth() + " " + mPreview.getHeight());
     }
 
     private void setupVisualizerFxAndUI() {
@@ -121,13 +119,21 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     }
 
     public static Camera getCameraInstance() {
-        Camera c = null;
+        Camera camera = null;
         try {
-            c = Camera.open();
-            c.setDisplayOrientation(90);
+            camera = Camera.open();
+            camera.setDisplayOrientation(90);
+//            Camera.Parameters mParameters = camera.getParameters();
+//            List<Camera.Size> i = mParameters.getSupportedPreviewSizes();
+//            Camera.Size mBestSize = i.get(0);
+//            List<int[]> fps = mParameters.getSupportedPreviewFpsRange();
+//            int[] best = fps.get(0);
+//            mParameters.setPreviewSize(mBestSize.width, mBestSize.height);
+//            mParameters.setPreviewFpsRange(best[0], best[1]);
+//            camera.setParameters(mParameters);
         } catch (Exception e) {
         }
-        return c;
+        return camera;
     }
 
     private boolean hasCamera(Context context) {
@@ -143,14 +149,13 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mCamera.unlock();
         mMediaRecorder.setCamera(mCamera);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-
-        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_1080P);
-
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
-        mMediaRecorder.setVideoFrameRate(profile.videoFrameRate);
-        mMediaRecorder.setVideoEncodingBitRate(profile.videoBitRate);
-        mMediaRecorder.setVideoSize(mPreview.getWidth(), mPreview.getWidth());
+        mMediaRecorder.setVideoSize(1080, 1080);
+        mMediaRecorder.setVideoFrameRate(24);
+        mMediaRecorder.setVideoEncodingBitRate(3000000);
+        mMediaRecorder.setOrientationHint(90);
+
         mVideoOutPut = Constant.VIDEO_DIRECTORY_PATH + "VIDEO_" + Tools.getDate() + ".mp4";
         mMediaRecorder.setOutputFile(mVideoOutPut);
         try {
@@ -186,7 +191,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             finish();
         }
         if (mCamera == null) {
-            // if the front facing camera does not exist
             if (findFrontFacingCamera() < 0) {
                 Toast.makeText(this, "No front facing camera found.", Toast.LENGTH_LONG).show();
                 mRlSwitchCamera.setVisibility(View.GONE);
@@ -260,7 +264,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             case R.id.rlSwitchCamera:
                 if (!recording) {
                     int camerasNumber = Camera.getNumberOfCameras();
-
                     if (camerasNumber > 1) {
                         releaseCamera();
                         chooseCamera();
