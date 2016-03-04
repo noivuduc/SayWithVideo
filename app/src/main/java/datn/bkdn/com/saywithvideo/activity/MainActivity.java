@@ -13,6 +13,7 @@ import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.utils.PagerSlidingTabStrip;
 
 public class MainActivity extends AppCompatActivity {
+    //  noi oc cho nhe
     private PagerSlidingTabStrip tabStrip;
     private ViewPager pager;
 
