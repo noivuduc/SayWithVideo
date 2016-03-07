@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.List;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.custom.VisualizerView;
@@ -122,15 +123,15 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         Camera camera = null;
         try {
             camera = Camera.open();
-            camera.setDisplayOrientation(90);
-//            Camera.Parameters mParameters = camera.getParameters();
-//            List<Camera.Size> i = mParameters.getSupportedPreviewSizes();
-//            Camera.Size mBestSize = i.get(0);
-//            List<int[]> fps = mParameters.getSupportedPreviewFpsRange();
-//            int[] best = fps.get(0);
-//            mParameters.setPreviewSize(mBestSize.width, mBestSize.height);
-//            mParameters.setPreviewFpsRange(best[0], best[1]);
-//            camera.setParameters(mParameters);
+//            camera.setDisplayOrientation(90);
+            Camera.Parameters mParameters = camera.getParameters();
+            List<Camera.Size> i = mParameters.getSupportedPreviewSizes();
+            Camera.Size mBestSize = i.get(0);
+            List<int[]> fps = mParameters.getSupportedPreviewFpsRange();
+            int[] best = fps.get(0);
+            mParameters.setPreviewSize(mBestSize.width, mBestSize.height);
+            mParameters.setPreviewFpsRange(best[0], best[1]);
+            camera.setParameters(mParameters);
         } catch (Exception e) {
         }
         return camera;
@@ -154,7 +155,12 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mMediaRecorder.setVideoSize(1080, 1080);
         mMediaRecorder.setVideoFrameRate(24);
         mMediaRecorder.setVideoEncodingBitRate(3000000);
-        mMediaRecorder.setOrientationHint(90);
+        if(cameraFront){
+            mMediaRecorder.setOrientationHint(270);
+        }
+        else{
+            mMediaRecorder.setOrientationHint(90);
+        }
 
         mVideoOutPut = Constant.VIDEO_DIRECTORY_PATH + "VIDEO_" + Tools.getDate() + ".mp4";
         mMediaRecorder.setOutputFile(mVideoOutPut);

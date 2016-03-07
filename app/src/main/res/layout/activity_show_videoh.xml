@@ -48,5 +48,5 @@
         android:gravity="center"
         android:text="Share it"
         android:textColor="#fff"
-        android:textSize="17sp"></TextView>
+        android:textSize="17sp" />
 </RelativeLayout>
