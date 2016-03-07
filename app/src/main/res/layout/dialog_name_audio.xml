@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <EditText
+        android:layout_margin="20dp"
+        android:id="@+id/edtnewName"
+        android:background="@null"
+        android:padding="10dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#1548be"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_marginTop="15dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/tvCancel"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:padding="15dp"
+            android:text="Cancel"
+            android:gravity="center"
+            android:textColor="#1a65cf"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tvOK"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:padding="15dp"
+            android:text="OK"
+            android:gravity="center"
+            android:textColor="#1a65cf"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</LinearLayout>

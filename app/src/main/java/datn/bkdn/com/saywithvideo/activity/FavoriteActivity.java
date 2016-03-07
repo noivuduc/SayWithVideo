@@ -1,5 +1,6 @@
 package datn.bkdn.com.saywithvideo.activity;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -70,6 +71,9 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
+                        Intent intent= new Intent(FavoriteActivity.this, CaptureVideoActivity.class);
+                        intent.putExtra("FilePath",sound.getLinkOnDisk());
+                        startActivity(intent);
                         //:TODO
                         break;
                     case R.id.rlOption:

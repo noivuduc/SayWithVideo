@@ -1,6 +1,7 @@
 package datn.bkdn.com.saywithvideo.activity;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -9,12 +10,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
@@ -183,6 +186,8 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
                 left = (mMarkerLeft.getX() + mMarkerLeft.getWidth() / 2 - mVisualizerView.getLeft()) / pixelPerSecond;
                 right = (mMarkerRight.getX() + mMarkerRight.getWidth() / 2 - mVisualizerView.getLeft()) / pixelPerSecond;
                 new EditAudio(left, right).execute();
+                //:TODO add name audio
+                createDialog();
                 break;
             case R.id.rlBack:
                 if (mMediaPlayer.isPlaying()) {
@@ -248,23 +253,52 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
             return null;
         }
 
-        private String idSound;
 
-        private void createSound() {
-            idSound = UUID.randomUUID().toString();
-            String id = Utils.getCurrentUserID(EditAudioActivity.this);
-            Sound sound = new Sound(idSound, outputPath, "noi", outputPath, outputPath, new Date().toString());
-            sound.setIdUser(id);
-            RealmUtils.getRealmUtils(EditAudioActivity.this).addNewSound(EditAudioActivity.this, sound);
-        }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             File file = new File(filePath);
             file.delete();
-            createSound();
-            finish();
+//            createSound();
+          //  finish();
         }
+    }
+    private String idSound;
+    private void createSound(String name) {
+        idSound = UUID.randomUUID().toString();
+        Date date = new Date();
+        SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy");
+        String id = Utils.getCurrentUserID(EditAudioActivity.this);
+        Sound sound = new Sound(idSound, name, Utils.getCurrentUserName(EditAudioActivity.this), outputPath, outputPath, ft.format(date).toString());
+        sound.setIdUser(id);
+        RealmUtils.getRealmUtils(EditAudioActivity.this).addNewSound(EditAudioActivity.this, sound);
+    }
+    public void createDialog(){
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_name_audio);
+        dialog.setTitle("Pick a name");
+
+        TextView tvOK = (TextView) dialog.findViewById(R.id.tvOK);
+        TextView tvCancel = (TextView) dialog.findViewById(R.id.tvCancel);
+        final EditText edtName = (EditText) dialog.findViewById(R.id.edtnewName);
+
+        tvOK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                createSound(edtName.getText().toString());
+                finish();
+            }
+        });
+
+        tvCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
     }
 }

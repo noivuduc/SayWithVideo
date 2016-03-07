@@ -3,11 +3,15 @@ package datn.bkdn.com.saywithvideo.database;
 import android.content.Context;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import datn.bkdn.com.saywithvideo.model.Migration;
 import datn.bkdn.com.saywithvideo.model.Sound;
 import datn.bkdn.com.saywithvideo.model.User;
+import datn.bkdn.com.saywithvideo.model.Video;
 import io.realm.DynamicRealm;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -122,5 +126,22 @@ public class RealmUtils {
         }catch (Exception e){
             return false;
         }
+    }
+
+    public boolean addVideo(Context context, String name, String path){
+        realm = RealmManager.getRealm(context);
+        String id = UUID.randomUUID().toString();
+        Date date = new Date();
+        SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy");
+        Video video = new Video(id,name,ft.format(date).toString(),path);
+        realm.beginTransaction();
+        realm.copyToRealm(video);
+        realm.commitTransaction();
+        return true;
+    }
+
+    public RealmResults<Video> getVideo(Context context){
+        realm = RealmManager.getRealm(context);
+        return realm.where(Video.class).findAll();
     }
 }
