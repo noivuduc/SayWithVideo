@@ -74,6 +74,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                     case R.id.llSoundInfor:
                         Intent intent= new Intent(SoundActivity.this, CaptureVideoActivity.class);
                         intent.putExtra("FilePath",sound.getLinkOnDisk());
+                        intent.putExtra("FileName",sound.getName());
                         startActivity(intent);
                         break;
                     case R.id.imgOption:

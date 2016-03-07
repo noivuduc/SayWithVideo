@@ -4,11 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.Set;
@@ -20,8 +22,11 @@ import datn.bkdn.com.saywithvideo.activity.RecordNewSoundActivity;
 import datn.bkdn.com.saywithvideo.activity.SettingActivity;
 import datn.bkdn.com.saywithvideo.activity.SoundActivity;
 import datn.bkdn.com.saywithvideo.activity.SoundBoardActivity;
+import datn.bkdn.com.saywithvideo.adapter.ListMyVideoAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
+import datn.bkdn.com.saywithvideo.model.Video;
 import datn.bkdn.com.saywithvideo.utils.Utils;
+import io.realm.RealmResults;
 
 /**
  * Created by Admin on 2/18/2016.
@@ -29,6 +34,7 @@ import datn.bkdn.com.saywithvideo.utils.Utils;
 public class UserProfileFragment extends Fragment implements View.OnClickListener {
 
     private boolean isVolume;
+    private ListView lvMyVideo;
     private ImageView imgVolume;
     private LinearLayout lnSound;
     private LinearLayout lnSoundboards;
@@ -65,6 +71,14 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         numSoundBoard = (TextView) v.findViewById(R.id.tvNumberSoundBoards);
         imgVolume = (ImageView) v.findViewById(R.id.imgVolume);
         imgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
+        lvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
+
+        RealmResults<Video> videos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
+        if(videos.size()!=0){
+            llCreateDub.setVisibility(View.INVISIBLE);
+        }
+        ListMyVideoAdapter adapter = new ListMyVideoAdapter(getContext(),videos);
+        lvMyVideo.setAdapter(adapter);
         init();
         return v;
     }
@@ -88,6 +102,8 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         numFavorite.setText(""+num);
         numSound.setText(numsound + "");
     }
+
+
 
     @Override
     public void onClick(View v) {

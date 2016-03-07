@@ -30,6 +30,7 @@ import java.nio.channels.FileChannel;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.custom.VisualizerView;
+import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.utils.CameraPreview;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Tools;
@@ -46,6 +47,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     private MediaPlayer mMediaPlayer;
     private MediaRecorder mMediaRecorder;
     private String filePath;
+    private String fileName;
     private boolean cameraFront = false;
     private boolean recording = false;
     private String mVideoOutPut;
@@ -56,7 +58,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         setContentView(R.layout.activity_capture_video);
 
         init();
-
+        fileName = getIntent().getStringExtra("FileName");
         filePath = getIntent().getStringExtra("FilePath");
         Log.d("filePath", filePath);
         mMediaPlayer = new MediaPlayer();
@@ -340,7 +342,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             File file = new File(mVideoOutPut);
             file.delete();
             Toast.makeText(getBaseContext(), "Mux video success", Toast.LENGTH_SHORT).show();
-
+            RealmUtils.getRealmUtils(CaptureVideoActivity.this).addVideo(CaptureVideoActivity.this,fileName,outputPath);
             Intent intent = new Intent(CaptureVideoActivity.this, ShowVideohActivity.class);
             intent.putExtra("VideoPath", outputPath);
             startActivity(intent);
