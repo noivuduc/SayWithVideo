@@ -52,6 +52,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     private boolean cameraFront = false;
     private boolean recording = false;
     private String mVideoOutPut;
+    private FrameLayout mFlPreview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,8 +85,11 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
 
         mCamera = getCameraInstance();
         mPreview = new CameraPreview(this, mCamera);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.cameraPreview);
-        preview.addView(mPreview);
+        mFlPreview = (FrameLayout) findViewById(R.id.cameraPreview);
+        int w=getResources().getDisplayMetrics().widthPixels;
+        RelativeLayout.LayoutParams params=new RelativeLayout.LayoutParams(w,w);
+        mFlPreview.setLayoutParams(params);
+        mFlPreview.addView(mPreview);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         Log.d("mPreview", mPreview.getWidth() + " " + mPreview.getHeight());
@@ -125,15 +129,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         Camera camera = null;
         try {
             camera = Camera.open();
-//            camera.setDisplayOrientation(90);
-            Camera.Parameters mParameters = camera.getParameters();
-            List<Camera.Size> i = mParameters.getSupportedPreviewSizes();
-            Camera.Size mBestSize = i.get(0);
-            List<int[]> fps = mParameters.getSupportedPreviewFpsRange();
-            int[] best = fps.get(0);
-            mParameters.setPreviewSize(mBestSize.width, mBestSize.height);
-            mParameters.setPreviewFpsRange(best[0], best[1]);
-            camera.setParameters(mParameters);
         } catch (Exception e) {
         }
         return camera;
@@ -154,8 +149,8 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
-        mMediaRecorder.setVideoSize(1080, 1080);
-        mMediaRecorder.setVideoFrameRate(24);
+        mMediaRecorder.setVideoSize(mFlPreview.getWidth(), mFlPreview.getHeight());
+        mMediaRecorder.setVideoFrameRate(30);
         mMediaRecorder.setVideoEncodingBitRate(3000000);
         if(cameraFront){
             mMediaRecorder.setOrientationHint(270);
