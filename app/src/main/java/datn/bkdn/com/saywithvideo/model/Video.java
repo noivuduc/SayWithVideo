@@ -2,10 +2,7 @@ package datn.bkdn.com.saywithvideo.model;
 
 import io.realm.RealmObject;
 
-/**
- * Created by Admin on 3/7/2016.
- */
-public class Video extends RealmObject{
+public class Video extends RealmObject {
     private String id;
     private String name;
     private String time;

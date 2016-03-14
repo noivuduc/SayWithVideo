@@ -6,12 +6,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
-/**
- * Created by Tien on 2/25/2016.
- */
 public class VisualizerView extends View {
 
     private byte[] mBytes;
@@ -19,10 +15,12 @@ public class VisualizerView extends View {
     private Rect mRect = new Rect();
     private Paint mForePaint = new Paint();
     private Paint mPaint = new Paint();
+    private Paint mClearPaint = new Paint();
     private int mDuration;
     private float mCurrentPosition;
-    private float startPosition;
-    private boolean isStop;
+    private float mStartPosition;
+    private float mEndPosition;
+    private boolean mIsStop;
 
     public VisualizerView(Context context) {
         super(context);
@@ -40,7 +38,11 @@ public class VisualizerView extends View {
     }
 
     public void setStartPosition(float startPosition) {
-        this.startPosition = startPosition * getWidth() / mDuration;
+        this.mStartPosition = startPosition * getWidth() / mDuration;
+    }
+
+    public void setEndPosition(float endPosition) {
+        this.mEndPosition = endPosition * getWidth() / mDuration;
     }
 
     private void init() {
@@ -50,11 +52,15 @@ public class VisualizerView extends View {
 
         mPaint.setStrokeWidth(3f);
         mPaint.setColor(Color.RED);
+
+        mClearPaint.setColor(Color.TRANSPARENT);
+        mEndPosition = -1;
+
         start();
     }
 
     public void reset() {
-        isStop = true;
+        mIsStop = true;
         invalidate();
     }
 
@@ -62,7 +68,7 @@ public class VisualizerView extends View {
         mBytes = null;
         mCurrentPosition = 0;
         mDuration = 0;
-        isStop = false;
+        mIsStop = false;
     }
 
     public void setDuration(int duration) {
@@ -70,7 +76,7 @@ public class VisualizerView extends View {
     }
 
     public void updateVisualizer(byte[] bytes, int mCurrentPosition) {
-        this.mCurrentPosition = mCurrentPosition;
+        this.mCurrentPosition = mCurrentPosition * getWidth() / mDuration;
         mBytes = bytes;
         invalidate();
     }
@@ -78,11 +84,9 @@ public class VisualizerView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (isStop) {
-            Log.d("tien", "draw reset");
-            Paint clearPaint = new Paint();
-            clearPaint.setColor(Color.TRANSPARENT);
-            canvas.drawRect(getLeft(), getTop(), getWidth(), getHeight(), clearPaint);
+
+        if (mIsStop || (mEndPosition != -1 && mCurrentPosition > mEndPosition)) {
+            canvas.drawRect(getLeft(), getTop(), getWidth(), getHeight(), mClearPaint);
             return;
         }
         if (mBytes == null) {
@@ -91,8 +95,7 @@ public class VisualizerView extends View {
         if (mPoints == null || mPoints.length < mBytes.length * 4) {
             mPoints = new float[mBytes.length * 4];
         }
-        mCurrentPosition = mCurrentPosition * getWidth() / mDuration;
-        canvas.drawRect(startPosition, getTop(), mCurrentPosition, getHeight(), mPaint);
+        canvas.drawRect(mStartPosition, getTop(), mCurrentPosition, getHeight(), mPaint);
         mRect.set(0, 0, getWidth(), getHeight());
         for (int i = 0; i < mBytes.length - 1; i++) {
             mPoints[i * 4] = mRect.width() * i / (mBytes.length - 1);

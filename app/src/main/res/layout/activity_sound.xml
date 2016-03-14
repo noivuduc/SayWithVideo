@@ -37,14 +37,14 @@
             android:paddingRight="10dp">
 
             <EditText
-                android:singleLine="true"
-                android:focusable="false"
                 android:id="@+id/edtSearch"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerVertical="true"
                 android:background="@null"
+                android:focusable="false"
                 android:hint="Search Snips"
+                android:singleLine="true"
                 android:textColor="#fff"
                 android:textColorHint="#fff" />
         </RelativeLayout>
@@ -76,10 +76,10 @@
 
         <ListView
             android:id="@+id/lvMySound"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="0dp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp" />
     </RelativeLayout>
 
     <TextView
@@ -87,11 +87,11 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
-        android:background="#03b698"
+        android:background="@drawable/background_button_add_sound"
         android:gravity="center"
         android:text="Add Sound"
         android:textColor="#fff"
         android:textSize="14sp"
-        android:textStyle="bold"></TextView>
+        android:textStyle="bold" />
 
 </RelativeLayout>

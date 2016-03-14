@@ -11,13 +11,12 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import java.io.IOException;
 
 import datn.bkdn.com.saywithvideo.R;
 
-public class ShowVideohActivity extends AppCompatActivity implements View.OnClickListener, TextureView.SurfaceTextureListener {
+public class ShowVideoActivity extends AppCompatActivity implements View.OnClickListener, TextureView.SurfaceTextureListener {
 
     private RelativeLayout mRlBack;
     private static final String TAG = "Tien";
@@ -29,7 +28,7 @@ public class ShowVideohActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_show_videoh);
+        setContentView(R.layout.activity_show_video);
 
         mVideoPath = getIntent().getStringExtra("VideoPath");
         init();
@@ -52,7 +51,7 @@ public class ShowVideohActivity extends AppCompatActivity implements View.OnClic
                 finish();
                 break;
             case R.id.tvShare:
-                Intent i = new Intent(ShowVideohActivity.this, ShareActivity.class);
+                Intent i = new Intent(ShowVideoActivity.this, ShareActivity.class);
                 i.putExtra("filePath", mVideoPath);
                 startActivity(i);
                 break;
@@ -74,7 +73,6 @@ public class ShowVideohActivity extends AppCompatActivity implements View.OnClic
             mMediaPlayer.setLooping(true);
             mMediaPlayer.prepareAsync();
 
-            // Play video when the media source is ready for playback.
             mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {

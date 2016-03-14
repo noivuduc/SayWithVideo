@@ -5,24 +5,39 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import datn.bkdn.com.saywithvideo.R;
 
-public class AddSoundActivity extends AppCompatActivity {
-    private LinearLayout llRecord;
-    private LinearLayout llImport;
+public class AddSoundActivity extends AppCompatActivity implements View.OnClickListener {
+    private LinearLayout mLlRecord;
+    private LinearLayout mLlImport;
+    private RelativeLayout mRlBack;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_sound);
-        llRecord = (LinearLayout) findViewById(R.id.llRecord);
-        llImport = (LinearLayout) findViewById(R.id.llImport);
+        mLlRecord = (LinearLayout) findViewById(R.id.llRecord);
+        mLlImport = (LinearLayout) findViewById(R.id.llImport);
+        mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
 
-        llRecord.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(AddSoundActivity.this,RecordNewSoundActivity.class));
-            }
-        });
+        mLlRecord.setOnClickListener(this);
+        mLlImport.setOnClickListener(this);
+        mRlBack.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.llRecord:
+                startActivity(new Intent(AddSoundActivity.this, RecordNewSoundActivity.class));
+                break;
+            case R.id.llImport:
+                break;
+            case R.id.rlBack:
+                finish();
+                break;
+        }
     }
 }

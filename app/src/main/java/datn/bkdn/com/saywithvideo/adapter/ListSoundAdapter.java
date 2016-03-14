@@ -17,23 +17,20 @@ import datn.bkdn.com.saywithvideo.model.Sound;
 import io.realm.RealmBaseAdapter;
 import io.realm.RealmResults;
 
-/**
- * Created by Admin on 2/18/2016.
- */
 public class ListSoundAdapter extends RealmBaseAdapter<Sound> {
 
-    public interface OnItemClicked{
+    public interface OnItemClicked {
         void onClick(int pos, View v);
     }
 
-    public OnItemClicked itemClicked;
+    public OnItemClicked mItemClicked;
 
     public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
-        this.itemClicked = playButtonClicked;
+        this.mItemClicked = playButtonClicked;
     }
 
-    public ListSoundAdapter(Context context, RealmResults<Sound> sounds,boolean autoUpdate) {
-        super(context, sounds,autoUpdate);
+    public ListSoundAdapter(Context context, RealmResults<Sound> sounds, boolean autoUpdate) {
+        super(context, sounds, autoUpdate);
     }
 
     @Override
@@ -60,38 +57,38 @@ public class ListSoundAdapter extends RealmBaseAdapter<Sound> {
         viewHolder.imgPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(itemClicked!=null){
-                    itemClicked.onClick(position,v);
+                if (mItemClicked != null) {
+                    mItemClicked.onClick(position, v);
                 }
             }
         });
         viewHolder.rlOption.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(itemClicked!=null){
-                    itemClicked.onClick(position,v);
+                if (mItemClicked != null) {
+                    mItemClicked.onClick(position, v);
                 }
             }
         });
         viewHolder.rlFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(itemClicked!=null){
-                    itemClicked.onClick(position,v);
+                if (mItemClicked != null) {
+                    mItemClicked.onClick(position, v);
                 }
             }
         });
         viewHolder.linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(itemClicked!=null){
-                    itemClicked.onClick(position,v);
+                if (mItemClicked != null) {
+                    mItemClicked.onClick(position, v);
                 }
             }
         });
         Sound sound = realmResults.get(position);
-        viewHolder.imgFavorite.setImageResource(sound.isFavorite()?R.mipmap.favorite_selected:R.mipmap.favorite_unselected);
-        viewHolder.imgPlayPause.setImageResource(sound.isPlaying()?R.mipmap.ic_pause:R.mipmap.ic_play);
+        viewHolder.imgFavorite.setImageResource(sound.isFavorite() ? R.mipmap.favorite_selected : R.mipmap.favorite_unselected);
+        viewHolder.imgPlayPause.setImageResource(sound.isPlaying() ? R.mipmap.ic_pause : R.mipmap.ic_play);
         viewHolder.tvSoundName.setText(sound.getName());
         viewHolder.tvSoundAuthor.setText(sound.getAuthor());
 
@@ -109,7 +106,7 @@ public class ListSoundAdapter extends RealmBaseAdapter<Sound> {
         private RelativeLayout rlFavorite;
     }
 
-    public RealmResults<Sound> getRealmResults(){
+    public RealmResults<Sound> getRealmResults() {
         return realmResults;
     }
 }

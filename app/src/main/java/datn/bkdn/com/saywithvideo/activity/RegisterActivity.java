@@ -16,9 +16,7 @@ import java.util.regex.Pattern;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
-import datn.bkdn.com.saywithvideo.model.User;
 import datn.bkdn.com.saywithvideo.utils.Utils;
-import io.realm.RealmResults;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText edtEmail;

@@ -6,9 +6,6 @@ import datn.bkdn.com.saywithvideo.model.Migration;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
-/**
- * Created by Admin on 2/21/2016.
- */
 public class RealmManager {
     private static RealmConfiguration defaultConfig;
 

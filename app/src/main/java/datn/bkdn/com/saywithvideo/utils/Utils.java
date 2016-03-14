@@ -8,16 +8,14 @@ import android.util.Patterns;
 
 import java.util.regex.Pattern;
 
-/**
- * Created by Admin on 2/24/2016.
- */
 public class Utils {
-    private static final String CURRENT_USER="current_user";
-    private static final String CURRENT_USER_EMAIL="email_key";
-    private static final String CURRENT_USER_NAME="name_key";
-    private static final String CURRENT_USER_ID="id_key";
-    public static final String getPrimaryEmail(Context context){
-        String possibleEmail=null;
+    private static final String CURRENT_USER = "current_user";
+    private static final String CURRENT_USER_EMAIL = "email_key";
+    private static final String CURRENT_USER_NAME = "name_key";
+    private static final String CURRENT_USER_ID = "id_key";
+
+    public static final String getPrimaryEmail(Context context) {
+        String possibleEmail = null;
         Pattern emailPattern = Patterns.EMAIL_ADDRESS;
         Account[] accounts = AccountManager.get(context).getAccounts();
         if (emailPattern.matcher(accounts[0].name).matches()) {
@@ -26,41 +24,41 @@ public class Utils {
         return possibleEmail;
     }
 
-    public static boolean setCurrentUsername(Context context,String name, String email, String id){
-        SharedPreferences pref = context.getSharedPreferences(CURRENT_USER,Context.MODE_PRIVATE);
+    public static boolean setCurrentUsername(Context context, String name, String email, String id) {
+        SharedPreferences pref = context.getSharedPreferences(CURRENT_USER, Context.MODE_PRIVATE);
         String mail = pref.getString(CURRENT_USER_EMAIL, "null");
         String sname = pref.getString(CURRENT_USER_NAME, "null");
-        if(mail.equals("null") && sname.equals("null")){
+        if (mail.equals("null") && sname.equals("null")) {
             SharedPreferences.Editor editor = pref.edit();
             //editor.clear();
-            editor.putString(CURRENT_USER_EMAIL,email);
-            editor.putString(CURRENT_USER_NAME,name);
-            editor.putString(CURRENT_USER_ID,id);
-            editor.commit();
+            editor.putString(CURRENT_USER_EMAIL, email);
+            editor.putString(CURRENT_USER_NAME, name);
+            editor.putString(CURRENT_USER_ID, id);
+            editor.apply();
             return true;
         }
         return false;
     }
 
-    public static String getCurrentUserEmail(Context context){
+    public static String getCurrentUserEmail(Context context) {
         SharedPreferences pref = context.getSharedPreferences(CURRENT_USER, Context.MODE_PRIVATE);
-        return pref.getString(CURRENT_USER_EMAIL,"null");
+        return pref.getString(CURRENT_USER_EMAIL, "null");
     }
 
-    public static String getCurrentUserName(Context context){
+    public static String getCurrentUserName(Context context) {
         SharedPreferences pref = context.getSharedPreferences(CURRENT_USER, Context.MODE_PRIVATE);
-        return pref.getString(CURRENT_USER_NAME,"null");
+        return pref.getString(CURRENT_USER_NAME, "null");
     }
 
-    public static String getCurrentUserID(Context context){
+    public static String getCurrentUserID(Context context) {
         SharedPreferences pref = context.getSharedPreferences(CURRENT_USER, Context.MODE_PRIVATE);
-        return pref.getString(CURRENT_USER_ID,"null");
+        return pref.getString(CURRENT_USER_ID, "null");
     }
 
-    public static void clearPref(Context context){
+    public static void clearPref(Context context) {
         SharedPreferences pref = context.getSharedPreferences(CURRENT_USER, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.clear();
-        editor.commit();
+        editor.apply();
     }
 }

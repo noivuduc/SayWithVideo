@@ -7,7 +7,7 @@
     <LinearLayout
         android:id="@+id/llTop"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="60dp"
         android:background="#f7de22">
 
         <RelativeLayout
@@ -38,12 +38,22 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/llBot"
+        android:layout_above="@+id/tvNext"
         android:layout_below="@+id/llTop">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="Hint: Move handles to select range"
+            android:textColor="#cac9c9"
+            android:textSize="13sp" />
+
         <RelativeLayout
+            android:id="@+id/rl"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="150dp"
             android:layout_centerVertical="true">
 
             <datn.bkdn.com.saywithvideo.custom.VisualizerView
@@ -51,41 +61,36 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp" />
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp" />
 
             <datn.bkdn.com.saywithvideo.custom.MarkerView
                 android:id="@+id/markerLeft"
-                android:layout_width="20dp"
+                android:layout_width="30dp"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:src="@mipmap/ic_marker" />
 
             <datn.bkdn.com.saywithvideo.custom.MarkerView
                 android:id="@+id/markerRight"
-                android:layout_width="20dp"
+                android:layout_width="30dp"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
                 android:scaleType="centerCrop"
                 android:src="@mipmap/ic_marker" />
         </RelativeLayout>
-    </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/llBot"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/tvNext"
-        android:gravity="center">
 
         <ImageButton
             android:id="@+id/imgPlay"
             style="@android:style/MediaButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/rl"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
             android:padding="10dp"
             android:src="@mipmap/ic_play" />
-    </LinearLayout>
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/tvNext"

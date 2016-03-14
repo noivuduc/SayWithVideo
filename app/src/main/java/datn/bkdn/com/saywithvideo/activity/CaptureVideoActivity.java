@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.util.List;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.custom.VisualizerView;
@@ -47,10 +46,10 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     private VisualizerView mVisualizerView;
     private MediaPlayer mMediaPlayer;
     private MediaRecorder mMediaRecorder;
-    private String filePath;
-    private String fileName;
-    private boolean cameraFront = false;
-    private boolean recording = false;
+    private String mFilePath;
+    private String mFileName;
+    private boolean mCameraFront = false;
+    private boolean mRecording = false;
     private String mVideoOutPut;
     private FrameLayout mFlPreview;
 
@@ -60,12 +59,12 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         setContentView(R.layout.activity_capture_video);
 
         init();
-        fileName = getIntent().getStringExtra("FileName");
-        filePath = getIntent().getStringExtra("FilePath");
-        Log.d("filePath", filePath);
+        mFileName = getIntent().getStringExtra("FileName");
+        mFilePath = getIntent().getStringExtra("FilePath");
+        Log.d("filePath", mFilePath);
         mMediaPlayer = new MediaPlayer();
         try {
-            mMediaPlayer.setDataSource(filePath);
+            mMediaPlayer.setDataSource(mFilePath);
             mMediaPlayer.prepare();
             mMediaPlayer.setOnCompletionListener(this);
         } catch (IOException e) {
@@ -152,7 +151,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mMediaRecorder.setVideoSize(mFlPreview.getWidth(), mFlPreview.getHeight());
         mMediaRecorder.setVideoFrameRate(30);
         mMediaRecorder.setVideoEncodingBitRate(3000000);
-        if(cameraFront){
+        if(mCameraFront){
             mMediaRecorder.setOrientationHint(270);
         }
         else{
@@ -204,7 +203,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     }
 
     public void chooseCamera() {
-        if (cameraFront) {
+        if (mCameraFront) {
             int cameraId = findBackFacingCamera();
             if (cameraId >= 0) {
                 mCamera = Camera.open(cameraId);
@@ -227,7 +226,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             Camera.getCameraInfo(i, info);
             if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                 cameraId = i;
-                cameraFront = true;
+                mCameraFront = true;
                 break;
             }
         }
@@ -242,7 +241,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             Camera.getCameraInfo(i, info);
             if (info.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
                 cameraId = i;
-                cameraFront = false;
+                mCameraFront = false;
                 break;
             }
         }
@@ -265,7 +264,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                 finish();
                 break;
             case R.id.rlSwitchCamera:
-                if (!recording) {
+                if (!mRecording) {
                     int camerasNumber = Camera.getNumberOfCameras();
                     if (camerasNumber > 1) {
                         releaseCamera();
@@ -277,8 +276,8 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                 }
                 break;
             case R.id.rlCaptureVideo:
-                if (!recording) {
-                    recording = !recording;
+                if (!mRecording) {
+                    mRecording = !mRecording;
                     mRlCaptureVideo.setEnabled(false);
                     setupVisualizerFxAndUI();
                     if (!prepareMediaRecorder()) {
@@ -314,7 +313,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         protected Void doInBackground(Void... params) {
             try {
                 Movie inputVideo = MovieCreator.build(mVideoOutPut);
-                Movie inputAudio = MovieCreator.build(filePath);
+                Movie inputAudio = MovieCreator.build(mFilePath);
                 Movie outputVideo = new Movie();
 
                 for (Track t : inputAudio.getTracks()) {
@@ -343,8 +342,8 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             File file = new File(mVideoOutPut);
             file.delete();
             Toast.makeText(getBaseContext(), "Mux video success", Toast.LENGTH_SHORT).show();
-            RealmUtils.getRealmUtils(CaptureVideoActivity.this).addVideo(CaptureVideoActivity.this,fileName,outputPath);
-            Intent intent = new Intent(CaptureVideoActivity.this, ShowVideohActivity.class);
+            RealmUtils.getRealmUtils(CaptureVideoActivity.this).addVideo(CaptureVideoActivity.this,mFileName,outputPath);
+            Intent intent = new Intent(CaptureVideoActivity.this, ShowVideoActivity.class);
             intent.putExtra("VideoPath", outputPath);
             startActivity(intent);
             finish();

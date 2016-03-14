@@ -13,62 +13,59 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter;
 import datn.bkdn.com.saywithvideo.adapter.ListSoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.model.Sound;
 import io.realm.RealmResults;
 
 public class FavoriteActivity extends AppCompatActivity implements View.OnClickListener{
-    private ListSoundAdapter adapter;
-    private RelativeLayout rlBack;
-    private RelativeLayout rlSort;
-    private EditText tvSearch;
-    private MediaPlayer player;
-    private ListView lvSound;
-    private ImageView imgSort;
-    private int currentPos=-1;
-    private RealmResults<Sound> sounds;
+    private ListSoundAdapter mAdapter;
+    private RelativeLayout mRlBack;
+    private RelativeLayout mRlSort;
+    private EditText mTvSearch;
+    private MediaPlayer mPlayer;
+    private ListView mLvSound;
+    private ImageView mImgSort;
+    private int mCurrentPos=-1;
+    private RealmResults<Sound> mSounds;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite);
         init();
-        sounds = RealmUtils.getRealmUtils(this).getFavoriteSound(this);
-        adapter = new ListSoundAdapter(this,sounds ,false);
-        adapter.setPlayButtonClicked(new ListSoundAdapter.OnItemClicked() {
+        mSounds = RealmUtils.getRealmUtils(this).getFavoriteSound(this);
+        mAdapter = new ListSoundAdapter(this,mSounds ,false);
+        mAdapter.setPlayButtonClicked(new ListSoundAdapter.OnItemClicked() {
             @Override
             public void onClick(int pos, View v) {
-                Sound sound = sounds.get(pos);
+                Sound sound = mSounds.get(pos);
                 switch (v.getId()) {
                     case R.id.imgPlay:
-                        if (currentPos != -1 && pos != currentPos) {
-                            Sound sound1 = sounds.get(currentPos);
+                        if (mCurrentPos != -1 && pos != mCurrentPos) {
+                            Sound sound1 = mSounds.get(mCurrentPos);
                             if(sound1.isPlaying()) {
-                                RealmUtils.getRealmUtils(FavoriteActivity.this).updatePlaying(FavoriteActivity.this, sounds.get(currentPos).getId());
-                                player.stop();
+                                RealmUtils.getRealmUtils(FavoriteActivity.this).updatePlaying(FavoriteActivity.this, mSounds.get(mCurrentPos).getId());
+                                mPlayer.stop();
                             }
                         }
-                        currentPos = pos;
+                        mCurrentPos = pos;
                         if(sound.isPlaying()){
-                            player.stop();
-                            player.reset();
+                            mPlayer.stop();
+                            mPlayer.reset();
                         }
                         else
                         {
                             playMp3(sound.getLinkOnDisk());
                         }
-                        RealmUtils.getRealmUtils(FavoriteActivity.this).updatePlaying(FavoriteActivity.this, sounds.get(pos).getId());
-                        adapter.notifyDataSetChanged();
+                        RealmUtils.getRealmUtils(FavoriteActivity.this).updatePlaying(FavoriteActivity.this, mSounds.get(pos).getId());
+                        mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
                             RealmUtils.getRealmUtils(FavoriteActivity.this).updateFavorite(FavoriteActivity.this,sound.getId());
-                            sounds = RealmUtils.getRealmUtils(FavoriteActivity.this).getFavoriteSound(FavoriteActivity.this);
-                        adapter.notifyDataSetChanged();
+                        mSounds = RealmUtils.getRealmUtils(FavoriteActivity.this).getFavoriteSound(FavoriteActivity.this);
+                        mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
                         Intent intent= new Intent(FavoriteActivity.this, CaptureVideoActivity.class);
@@ -82,42 +79,42 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                 }
             }
         });
-        lvSound.setAdapter(adapter);
+        mLvSound.setAdapter(mAdapter);
 
     }
 
     public void playMp3(String path)  {
-        player = new MediaPlayer();
+        mPlayer = new MediaPlayer();
         try {
-            player.setDataSource(path);
-            player.prepare();
+            mPlayer.setDataSource(path);
+            mPlayer.prepare();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        player.start();
-        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        mPlayer.start();
+        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 Log.d("stop", "stop");
-                RealmUtils.getRealmUtils(FavoriteActivity.this).updatePlaying(FavoriteActivity.this, sounds.get(currentPos).getId());
-                adapter.notifyDataSetChanged();
+                RealmUtils.getRealmUtils(FavoriteActivity.this).updatePlaying(FavoriteActivity.this, mSounds.get(mCurrentPos).getId());
+                mAdapter.notifyDataSetChanged();
             }
         });
     }
 
     private void init(){
-        lvSound = (ListView) findViewById(R.id.lvSoundFavorite);
-        rlBack = (RelativeLayout) findViewById(R.id.rlBack);
-        rlSort = (RelativeLayout) findViewById(R.id.rlSort);
-        imgSort = (ImageView) findViewById(R.id.imgSort);
-        tvSearch = (EditText) findViewById(R.id.edtSearch);
+        mLvSound = (ListView) findViewById(R.id.lvSoundFavorite);
+        mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
+        mRlSort = (RelativeLayout) findViewById(R.id.rlSort);
+        mImgSort = (ImageView) findViewById(R.id.imgSort);
+        mTvSearch = (EditText) findViewById(R.id.edtSearch);
         setEvent();
     }
 
     private void setEvent(){
-        rlBack.setOnClickListener(this);
-        rlSort.setOnClickListener(this);
-        tvSearch.setOnClickListener(this);
+        mRlBack.setOnClickListener(this);
+        mRlSort.setOnClickListener(this);
+        mTvSearch.setOnClickListener(this);
     }
 
     private void createPopupMenu(View v){
@@ -148,11 +145,11 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                 finishActivity();
                 break;
             case R.id.rlSort:
-                createSortMenu(imgSort);
+                createSortMenu(mImgSort);
                 break;
             case R.id.edtSearch:
-                tvSearch.setFocusable(true);
-                tvSearch.setFocusableInTouchMode(true);
+                mTvSearch.setFocusable(true);
+                mTvSearch.setFocusableInTouchMode(true);
                 break;
         }
     }

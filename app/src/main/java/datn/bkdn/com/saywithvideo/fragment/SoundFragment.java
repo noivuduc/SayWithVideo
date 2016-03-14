@@ -2,7 +2,6 @@ package datn.bkdn.com.saywithvideo.fragment;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,27 +13,21 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity;
 import datn.bkdn.com.saywithvideo.adapter.ListSoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.model.Sound;
-import datn.bkdn.com.saywithvideo.utils.Mp3Tools;
 import io.realm.RealmResults;
 
-/**
- * Created by Admin on 2/18/2016.
- */
 public class SoundFragment extends Fragment {
-    private int currentPos = -1;
-    private RealmResults<Sound> sounds;
-    private MediaPlayer player;
-    private ListView lvSound;
-    private ListSoundAdapter adapter;
+    private int mCurrentPos = -1;
+    private RealmResults<Sound> mSounds;
+    private MediaPlayer mPlayer;
+    private ListView mLvSound;
+    private ListSoundAdapter mAdapter;
+
     public static SoundFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -48,35 +41,35 @@ public class SoundFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.from(getContext()).inflate(R.layout.fragment_sound, container, false);
-        lvSound = (ListView) v.findViewById(R.id.lvSound);
+        mLvSound = (ListView) v.findViewById(R.id.lvSound);
         return v;
     }
 
-    private void init(){
-        sounds = RealmUtils.getRealmUtils(getContext()).getAllSound(getContext());
-        adapter = new ListSoundAdapter(getContext(),sounds ,false);
-        adapter.setPlayButtonClicked(new ListSoundAdapter.OnItemClicked() {
+    private void init() {
+        mSounds = RealmUtils.getRealmUtils(getContext()).getAllSound(getContext());
+        mAdapter = new ListSoundAdapter(getContext(), mSounds, false);
+        mAdapter.setPlayButtonClicked(new ListSoundAdapter.OnItemClicked() {
             @Override
             public void onClick(int pos, View v) {
-                Sound sound = sounds.get(pos);
+                Sound sound = mSounds.get(pos);
                 switch (v.getId()) {
                     case R.id.imgPlay:
-                        if (currentPos != -1 && pos != currentPos) {
-                            Sound sound1 = sounds.get(currentPos);
+                        if (mCurrentPos != -1 && pos != mCurrentPos) {
+                            Sound sound1 = mSounds.get(mCurrentPos);
                             if (sound1.isPlaying()) {
-                                RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), sounds.get(currentPos).getId());
-                                player.stop();
+                                RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(mCurrentPos).getId());
+                                mPlayer.stop();
                             }
                         }
-                        currentPos = pos;
+                        mCurrentPos = pos;
                         if (sound.isPlaying()) {
-                            player.stop();
-                            player.reset();
+                            mPlayer.stop();
+                            mPlayer.reset();
                         } else {
                             playMp3(sound.getLinkOnDisk());
                         }
-                        RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), sounds.get(pos).getId());
-                        adapter.notifyDataSetChanged();
+                        RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(pos).getId());
+                        mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
 //                        if (!sound.isFavorite()) {
@@ -84,11 +77,11 @@ public class SoundFragment extends Fragment {
 //                        }
                         RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), sound.getId());
 
-                        adapter.notifyDataSetChanged();
+                        mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
-                        Intent intent= new Intent(getContext(), CaptureVideoActivity.class);
-                        intent.putExtra("FilePath",sound.getLinkOnDisk());
+                        Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
+                        intent.putExtra("FilePath", sound.getLinkOnDisk());
                         startActivity(intent);
                         break;
                     case R.id.rlOption:
@@ -97,7 +90,7 @@ public class SoundFragment extends Fragment {
                 }
             }
         });
-        lvSound.setAdapter(adapter);
+        mLvSound.setAdapter(mAdapter);
     }
 
     @Override
@@ -106,29 +99,29 @@ public class SoundFragment extends Fragment {
         init();
     }
 
-    public void playMp3(String path)  {
-        if(player==null) {
-            player = new MediaPlayer();
-        }else
-        {
-            player.reset();
+    public void playMp3(String path) {
+        if (mPlayer == null) {
+            mPlayer = new MediaPlayer();
+        } else {
+            mPlayer.reset();
         }
         try {
-            player.setDataSource(path);
-            player.prepare();
+            mPlayer.setDataSource(path);
+            mPlayer.prepare();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        player.start();
-        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        mPlayer.start();
+        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 Log.d("stop", "stop");
-                RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), sounds.get(currentPos).getId());
-                adapter.notifyDataSetChanged();
+                RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(mCurrentPos).getId());
+                mAdapter.notifyDataSetChanged();
             }
         });
     }
+
     private void createPopupMenu(View v) {
         PopupMenu menu = new PopupMenu(getContext(), v);
         menu.getMenuInflater().inflate(R.menu.popup_menu, menu.getMenu());

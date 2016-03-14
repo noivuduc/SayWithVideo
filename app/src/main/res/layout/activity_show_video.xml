@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="datn.bkdn.com.saywithvideo.activity.ShowVideohActivity">
+    tools:context=".activity.ShowVideoActivity">
 
     <RelativeLayout
         android:id="@+id/rl"

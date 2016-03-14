@@ -15,11 +15,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.io.IOException;
-import java.util.Date;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.database.RealmUtils;
-import datn.bkdn.com.saywithvideo.model.Sound;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Tools;
 
@@ -32,6 +29,7 @@ public class RecordNewSoundActivity extends Activity {
     private ViewGroup vgBack;
     private TextView tvStart;
     private TextView tvTime;
+    private TextView tvInfor;
     private MediaRecorder mRecorder = null;
     private MediaPlayer mPlayer = null;
     private ClockRecord mClockRecord;
@@ -46,6 +44,7 @@ public class RecordNewSoundActivity extends Activity {
         vgBack = (ViewGroup) findViewById(R.id.rlBack);
         tvStart = (TextView) findViewById(R.id.tvStart);
         tvTime = (TextView) findViewById(R.id.tvTime);
+        tvInfor = (TextView) findViewById(R.id.tvInfor);
 
         buttonRecord.setOnClickListener(new OnClickListener() {
             @Override
@@ -54,6 +53,7 @@ public class RecordNewSoundActivity extends Activity {
                     tvTime.setVisibility(View.VISIBLE);
                     buttonRecord.setBackgroundResource(R.drawable.selector_button_record_a_sound_pressed);
                     tvStart.setText("Done");
+                    tvInfor.setText("Tap when you are done!");
                     clockRecord();
                     mStartRecording = !mStartRecording;
                 } else {
@@ -71,7 +71,6 @@ public class RecordNewSoundActivity extends Activity {
             }
         });
     }
-
 
 
     private void onRecord(boolean start) {

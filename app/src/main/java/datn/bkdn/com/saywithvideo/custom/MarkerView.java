@@ -6,9 +6,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.ImageView;
 
-/**
- * Created by Tien on 2/26/2016.
- */
 public class MarkerView extends ImageView {
 
     public interface CustomListener {
@@ -21,10 +18,10 @@ public class MarkerView extends ImageView {
         void markerMove(MarkerView customImageView, float x);
     }
 
-    private CustomListener listener;
+    private CustomListener mListener;
 
     public void setListener(CustomListener listener) {
-        this.listener = listener;
+        this.mListener = listener;
     }
 
     public MarkerView(Context context) {
@@ -44,13 +41,13 @@ public class MarkerView extends ImageView {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 requestFocus();
-                listener.markerTouchStart(this);
+                mListener.markerTouchStart(this);
                 break;
             case MotionEvent.ACTION_MOVE:
-                listener.markerMove(this, event.getRawX());
+                mListener.markerMove(this, event.getRawX());
                 break;
             case MotionEvent.ACTION_UP:
-                listener.markerTouchEnd(this, event.getX());
+                mListener.markerTouchEnd(this, event.getRawX());
                 break;
         }
         return true;
@@ -59,7 +56,7 @@ public class MarkerView extends ImageView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (listener != null)
-            listener.markerDraw();
+        if (mListener != null)
+            mListener.markerDraw();
     }
 }

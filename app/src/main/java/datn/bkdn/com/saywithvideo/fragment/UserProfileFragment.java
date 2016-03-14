@@ -28,24 +28,22 @@ import datn.bkdn.com.saywithvideo.model.Video;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 
-/**
- * Created by Admin on 2/18/2016.
- */
 public class UserProfileFragment extends Fragment implements View.OnClickListener {
 
-    private boolean isVolume;
-    private ListView lvMyVideo;
-    private ImageView imgVolume;
-    private LinearLayout lnSound;
-    private LinearLayout lnSoundboards;
-    private LinearLayout lnFavorites;
-    private LinearLayout llCreateDub;
-    private TextView tvCreateDub;
-    private TextView tvUserName;
-    private TextView numFavorite;
-    private TextView numSound;
-    private TextView numSoundBoard;
-    private ImageView imgBackgroundVideo;
+    private boolean mIsVolume;
+    private ListView mLvMyVideo;
+    private ImageView mImgVolume;
+    private LinearLayout mLnSound;
+    private LinearLayout mLnSoundboards;
+    private LinearLayout mLnFavorites;
+    private LinearLayout mLlCreateDub;
+    private TextView mTvCreateDub;
+    private TextView mTvUserName;
+    private TextView mNumFavorite;
+    private TextView mNumSound;
+    private TextView mNumSoundBoard;
+    private ImageView mImgBackgroundVideo;
+
     public static UserProfileFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -60,49 +58,48 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.from(getContext()).inflate(R.layout.fragment_user_profile, container, false);
 
-        lnSound = (LinearLayout) v.findViewById(R.id.lnSounds);
-        lnSoundboards = (LinearLayout) v.findViewById(R.id.lnSoundboards);
-        lnFavorites = (LinearLayout) v.findViewById(R.id.lnFavorites);
-        llCreateDub = (LinearLayout) v.findViewById(R.id.llCreateDub);
-        tvCreateDub = (TextView) v.findViewById(R.id.tvCreateDub);
-        tvUserName = (TextView) v.findViewById(R.id.tvNameUser);
-        numFavorite = (TextView) v.findViewById(R.id.tvNumberSoundFavorite);
-        numSound = (TextView) v.findViewById(R.id.tvNumberSound);
-        numSoundBoard = (TextView) v.findViewById(R.id.tvNumberSoundBoards);
-        imgVolume = (ImageView) v.findViewById(R.id.imgVolume);
-        imgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
-        lvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
+        mLnSound = (LinearLayout) v.findViewById(R.id.lnSounds);
+        mLnSoundboards = (LinearLayout) v.findViewById(R.id.lnSoundboards);
+        mLnFavorites = (LinearLayout) v.findViewById(R.id.lnFavorites);
+        mLlCreateDub = (LinearLayout) v.findViewById(R.id.llCreateDub);
+        mTvCreateDub = (TextView) v.findViewById(R.id.tvCreateDub);
+        mTvUserName = (TextView) v.findViewById(R.id.tvNameUser);
+        mNumFavorite = (TextView) v.findViewById(R.id.tvNumberSoundFavorite);
+        mNumSound = (TextView) v.findViewById(R.id.tvNumberSound);
+        mNumSoundBoard = (TextView) v.findViewById(R.id.tvNumberSoundBoards);
+        mImgVolume = (ImageView) v.findViewById(R.id.imgVolume);
+        mImgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
+        mLvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
 
         RealmResults<Video> videos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
-        if(videos.size()!=0){
-            llCreateDub.setVisibility(View.INVISIBLE);
+        if (videos.size() != 0) {
+            mLlCreateDub.setVisibility(View.INVISIBLE);
         }
-        ListMyVideoAdapter adapter = new ListMyVideoAdapter(getContext(),videos);
-        lvMyVideo.setAdapter(adapter);
+        ListMyVideoAdapter adapter = new ListMyVideoAdapter(getContext(), videos);
+        mLvMyVideo.setAdapter(adapter);
         init();
         return v;
     }
 
-    private void init(){
-        lnSound.setOnClickListener(this);
-        lnSoundboards.setOnClickListener(this);
-        lnFavorites.setOnClickListener(this);
-        tvUserName.setOnClickListener(this);
-        tvCreateDub.setOnClickListener(this);
-        imgVolume.setOnClickListener(this);
-        llCreateDub.setOnClickListener(this);
+    private void init() {
+        mLnSound.setOnClickListener(this);
+        mLnSoundboards.setOnClickListener(this);
+        mLnFavorites.setOnClickListener(this);
+        mTvUserName.setOnClickListener(this);
+        mTvCreateDub.setOnClickListener(this);
+        mImgVolume.setOnClickListener(this);
+        mLlCreateDub.setOnClickListener(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        tvUserName.setText(Utils.getCurrentUserName(getContext()));
+        mTvUserName.setText(Utils.getCurrentUserName(getContext()));
         int num = RealmUtils.getRealmUtils(getContext()).getFavoriteSound(getContext()).size();
-        int numsound = RealmUtils.getRealmUtils(getContext()).getSoundOfUser(getContext(),Utils.getCurrentUserID(getContext())).size();
-        numFavorite.setText(""+num);
-        numSound.setText(numsound + "");
+        int numsound = RealmUtils.getRealmUtils(getContext()).getSoundOfUser(getContext(), Utils.getCurrentUserID(getContext())).size();
+        mNumFavorite.setText("" + num);
+        mNumSound.setText(numsound + "");
     }
-
 
 
     @Override
@@ -124,8 +121,8 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
                 ((MainActivity) getContext()).showSounds();
                 break;
             case R.id.imgVolume:
-                isVolume = !isVolume;
-                imgVolume.setImageResource(isVolume ? R.mipmap.ic_action_volume_on : R.mipmap.ic_action_volume_muted);
+                mIsVolume = !mIsVolume;
+                mImgVolume.setImageResource(mIsVolume ? R.mipmap.ic_action_volume_on : R.mipmap.ic_action_volume_muted);
                 break;
         }
     }

@@ -2,13 +2,13 @@ package datn.bkdn.com.saywithvideo.activity;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.audiofx.Visualizer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -36,48 +36,49 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
 
     private MarkerView mMarkerLeft;
     private MarkerView mMarkerRight;
-    private RelativeLayout mRlBack;
     private VisualizerView mVisualizerView;
-    private TextView mTvNext;
     private ImageView mImgPlay;
-    private static final int MIN_SECOND = 2;
-    private float pixelPerSecond;
-    private String filePath;
+    private static final int MIN_SECOND = 1;
+    private float mPixelPerSecond;
+    private String mFilePath;
     private MediaPlayer mMediaPlayer;
     private Visualizer mVisualizer;
-    private int wRight;
-    private String outputPath;
+    private int mWidth;
+    private String mOutputPath;
 
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.activity_edit_audio);
 
-        filePath = getIntent().getStringExtra("FileName");
-        if (filePath == null) {
+        mFilePath = getIntent().getStringExtra("FileName");
+        if (mFilePath == null) {
             finish();
         }
+
         init();
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         mMediaPlayer = new MediaPlayer();
         try {
-            mMediaPlayer.setDataSource(filePath);
+            mMediaPlayer.setDataSource(mFilePath);
             mMediaPlayer.prepare();
+            mMediaPlayer.setOnCompletionListener(this);
         } catch (IOException e) {
             e.printStackTrace();
             mMediaPlayer = null;
         }
-        mMediaPlayer.setOnCompletionListener(this);
-        wRight = getResources().getDisplayMetrics().widthPixels;
+
+        mWidth = getResources().getDisplayMetrics().widthPixels;
+        mPixelPerSecond = mVisualizerView.getWidth() * 1.0f / mMediaPlayer.getDuration();
     }
 
     private void init() {
         mMarkerLeft = (MarkerView) findViewById(R.id.markerLeft);
         mMarkerRight = (MarkerView) findViewById(R.id.markerRight);
-        mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
+        RelativeLayout mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         mVisualizerView = (VisualizerView) findViewById(R.id.visualizerView);
-        mTvNext = (TextView) findViewById(R.id.tvNext);
+        TextView mTvNext = (TextView) findViewById(R.id.tvNext);
         mImgPlay = (ImageView) findViewById(R.id.imgPlay);
 
         mMarkerLeft.setListener(this);
@@ -120,7 +121,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
 
     @Override
     public void markerTouchStart(MarkerView customImageView) {
-        pixelPerSecond = mVisualizerView.getWidth() * 1.0f / mMediaPlayer.getDuration();
+        mPixelPerSecond = mVisualizerView.getWidth() * 1.0f / mMediaPlayer.getDuration();
     }
 
     @Override
@@ -130,14 +131,14 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
 
     @Override
     public void markerMove(MarkerView customImageView, float x) {
-        float min_pixel = MIN_SECOND * pixelPerSecond * 1000;
+        float min_pixel = MIN_SECOND * mPixelPerSecond * 1000;
         if (customImageView.getId() == R.id.markerLeft) {
             if (mMarkerRight.getX() - x < min_pixel) {
                 return;
             }
         } else {
             int xr = (int) x + mMarkerRight.getWidth();
-            if (xr > wRight) {
+            if (xr > mWidth) {
                 return;
             }
             if (x - mMarkerLeft.getX() < min_pixel) {
@@ -149,8 +150,8 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
 
     @Override
     public void onClick(View v) {
-        float left = 0;
-        float right = 0;
+        float left;
+        float right;
         switch (v.getId()) {
             case R.id.imgPlay:
                 if (mVisualizer != null && mVisualizer.getEnabled()) {
@@ -163,30 +164,30 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
                     }
                     try {
                         mMediaPlayer.reset();
-                        mMediaPlayer.setDataSource(filePath);
+                        mMediaPlayer.setDataSource(mFilePath);
                         mMediaPlayer.prepare();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     setupVisualizerFxAndUI();
                     mVisualizer.setEnabled(true);
-                    if (pixelPerSecond == 0) {
-                        pixelPerSecond = mVisualizerView.getWidth() * 1.0f / mMediaPlayer.getDuration();
+                    if (mPixelPerSecond == 0) {
+                        mPixelPerSecond = mVisualizerView.getWidth() * 1.0f / mMediaPlayer.getDuration();
                     }
-                    left = (mMarkerLeft.getX() + mMarkerLeft.getWidth() / 2 - mVisualizerView.getLeft()) / pixelPerSecond;
-                    right = (mMarkerRight.getX() + mMarkerRight.getWidth() / 2 - mVisualizerView.getLeft()) / pixelPerSecond;
+                    left = (mMarkerLeft.getX() + mMarkerLeft.getWidth() / 2 - mVisualizerView.getLeft()) / mPixelPerSecond;
+                    right = (mMarkerRight.getX() + mMarkerRight.getWidth() / 2 - mVisualizerView.getLeft()) / mPixelPerSecond;
                     mVisualizerView.setStartPosition(left);
+                    mVisualizerView.setEndPosition(right);
                     start((long) left, (long) (right - left));
                 }
                 break;
             case R.id.tvNext:
-                if (pixelPerSecond == 0) {
-                    pixelPerSecond = mVisualizerView.getWidth() * 1.0f / mMediaPlayer.getDuration();
+                if (mPixelPerSecond == 0) {
+                    mPixelPerSecond = mVisualizerView.getWidth() * 1.0f / mMediaPlayer.getDuration();
                 }
-                left = (mMarkerLeft.getX() + mMarkerLeft.getWidth() / 2 - mVisualizerView.getLeft()) / pixelPerSecond;
-                right = (mMarkerRight.getX() + mMarkerRight.getWidth() / 2 - mVisualizerView.getLeft()) / pixelPerSecond;
+                left = (mMarkerLeft.getX() + mMarkerLeft.getWidth() / 2 - mVisualizerView.getLeft()) / mPixelPerSecond;
+                right = (mMarkerRight.getX() + mMarkerRight.getWidth() / 2 - mVisualizerView.getLeft()) / mPixelPerSecond;
                 new EditAudio(left, right).execute();
-                //:TODO add name audio
                 createDialog();
                 break;
             case R.id.rlBack:
@@ -241,10 +242,10 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
 
         @Override
         protected Void doInBackground(Void... params) {
-            outputPath = Constant.AUDIO_DIRECTORY_PATH + "AUDIO_" + Tools.getDate() + ".m4a";
+            mOutputPath = Constant.AUDIO_DIRECTORY_PATH + "AUDIO_" + Tools.getDate() + ".m4a";
             try {
-                SoundFile soundFile = SoundFile.create(filePath, null);
-                soundFile.WriteFile(new File(outputPath), left / 1000, right / 1000);
+                SoundFile soundFile = SoundFile.create(mFilePath, null);
+                soundFile.WriteFile(new File(mOutputPath), left / 1000, right / 1000);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (SoundFile.InvalidInputException e) {
@@ -254,27 +255,27 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         }
 
 
-
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            File file = new File(filePath);
+            File file = new File(mFilePath);
             file.delete();
-//            createSound();
-          //  finish();
         }
     }
+
     private String idSound;
+
     private void createSound(String name) {
         idSound = UUID.randomUUID().toString();
         Date date = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy");
         String id = Utils.getCurrentUserID(EditAudioActivity.this);
-        Sound sound = new Sound(idSound, name, Utils.getCurrentUserName(EditAudioActivity.this), outputPath, outputPath, ft.format(date).toString());
+        Sound sound = new Sound(idSound, name, Utils.getCurrentUserName(EditAudioActivity.this), mOutputPath, mOutputPath, ft.format(date).toString());
         sound.setIdUser(id);
         RealmUtils.getRealmUtils(EditAudioActivity.this).addNewSound(EditAudioActivity.this, sound);
     }
-    public void createDialog(){
+
+    public void createDialog() {
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_name_audio);
         dialog.setTitle("Pick a name");

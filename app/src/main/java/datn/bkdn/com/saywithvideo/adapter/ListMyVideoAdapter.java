@@ -4,38 +4,30 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.model.Sound;
 import datn.bkdn.com.saywithvideo.model.Video;
 import io.realm.RealmBaseAdapter;
 import io.realm.RealmResults;
 
-/**
- * Created by Admin on 2/18/2016.
- */
 public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
 
-    public interface OnItemClicked{
+    public interface OnItemClicked {
         void onClick(int pos, View v);
     }
 
-    public OnItemClicked itemClicked;
+    public OnItemClicked mItemClicked;
 
     public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
-        this.itemClicked = playButtonClicked;
+        this.mItemClicked = playButtonClicked;
     }
 
     public ListMyVideoAdapter(Context context, RealmResults<Video> videos) {
-        super(context, videos,true);
+        super(context, videos, true);
     }
 
     @Override
@@ -49,7 +41,7 @@ public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
             viewHolder.tvDateOfCreate = (TextView) convertView.findViewById(R.id.tvTimeVideo);
             viewHolder.imgoption = (ImageView) convertView.findViewById(R.id.imgoption);
             viewHolder.imgshare = (ImageView) convertView.findViewById(R.id.imgshare);
-            viewHolder.videoView = (ImageView)convertView.findViewById(R.id.videoView);
+            viewHolder.videoView = (ImageView) convertView.findViewById(R.id.videoView);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -58,16 +50,16 @@ public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
         viewHolder.imgshare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (itemClicked != null) {
-                    itemClicked.onClick(position, v);
+                if (mItemClicked != null) {
+                    mItemClicked.onClick(position, v);
                 }
             }
         });
         viewHolder.imgoption.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (itemClicked != null) {
-                    itemClicked.onClick(position, v);
+                if (mItemClicked != null) {
+                    mItemClicked.onClick(position, v);
                 }
             }
         });

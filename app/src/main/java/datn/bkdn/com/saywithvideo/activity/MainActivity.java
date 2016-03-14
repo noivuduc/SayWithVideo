@@ -9,23 +9,22 @@ import android.view.View;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.MainPagerAdapter;
-import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.utils.PagerSlidingTabStrip;
 
 public class MainActivity extends AppCompatActivity {
-    //  noi oc cho nhe
-    private PagerSlidingTabStrip tabStrip;
-    private ViewPager pager;
+
+    private PagerSlidingTabStrip mTabStrip;
+    private ViewPager mPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        pager = (ViewPager) findViewById(R.id.pager);
-        tabStrip = (PagerSlidingTabStrip) findViewById(R.id.tab);
+        mPager = (ViewPager) findViewById(R.id.pager);
+        mTabStrip = (PagerSlidingTabStrip) findViewById(R.id.tab);
         MainPagerAdapter adapter = new MainPagerAdapter(getSupportFragmentManager());
-        pager.setAdapter(adapter);
-        tabStrip.setViewPager(pager);
+        mPager.setAdapter(adapter);
+        mTabStrip.setViewPager(mPager);
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -35,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        tabStrip.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        mTabStrip.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
@@ -60,6 +59,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showSounds() {
-        pager.setCurrentItem(0);
+        mPager.setCurrentItem(0);
     }
 }

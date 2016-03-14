@@ -5,6 +5,7 @@ import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -14,8 +15,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter;
@@ -23,8 +22,9 @@ import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.model.Sound;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
+import io.realm.Sort;
 
-public class SoundActivity extends AppCompatActivity implements View.OnClickListener {
+public class SoundActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
     private ListMySoundAdapter adapter;
     private RelativeLayout rlBack;
     private RelativeLayout rlSort;
@@ -34,15 +34,16 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private ListView listView;
     private ImageView imgSort;
     private RealmResults<Sound> sounds;
-    private int currentPos=-1;
+    private int currentPos = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sound);
         init();
         String id = Utils.getCurrentUserID(this);
-        sounds = RealmUtils.getRealmUtils(this).getSoundOfUser(this,id);
-        adapter = new ListMySoundAdapter(this,sounds);
+        sounds = RealmUtils.getRealmUtils(this).getSoundOfUser(this, id);
+        adapter = new ListMySoundAdapter(this, sounds);
         listView.setAdapter(adapter);
 
         adapter.setPlayButtonClicked(new ListMySoundAdapter.OnItemClicked() {
@@ -50,31 +51,29 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onClick(int pos, View v) {
                 Sound sound = sounds.get(pos);
-                switch (v.getId()){
+                switch (v.getId()) {
                     case R.id.imgPlay:
                         if (currentPos != -1 && pos != currentPos) {
                             Sound sound1 = sounds.get(currentPos);
-                            if(sound1.isPlaying()) {
+                            if (sound1.isPlaying()) {
                                 RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, sounds.get(currentPos).getId());
                                 player.stop();
                             }
                         }
                         currentPos = pos;
-                        if(sound.isPlaying()){
+                        if (sound.isPlaying()) {
                             player.stop();
                             player.reset();
-                        }
-                        else
-                        {
+                        } else {
                             playMp3(sound.getLinkOnDisk());
                         }
                         RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, sounds.get(pos).getId());
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
-                        Intent intent= new Intent(SoundActivity.this, CaptureVideoActivity.class);
-                        intent.putExtra("FilePath",sound.getLinkOnDisk());
-                        intent.putExtra("FileName",sound.getName());
+                        Intent intent = new Intent(SoundActivity.this, CaptureVideoActivity.class);
+                        intent.putExtra("FilePath", sound.getLinkOnDisk());
+                        intent.putExtra("FileName", sound.getName());
                         startActivity(intent);
                         break;
                     case R.id.imgOption:
@@ -83,7 +82,8 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             }
         });
     }
-    public void playMp3(String path)  {
+
+    public void playMp3(String path) {
         player = new MediaPlayer();
         try {
             player.setDataSource(path);
@@ -101,7 +101,8 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             }
         });
     }
-    private void init(){
+
+    private void init() {
         listView = (ListView) findViewById(R.id.lvMySound);
         rlBack = (RelativeLayout) findViewById(R.id.rlBack);
         rlSort = (RelativeLayout) findViewById(R.id.rlSort);
@@ -111,20 +112,21 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         setEvent();
     }
 
-    private void setEvent(){
+    private void setEvent() {
         rlBack.setOnClickListener(this);
         rlSort.setOnClickListener(this);
         tvAddSound.setOnClickListener(this);
         tvSearch.setOnClickListener(this);
     }
 
-    private void createSortMenu(View v){
-        PopupMenu menu = new PopupMenu(this,v);
+    private void createSortMenu(View v) {
+        PopupMenu menu = new PopupMenu(this, v);
         menu.getMenuInflater().inflate(R.menu.sort_menu, menu.getMenu());
+        menu.setOnMenuItemClickListener(this);
         menu.show();
     }
 
-    private void finishActivity(){
+    private void finishActivity() {
         this.finish();
     }
 
@@ -136,7 +138,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.rlBack:
                 finishActivity();
                 break;
@@ -148,8 +150,27 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                 tvSearch.setFocusableInTouchMode(true);
                 break;
             case R.id.tvAddsound:
-                startActivity(new Intent(SoundActivity.this,AddSoundActivity.class));
+                startActivity(new Intent(SoundActivity.this, AddSoundActivity.class));
                 break;
         }
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.byName:
+                sounds.sort("name", Sort.ASCENDING);
+                adapter.notifyDataSetChanged();
+                break;
+            case R.id.byDate:
+                sounds.sort("dateOfCreate", Sort.ASCENDING);
+                adapter.notifyDataSetChanged();
+                break;
+            case R.id.byPlays:
+                sounds.sort("plays", Sort.ASCENDING);
+                adapter.notifyDataSetChanged();
+                break;
+        }
+        return true;
     }
 }

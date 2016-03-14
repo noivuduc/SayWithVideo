@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <RelativeLayout
         android:id="@+id/rlTop"
         android:layout_width="match_parent"
@@ -37,68 +37,76 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@null"
                 android:gravity="center_vertical"
                 android:text="Add sound"
-                android:background="@null"
-                android:textColor="#fff" />
+                android:textColor="#fff"
+                android:textSize="17sp" />
         </RelativeLayout>
 
     </RelativeLayout>
+
     <LinearLayout
         android:id="@+id/llRecord"
-        android:layout_centerInParent="true"
         android:layout_width="wrap_content"
-        android:orientation="vertical"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
+
         <LinearLayout
-            android:paddingLeft="30dp"
-            android:paddingTop="15dp"
-            android:paddingBottom="15dp"
-            android:paddingRight="30dp"
-            android:background="#aa85e6"
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@drawable/background_button_addsound"
+            android:orientation="horizontal"
+            android:paddingBottom="15dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:paddingTop="15dp">
+
             <ImageView
-                android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@mipmap/abc_ic_voice_search_api_mtrl_alpha"/>
+                android:layout_gravity="center_vertical"
+                android:src="@mipmap/abc_ic_voice_search_api_mtrl_alpha" />
+
             <TextView
-                android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:textStyle="bold"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
                 android:text="Record a sound"
+                android:textColor="@android:color/white"
                 android:textSize="15sp"
-                android:textColor="@android:color/white"/>
+                android:textStyle="bold" />
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/llImport"
-            android:layout_marginTop="20dp"
-            android:paddingLeft="30dp"
-            android:paddingTop="15dp"
-            android:paddingBottom="15dp"
-            android:paddingRight="30dp"
-            android:background="#aa85e6"
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/background_button_addsound"
+            android:orientation="horizontal"
+            android:paddingBottom="15dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:paddingTop="15dp">
+
             <ImageView
-                android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@mipmap/ic_import_white"/>
+                android:layout_gravity="center_vertical"
+                android:src="@mipmap/ic_import_white" />
+
             <TextView
-                android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:textStyle="bold"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
                 android:text="Import a sound"
+                android:textColor="@android:color/white"
                 android:textSize="15sp"
-                android:textColor="@android:color/white"/>
+                android:textStyle="bold" />
         </LinearLayout>
 
     </LinearLayout>

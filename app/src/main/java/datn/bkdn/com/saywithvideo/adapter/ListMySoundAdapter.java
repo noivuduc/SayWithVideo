@@ -17,23 +17,20 @@ import datn.bkdn.com.saywithvideo.model.Sound;
 import io.realm.RealmBaseAdapter;
 import io.realm.RealmResults;
 
-/**
- * Created by Admin on 2/18/2016.
- */
 public class ListMySoundAdapter extends RealmBaseAdapter<Sound> {
 
-    public interface OnItemClicked{
+    public interface OnItemClicked {
         void onClick(int pos, View v);
     }
 
-    public OnItemClicked itemClicked;
+    public OnItemClicked mItemClicked;
 
     public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
-        this.itemClicked = playButtonClicked;
+        this.mItemClicked = playButtonClicked;
     }
 
     public ListMySoundAdapter(Context context, RealmResults<Sound> sounds) {
-        super(context, sounds,true);
+        super(context, sounds, true);
     }
 
     @Override
@@ -58,31 +55,31 @@ public class ListMySoundAdapter extends RealmBaseAdapter<Sound> {
         viewHolder.imgPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(itemClicked!=null){
-                    itemClicked.onClick(position,v);
+                if (mItemClicked != null) {
+                    mItemClicked.onClick(position, v);
                 }
             }
         });
         viewHolder.rlOption.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(itemClicked!=null){
-                    itemClicked.onClick(position,v);
+                if (mItemClicked != null) {
+                    mItemClicked.onClick(position, v);
                 }
             }
         });
         viewHolder.linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(itemClicked!=null){
-                    itemClicked.onClick(position,v);
+                if (mItemClicked != null) {
+                    mItemClicked.onClick(position, v);
                 }
             }
         });
         Sound sound = getItem(position);
-        viewHolder.imgPlayPause.setImageResource(sound.isPlaying()?R.mipmap.ic_pause:R.mipmap.ic_play);
+        viewHolder.imgPlayPause.setImageResource(sound.isPlaying() ? R.mipmap.ic_pause : R.mipmap.ic_play);
         viewHolder.tvSoundName.setText(sound.getName());
-        viewHolder.tvPlays.setText(sound.getPlays()+" plays");
+        viewHolder.tvPlays.setText(sound.getPlays() + " plays");
         viewHolder.tvDateOfCreate.setText(sound.getDateOfCreate());
         return convertView;
     }
