@@ -17,6 +17,7 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 
@@ -43,7 +44,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         FacebookSdk.sdkInitialize(getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
 
@@ -64,6 +64,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                 } catch (JSONException e) {
                                     email = id;
                                 }
+                                Log.d("eeeeeee",email+" "+name);
                                 if (RealmUtils.getRealmUtils(LoginActivity.this).checkExistsEmail(LoginActivity.this,email)) {
                                     finish();
                                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
@@ -88,6 +89,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onError(FacebookException error) {
                 Toast.makeText(LoginActivity.this, "Login facebook failed", Toast.LENGTH_SHORT).show();
+                Log.d("errorr",error.toString());
             }
         });
 
@@ -207,4 +209,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AppEventsLogger.activateApp(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        AppEventsLogger.deactivateApp(this);
+    }
 }
