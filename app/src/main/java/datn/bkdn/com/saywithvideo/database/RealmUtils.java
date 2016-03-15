@@ -47,7 +47,9 @@ public class RealmUtils {
 
     public void deleteSound(Context context, String id) {
         realm = RealmManager.getRealm(context);
+        realm.beginTransaction();
         realm.where(Sound.class).equalTo("id", id).findAll().clear();
+        realm.commitTransaction();
     }
 
     public void updateFavorite(Context context, final String id) {

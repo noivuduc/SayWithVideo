@@ -20,6 +20,8 @@ import datn.bkdn.com.saywithvideo.activity.FavoriteActivity;
 import datn.bkdn.com.saywithvideo.activity.MainActivity;
 import datn.bkdn.com.saywithvideo.activity.RecordNewSoundActivity;
 import datn.bkdn.com.saywithvideo.activity.SettingActivity;
+import datn.bkdn.com.saywithvideo.activity.ShareActivity;
+import datn.bkdn.com.saywithvideo.activity.ShowVideoActivity;
 import datn.bkdn.com.saywithvideo.activity.SoundActivity;
 import datn.bkdn.com.saywithvideo.activity.SoundBoardActivity;
 import datn.bkdn.com.saywithvideo.adapter.ListMyVideoAdapter;
@@ -28,7 +30,7 @@ import datn.bkdn.com.saywithvideo.model.Video;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 
-public class UserProfileFragment extends Fragment implements View.OnClickListener {
+public class UserProfileFragment extends Fragment implements View.OnClickListener,ListMyVideoAdapter.OnItemClicked {
 
     private boolean mIsVolume;
     private ListView mLvMyVideo;
@@ -43,7 +45,8 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     private TextView mNumSound;
     private TextView mNumSoundBoard;
     private ImageView mImgBackgroundVideo;
-
+    private RealmResults<Video> mVideos;
+    private ListMyVideoAdapter mAdapter;
     public static UserProfileFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -71,12 +74,13 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         mImgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
         mLvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
 
-        RealmResults<Video> videos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
-        if (videos.size() != 0) {
+        mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
+        if (mVideos.size() != 0) {
             mLlCreateDub.setVisibility(View.INVISIBLE);
         }
-        ListMyVideoAdapter adapter = new ListMyVideoAdapter(getContext(), videos);
-        mLvMyVideo.setAdapter(adapter);
+         mAdapter= new ListMyVideoAdapter(getContext(), mVideos);
+        mAdapter.setPlayButtonClicked(this);
+        mLvMyVideo.setAdapter(mAdapter);
         init();
         return v;
     }
@@ -123,6 +127,30 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
             case R.id.imgVolume:
                 mIsVolume = !mIsVolume;
                 mImgVolume.setImageResource(mIsVolume ? R.mipmap.ic_action_volume_on : R.mipmap.ic_action_volume_muted);
+                break;
+        }
+    }
+
+    /**
+     * List video event
+     * @param pos
+     * @param v
+     */
+    @Override
+    public void onClick(int pos, View v) {
+        Video video = mVideos.get(pos);
+        switch (v.getId()){
+            case R.id.llinfo:
+                Intent intent = new Intent(getActivity(), ShowVideoActivity.class);
+                intent.putExtra("VideoPath", video.getPath());
+                startActivity(intent);
+                 break;
+            case R.id.imgshare:
+                Intent i = new Intent(getActivity(), ShareActivity.class);
+                i.putExtra("filePath", video.getPath());
+                startActivity(i);
+                break;
+            case R.id.imgoption:
                 break;
         }
     }

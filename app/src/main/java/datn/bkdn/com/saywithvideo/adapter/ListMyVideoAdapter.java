@@ -7,6 +7,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import datn.bkdn.com.saywithvideo.R;
@@ -41,6 +42,7 @@ public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
             viewHolder.tvDateOfCreate = (TextView) convertView.findViewById(R.id.tvTimeVideo);
             viewHolder.imgoption = (ImageView) convertView.findViewById(R.id.imgoption);
             viewHolder.imgshare = (ImageView) convertView.findViewById(R.id.imgshare);
+            viewHolder.llInfo = (LinearLayout) convertView.findViewById(R.id.llinfo);
             viewHolder.videoView = (ImageView) convertView.findViewById(R.id.videoView);
             convertView.setTag(viewHolder);
         } else {
@@ -63,6 +65,15 @@ public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
                 }
             }
         });
+
+        viewHolder.llInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mItemClicked!=null){
+                    mItemClicked.onClick(position,v);
+                }
+            }
+        });
         Video video = getItem(position);
         viewHolder.tvSoundName.setText(video.getName());
         Bitmap thump = ThumbnailUtils.createVideoThumbnail(video.getPath(), MediaStore.Images.Thumbnails.MINI_KIND);
@@ -77,6 +88,7 @@ public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
         private TextView tvDateOfCreate;
         private ImageView imgoption;
         private ImageView imgshare;
+        private LinearLayout llInfo;
     }
 
 }

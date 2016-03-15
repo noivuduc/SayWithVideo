@@ -14,6 +14,7 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.io.File;
 import java.io.IOException;
 
 import datn.bkdn.com.saywithvideo.R;
@@ -58,6 +59,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                             if (sound1.isPlaying()) {
                                 RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, sounds.get(currentPos).getId());
                                 player.stop();
+                                player.reset();
                             }
                         }
                         currentPos = pos;
@@ -76,7 +78,8 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                         intent.putExtra("FileName", sound.getName());
                         startActivity(intent);
                         break;
-                    case R.id.imgOption:
+                    case R.id.rlOption:
+                        createSoundMenu(v,pos);
                         break;
                 }
             }
@@ -84,7 +87,9 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     }
 
     public void playMp3(String path) {
-        player = new MediaPlayer();
+        if(player==null) {
+            player = new MediaPlayer();
+        }
         try {
             player.setDataSource(path);
             player.prepare();
@@ -95,7 +100,6 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                Log.d("stop", "stop");
                 RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, sounds.get(currentPos).getId());
                 adapter.notifyDataSetChanged();
             }
@@ -123,6 +127,29 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         PopupMenu menu = new PopupMenu(this, v);
         menu.getMenuInflater().inflate(R.menu.sort_menu, menu.getMenu());
         menu.setOnMenuItemClickListener(this);
+        menu.show();
+    }
+
+    private void createSoundMenu(View v, final int pos) {
+        Log.d("eeee","menu");
+        PopupMenu menu = new PopupMenu(this, v);
+        menu.getMenuInflater().inflate(R.menu.sound_menu, menu.getMenu());
+        menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()){
+                    case R.id.delete:
+                        Sound sound = sounds.get(pos);
+                        File file = new File(sound.getLinkOnDisk());
+                       // file.delete();
+                        RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this,sound.getId());
+                        adapter.notifyDataSetChanged();
+                        break;
+
+                }
+                return false;
+            }
+        });
         menu.show();
     }
 
@@ -170,6 +197,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                 sounds.sort("plays", Sort.ASCENDING);
                 adapter.notifyDataSetChanged();
                 break;
+
         }
         return true;
     }

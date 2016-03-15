@@ -64,7 +64,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                 } catch (JSONException e) {
                                     email = id;
                                 }
-                                Log.d("eeeeeee",email+" "+name);
                                 if (RealmUtils.getRealmUtils(LoginActivity.this).checkExistsEmail(LoginActivity.this,email)) {
                                     finish();
                                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
@@ -89,7 +88,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onError(FacebookException error) {
                 Toast.makeText(LoginActivity.this, "Login facebook failed", Toast.LENGTH_SHORT).show();
-                Log.d("errorr",error.toString());
             }
         });
 

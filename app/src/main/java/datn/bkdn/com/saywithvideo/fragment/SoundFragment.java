@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -126,5 +127,7 @@ public class SoundFragment extends Fragment {
         PopupMenu menu = new PopupMenu(getContext(), v);
         menu.getMenuInflater().inflate(R.menu.popup_menu, menu.getMenu());
         menu.show();
+
     }
+
 }
