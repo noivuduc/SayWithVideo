@@ -34,6 +34,7 @@ public class AddSoundActivity extends AppCompatActivity implements View.OnClickL
                 startActivity(new Intent(AddSoundActivity.this, RecordNewSoundActivity.class));
                 break;
             case R.id.llImport:
+                startActivity(new Intent(AddSoundActivity.this, ImportSoundActivity.class));
                 break;
             case R.id.rlBack:
                 finish();

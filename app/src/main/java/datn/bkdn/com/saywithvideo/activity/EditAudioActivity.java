@@ -52,6 +52,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         setContentView(R.layout.activity_edit_audio);
 
         mFilePath = getIntent().getStringExtra("FileName");
+        Log.d("Path", mFilePath);
         if (mFilePath == null) {
             finish();
         }
