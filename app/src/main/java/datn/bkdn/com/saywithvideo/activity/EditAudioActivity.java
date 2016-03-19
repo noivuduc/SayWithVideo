@@ -14,6 +14,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.utilities.Base64;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +30,9 @@ import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.custom.MarkerView;
 import datn.bkdn.com.saywithvideo.custom.VisualizerView;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
+import datn.bkdn.com.saywithvideo.model.FirebaseAudio;
+import datn.bkdn.com.saywithvideo.model.FirebaseAudioContent;
+import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.model.Sound;
 import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
 import datn.bkdn.com.saywithvideo.utils.Constant;
@@ -45,11 +53,15 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
     private Visualizer mVisualizer;
     private int mWidth;
     private String mOutputPath;
+    private Firebase mFirebase;
 
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.activity_edit_audio);
+
+        Firebase.setAndroidContext(this);
+        mFirebase = new Firebase(FirebaseConstant.BASE_URL);
 
         mFilePath = getIntent().getStringExtra("FileName");
         Log.d("Path", mFilePath);
@@ -65,13 +77,13 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
             mMediaPlayer.setDataSource(mFilePath);
             mMediaPlayer.prepare();
             mMediaPlayer.setOnCompletionListener(this);
+            mPixelPerSecond = mVisualizerView.getWidth() * 1.0f / mMediaPlayer.getDuration();
         } catch (IOException e) {
             e.printStackTrace();
             mMediaPlayer = null;
         }
 
         mWidth = getResources().getDisplayMetrics().widthPixels;
-        mPixelPerSecond = mVisualizerView.getWidth() * 1.0f / mMediaPlayer.getDuration();
     }
 
     private void init() {
@@ -270,10 +282,39 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         idSound = UUID.randomUUID().toString();
         Date date = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy");
-        String id = Utils.getCurrentUserID(EditAudioActivity.this);
+        final String id = Utils.getCurrentUserID(EditAudioActivity.this);
         Sound sound = new Sound(idSound, name, Utils.getCurrentUserName(EditAudioActivity.this), mOutputPath, mOutputPath, ft.format(date).toString());
         sound.setIdUser(id);
         RealmUtils.getRealmUtils(EditAudioActivity.this).addNewSound(EditAudioActivity.this, sound);
+
+        //  send to server
+        FirebaseAudio mAudio = new FirebaseAudio(name, id, ft.format(date), 0);
+        Firebase firebase = mFirebase.child(FirebaseConstant.AUDIO_URL).push();
+
+        firebase.setValue(mAudio, new Firebase.CompletionListener() {
+            @Override
+            public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                if (firebaseError != null) {
+                    Toast.makeText(getBaseContext(), "Audio cound not saved", Toast.LENGTH_SHORT).show();
+                } else {
+                    String audio_id = firebase.getKey();
+                    try {
+                        String audioContent = Base64.encodeFromFile(mOutputPath);
+                        final FirebaseAudioContent mContent = new FirebaseAudioContent(audio_id, audioContent);
+                        mFirebase.child(FirebaseConstant.AUDIO_CONTENT_URL).push().setValue(mContent, new Firebase.CompletionListener() {
+                            @Override
+                            public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                                if (firebaseError != null) {
+                                    mFirebase.child(FirebaseConstant.AUDIO_CONTENT_URL).push().setValue(mContent);
+                                }
+                            }
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     public void createDialog() {
