@@ -1,8 +1,8 @@
 package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -11,23 +11,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsLogger;
-import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
+import com.firebase.client.AuthData;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import java.util.Arrays;
+import java.util.HashMap;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.database.RealmUtils;
-import datn.bkdn.com.saywithvideo.model.User;
+import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
@@ -39,57 +35,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private TextView tvRegister;
     private TextView tvLoginFacebook;
     private CallbackManager callbackManager;
+    private Firebase root;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        callbackManager = CallbackManager.Factory.create();
-
-        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(),
-                        new GraphRequest.GraphJSONObjectCallback() {
-                            @Override
-                            public void onCompleted(JSONObject object, GraphResponse response) {
-                                String email = "";
-                                String name = "";
-                                String id = "";
-                                try {
-                                    email = object.getString("email");
-                                    name = object.getString("name");
-                                    id = object.getString("id");
-                                } catch (JSONException e) {
-                                    email = id;
-                                }
-                                if (RealmUtils.getRealmUtils(LoginActivity.this).checkExistsEmail(LoginActivity.this,email)) {
-                                    finish();
-                                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                                } else {
-                                    RealmUtils.getRealmUtils(LoginActivity.this).addUser(LoginActivity.this, name, "", email);
-                                    Utils.setCurrentUsername(LoginActivity.this, name, email, RealmUtils.getRealmUtils(LoginActivity.this).getUserWithEmail(LoginActivity.this, email).get(0).getId());
-                                    startActivity(new Intent(LoginActivity.this, RegisterSuccessActivity.class));
-                                    finish();
-                                }
-                            }
-                        });
-                Bundle parameters = new Bundle();
-                parameters.putString("fields", "id,name,email,gender,birthday");
-                request.setParameters(parameters);
-                request.executeAsync();
-            }
-
-            @Override
-            public void onCancel() {
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-                Toast.makeText(LoginActivity.this, "Login facebook failed", Toast.LENGTH_SHORT).show();
-            }
-        });
+        Firebase.setAndroidContext(this);
+        root = new Firebase(Constant.FIREBASE_ROOT);
 
         if (!checkCurrentUser()) {
             startActivity(new Intent(this, MainActivity.class));
@@ -184,21 +137,77 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
                 break;
             case R.id.tvLoginFacebook:
-                LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "user_friends", "email"));
+//                LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "user_friends", "email"));
+                loginFacebook(AccessToken.getCurrentAccessToken());
                 break;
         }
     }
 
-    private void checkisValidAccount(String email, String pass) {
-        User user = RealmUtils.getRealmUtils(LoginActivity.this).checkisValidAccount(LoginActivity.this, email, pass);
-        if (user == null) {
-            Toast.makeText(this, "Email or password is wrong!", Toast.LENGTH_SHORT).show();
-            return;
-        } else {
-            Utils.setCurrentUsername(this, user.getName(), user.getEmail(), user.getId());
-            Intent i = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(i);
-        }
+    private void loginFacebook(final AccessToken token){
+            if(token!=null)
+            {
+                root.authWithOAuthToken("facebook", token.getToken(), new Firebase.AuthResultHandler() {
+                    @Override
+                    public void onAuthenticated(AuthData authData) {
+                        String name = authData.getProviderData().get("displayName").toString();
+                       // String email = authData.getProviderData().get("email").toString();
+                        String uid = authData.getUid();
+                        HashMap<String, String> map = new HashMap<String, String>();
+                        map.put("name", name);
+                        root.child("users").child(authData.getUid()).setValue(map);
+                        finishActivity(name, "", uid);
+                    }
+
+                    @Override
+                    public void onAuthenticationError(FirebaseError firebaseError) {
+                        Toast.makeText(LoginActivity.this, firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+            }else
+            {
+                root.unauth();
+            }
+    }
+
+    private void finishActivity(String name, String email, String uid)
+    {
+        Utils.setCurrentUsername(LoginActivity.this,name,email,uid);
+        Intent i = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(i);
+        this.finish();
+
+    }
+
+    private void checkisValidAccount(final String email, String pass) {
+
+        root.authWithPassword(email, pass,
+                new Firebase.AuthResultHandler() {
+
+                    @Override
+                    public void onAuthenticated(final AuthData authData) {
+                        Firebase base = new Firebase(Constant.FIREBASE_ROOT+"users/"+authData.getUid()+"/name/");
+                        final String uid = authData.getUid();
+                        base.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                              String name = dataSnapshot.getValue().toString();
+                                finishActivity(name,email,uid);
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onAuthenticationError(FirebaseError error) {
+                        Toast.makeText(LoginActivity.this, "Email or password is wrong!", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     @Override

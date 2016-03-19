@@ -1,8 +1,8 @@
 package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -11,11 +11,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.database.RealmUtils;
+import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
@@ -32,6 +36,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        Firebase.setAndroidContext(this);
         init();
     }
 
@@ -129,18 +134,38 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 edtName.setText("");
                 break;
             case R.id.tvRegisterUser:
-                if (checkisValidInfo()) {
-                    if (RealmUtils.getRealmUtils(this).checkExistsEmail(this, edtEmail.getText().toString())) {
-                        Toast.makeText(this, "Email already exists", Toast.LENGTH_SHORT).show();
-                    } else {
-                        String name = edtName.getText().toString();
-                        String email = edtEmail.getText().toString();
-                        String pass = edtPass.getText().toString();
-                        RealmUtils.getRealmUtils(this).addUser(this, name, pass, email);
-                        Utils.setCurrentUsername(this, name, email, RealmUtils.getRealmUtils(RegisterActivity.this).getUserWithEmail(RegisterActivity.this, email).get(0).getId());
-                        startActivity(new Intent(RegisterActivity.this, RegisterSuccessActivity.class));
+                final String name = edtName.getText().toString();
+                final String email = edtEmail.getText().toString();
+                final String pass = edtPass.getText().toString();
+
+                Firebase userFire = new Firebase(Constant.FIREBASE_ROOT);
+                userFire.createUser(email, pass, new Firebase.ValueResultHandler<Map<String, Object>>() {
+                    @Override
+                    public void onSuccess(Map<String, Object> stringObjectMap) {
+                        Intent i = new Intent(RegisterActivity.this, RegisterSuccessActivity.class);
+                        i.putExtra("email",email);
+                        i.putExtra("pass",pass);
+                        i.putExtra("name",name);
+                        startActivity(i);
                     }
-                }
+
+                    @Override
+                    public void onError(FirebaseError firebaseError) {
+                        switch (firebaseError.getCode()) {
+                            case FirebaseError.EMAIL_TAKEN:
+                                Toast.makeText(RegisterActivity.this, firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                                break;
+                            case FirebaseError.INVALID_EMAIL:
+                                Toast.makeText(RegisterActivity.this,firebaseError.getMessage(),Toast.LENGTH_SHORT).show();
+                                break;
+                            case FirebaseError.INVALID_PASSWORD:
+                                Toast.makeText(RegisterActivity.this, firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                                break;
+                        }
+                    }
+                });
+
+
                 break;
             case R.id.tvhaveaccount:
                 startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
