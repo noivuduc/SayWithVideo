@@ -32,8 +32,8 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile files('libs/mp4parser-master.jar')
     compile files('libs/realm-android-0.86.0.jar')
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
+    compile 'com.android.support:appcompat-v7:23.2.0'
+    compile 'com.android.support:design:23.2.0'
     compile 'com.facebook.android:facebook-android-sdk:4.+'
     compile 'com.firebase:firebase-client-android:2.3.1'
 }
