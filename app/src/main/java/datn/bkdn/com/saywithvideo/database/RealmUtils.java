@@ -5,17 +5,13 @@ import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
-import datn.bkdn.com.saywithvideo.model.Migration;
+import datn.bkdn.com.saywithvideo.model.ContentAudio;
 import datn.bkdn.com.saywithvideo.model.Sound;
 import datn.bkdn.com.saywithvideo.model.User;
 import datn.bkdn.com.saywithvideo.model.Video;
-import io.realm.DynamicRealm;
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmMigration;
 import io.realm.RealmResults;
 
 public class RealmUtils {
@@ -83,6 +79,30 @@ public class RealmUtils {
         RealmResults<Sound> sounds = realm.where(Sound.class).findAll();
         //realm.close();
         return sounds;
+    }
+
+    public void addSoundContent(Context context, ContentAudio audio){
+        realm = RealmManager.getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealm(audio);
+        realm.commitTransaction();
+    }
+
+    public ContentAudio getContentAudio(Context context, String id){
+        realm = RealmManager.getRealm(context);
+        RealmResults<ContentAudio> audios = realm.where(ContentAudio.class).equalTo("id",id).findAll();
+        if(audios.size()>0){
+            Log.d("nnnnn","nnnn");
+            return audios.get(0);
+        }
+        return null;
+    }
+
+    public void deleteAllSound(Context context){
+        realm = RealmManager.getRealm(context);
+        realm.beginTransaction();
+        realm.where(Sound.class).findAll().clear();
+        realm.commitTransaction();
     }
 
     public RealmResults<Sound> getFavoriteSound(Context context) {

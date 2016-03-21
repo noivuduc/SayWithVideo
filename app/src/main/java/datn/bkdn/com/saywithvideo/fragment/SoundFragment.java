@@ -3,15 +3,22 @@ package datn.bkdn.com.saywithvideo.fragment;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
+import com.firebase.client.utilities.Base64;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 
@@ -19,7 +26,13 @@ import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity;
 import datn.bkdn.com.saywithvideo.adapter.ListSoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
+import datn.bkdn.com.saywithvideo.model.ContentAudio;
+import datn.bkdn.com.saywithvideo.model.FireBaseContent;
+import datn.bkdn.com.saywithvideo.model.FirebaseAudio;
+import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.model.Sound;
+import datn.bkdn.com.saywithvideo.network.Tools;
+import datn.bkdn.com.saywithvideo.utils.Constant;
 import io.realm.RealmResults;
 
 public class SoundFragment extends Fragment {
@@ -28,7 +41,9 @@ public class SoundFragment extends Fragment {
     private MediaPlayer mPlayer;
     private ListView mLvSound;
     private ListSoundAdapter mAdapter;
-
+    private Firebase mFirebase;
+    private Firebase mContent;
+    private String mJsonContent;
     public static SoundFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -45,8 +60,48 @@ public class SoundFragment extends Fragment {
         mLvSound = (ListView) v.findViewById(R.id.lvSound);
         return v;
     }
-
+    ContentAudio contentaudio;
     private void init() {
+
+        Firebase.setAndroidContext(getContext());
+        mFirebase = new Firebase(FirebaseConstant.BASE_URL);
+        mFirebase.child(FirebaseConstant.AUDIO_URL).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("TTTTT", "TTTT");
+                RealmUtils.getRealmUtils(getContext()).deleteAllSound(getContext());
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    FirebaseAudio firebaseAudio = data.getValue(FirebaseAudio.class);
+                    final String name = firebaseAudio.getName();
+                    final String dateCreate = firebaseAudio.getDate_create();
+                    final String user_id = firebaseAudio.getUser_id();
+                    final String audio_id = data.getKey();
+                    int plays = firebaseAudio.getPlays();
+                    Firebase base = new Firebase(Constant.FIREBASE_ROOT + "users/" + user_id + "/name/");
+                    base.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            String userName = dataSnapshot.getValue().toString();
+                            Sound sound = new Sound(audio_id, name, userName, dateCreate);
+                            RealmUtils.getRealmUtils(getContext()).addNewSound(getContext(), sound);
+
+                        }
+
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+
+                        }
+                    });
+
+                }
+//                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
         mSounds = RealmUtils.getRealmUtils(getContext()).getAllSound(getContext());
         mAdapter = new ListSoundAdapter(getContext(), mSounds, false);
         mAdapter.setPlayButtonClicked(new ListSoundAdapter.OnItemClicked() {
@@ -55,6 +110,31 @@ public class SoundFragment extends Fragment {
                 Sound sound = mSounds.get(pos);
                 switch (v.getId()) {
                     case R.id.imgPlay:
+                        final String audioId = sound.getId();
+                        String path="";
+                        ContentAudio contentAudio;
+                        contentAudio= RealmUtils.getRealmUtils(getContext()).getContentAudio(getContext(), audioId);
+                        if(contentAudio==null) {
+                            String link = FirebaseConstant.BASE_URL+FirebaseConstant.AUDIO_CONTENT_URL+"/"+audioId+".json";
+                            Log.d("link",link);
+                            String json = Tools.getJson(link);
+                            Log.d("json",json);
+                            FireBaseContent c = new Gson().fromJson(json,FireBaseContent.class);
+                                        String content = c.getContent();
+                                        String path_audio =  Environment.getExternalStorageDirectory().getAbsolutePath() + "/"+audioId+".m4a";
+                                        ContentAudio audio = new ContentAudio();
+                                        audio.setId(audioId);
+                                        audio.setContent(path_audio);
+                            try {
+                                Base64.decodeToFile(content, path_audio);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            RealmUtils.getRealmUtils(getContext()).addSoundContent(getContext(), audio);
+
+                            contentAudio = RealmUtils.getRealmUtils(getContext()).getContentAudio(getContext(), audioId);
+                        }
+                        path = contentAudio.getContent();
                         if (mCurrentPos != -1 && pos != mCurrentPos) {
                             Sound sound1 = mSounds.get(mCurrentPos);
                             if (sound1.isPlaying()) {
@@ -67,7 +147,7 @@ public class SoundFragment extends Fragment {
                             mPlayer.stop();
                             mPlayer.reset();
                         } else {
-                            playMp3(sound.getLinkOnDisk());
+                            playMp3(path);
                         }
                         RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(pos).getId());
                         mAdapter.notifyDataSetChanged();
@@ -93,6 +173,7 @@ public class SoundFragment extends Fragment {
         });
         mLvSound.setAdapter(mAdapter);
     }
+
 
     @Override
     public void onResume() {
@@ -129,5 +210,4 @@ public class SoundFragment extends Fragment {
         menu.show();
 
     }
-
 }

@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.UUID;
 
 import datn.bkdn.com.saywithvideo.R;
@@ -31,7 +32,6 @@ import datn.bkdn.com.saywithvideo.custom.MarkerView;
 import datn.bkdn.com.saywithvideo.custom.VisualizerView;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.model.FirebaseAudio;
-import datn.bkdn.com.saywithvideo.model.FirebaseAudioContent;
 import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.model.Sound;
 import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
@@ -300,15 +300,9 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
                     String audio_id = firebase.getKey();
                     try {
                         String audioContent = Base64.encodeFromFile(mOutputPath);
-                        final FirebaseAudioContent mContent = new FirebaseAudioContent(audio_id, audioContent);
-                        mFirebase.child(FirebaseConstant.AUDIO_CONTENT_URL).push().setValue(mContent, new Firebase.CompletionListener() {
-                            @Override
-                            public void onComplete(FirebaseError firebaseError, Firebase firebase) {
-                                if (firebaseError != null) {
-                                    mFirebase.child(FirebaseConstant.AUDIO_CONTENT_URL).push().setValue(mContent);
-                                }
-                            }
-                        });
+                        HashMap<String, String> hashMap = new HashMap<String, String>();
+                        hashMap.put("content", audioContent);
+                        mFirebase.child(FirebaseConstant.AUDIO_CONTENT_URL).child(audio_id).setValue(hashMap);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
