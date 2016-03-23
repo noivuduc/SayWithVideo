@@ -30,9 +30,11 @@ import datn.bkdn.com.saywithvideo.model.ContentAudio;
 import datn.bkdn.com.saywithvideo.model.FireBaseContent;
 import datn.bkdn.com.saywithvideo.model.FirebaseAudio;
 import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.model.FirebaseUser;
 import datn.bkdn.com.saywithvideo.model.Sound;
 import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
+import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 
 public class SoundFragment extends Fragment {
@@ -60,15 +62,14 @@ public class SoundFragment extends Fragment {
         mLvSound = (ListView) v.findViewById(R.id.lvSound);
         return v;
     }
-    ContentAudio contentaudio;
     private void init() {
 
         Firebase.setAndroidContext(getContext());
+        user = Utils.getFavoriteUser(getContext());
         mFirebase = new Firebase(FirebaseConstant.BASE_URL);
         mFirebase.child(FirebaseConstant.AUDIO_URL).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("TTTTT", "TTTT");
                 RealmUtils.getRealmUtils(getContext()).deleteAllSound(getContext());
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     FirebaseAudio firebaseAudio = data.getValue(FirebaseAudio.class);
@@ -83,6 +84,10 @@ public class SoundFragment extends Fragment {
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             String userName = dataSnapshot.getValue().toString();
                             Sound sound = new Sound(audio_id, name, userName, dateCreate);
+                            if(user.getFavorite()!=null) {
+                                if (user.getFavorite().contains(audio_id))
+                                    sound.setIsFavorite(true);
+                            }
                             RealmUtils.getRealmUtils(getContext()).addNewSound(getContext(), sound);
 
                         }
@@ -116,9 +121,7 @@ public class SoundFragment extends Fragment {
                         contentAudio= RealmUtils.getRealmUtils(getContext()).getContentAudio(getContext(), audioId);
                         if(contentAudio==null) {
                             String link = FirebaseConstant.BASE_URL+FirebaseConstant.AUDIO_CONTENT_URL+"/"+audioId+".json";
-                            Log.d("link",link);
                             String json = Tools.getJson(link);
-                            Log.d("json",json);
                             FireBaseContent c = new Gson().fromJson(json,FireBaseContent.class);
                                         String content = c.getContent();
                                         String path_audio =  Environment.getExternalStorageDirectory().getAbsolutePath() + "/"+audioId+".m4a";
@@ -153,9 +156,17 @@ public class SoundFragment extends Fragment {
                         mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
-//                        if (!sound.isFavorite()) {
-//                            RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), sound.getId());
-//                        }
+                        Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL+FirebaseConstant.USER_URL+"/"+ Utils.getCurrentUserID(getContext())).child("favorite");
+                        String id = sound.getId();
+
+                        if(user.getFavorite().contains(id))
+                        {
+                            user.getFavorite().remove(id);
+                        }else
+                        {
+                            user.getFavorite().add(id);
+                        }
+                        favoriteFirebase.setValue(user.getFavorite());
                         RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), sound.getId());
 
                         mAdapter.notifyDataSetChanged();
@@ -174,6 +185,7 @@ public class SoundFragment extends Fragment {
         mLvSound.setAdapter(mAdapter);
     }
 
+    private FirebaseUser user;
 
     @Override
     public void onResume() {

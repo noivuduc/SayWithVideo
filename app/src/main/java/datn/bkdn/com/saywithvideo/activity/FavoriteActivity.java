@@ -2,9 +2,8 @@ package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -12,12 +11,17 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
+import com.firebase.client.Firebase;
+
 import java.io.IOException;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.ListSoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
+import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.model.FirebaseUser;
 import datn.bkdn.com.saywithvideo.model.Sound;
+import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 
 public class FavoriteActivity extends AppCompatActivity implements View.OnClickListener{
@@ -30,6 +34,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     private ImageView mImgSort;
     private int mCurrentPos=-1;
     private RealmResults<Sound> mSounds;
+    private FirebaseUser user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +68,14 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                         mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
-                            RealmUtils.getRealmUtils(FavoriteActivity.this).updateFavorite(FavoriteActivity.this,sound.getId());
+                        Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL+FirebaseConstant.USER_URL+"/"+ Utils.getCurrentUserID(FavoriteActivity.this)).child("favorite");
+                        String id = sound.getId();
+                        if(user.getFavorite().contains(id))
+                        {
+                            user.getFavorite().remove(id);
+                        }
+                        favoriteFirebase.setValue(user.getFavorite());
+                        RealmUtils.getRealmUtils(FavoriteActivity.this).updateFavorite(FavoriteActivity.this,sound.getId());
                         mSounds = RealmUtils.getRealmUtils(FavoriteActivity.this).getFavoriteSound(FavoriteActivity.this);
                         mAdapter.notifyDataSetChanged();
                         break;
@@ -95,7 +107,6 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                Log.d("stop", "stop");
                 RealmUtils.getRealmUtils(FavoriteActivity.this).updatePlaying(FavoriteActivity.this, mSounds.get(mCurrentPos).getId());
                 mAdapter.notifyDataSetChanged();
             }
@@ -103,6 +114,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void init(){
+        user = Utils.getFavoriteUser(this);
         mLvSound = (ListView) findViewById(R.id.lvSoundFavorite);
         mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         mRlSort = (RelativeLayout) findViewById(R.id.rlSort);

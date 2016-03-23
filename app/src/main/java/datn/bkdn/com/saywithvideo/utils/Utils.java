@@ -6,7 +6,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Patterns;
 
+import com.google.gson.Gson;
+
 import java.util.regex.Pattern;
+
+import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.model.FirebaseUser;
 
 public class Utils {
     private static final String CURRENT_USER = "current_user";
@@ -38,6 +43,13 @@ public class Utils {
             return true;
         }
         return false;
+    }
+
+    public static FirebaseUser getFavoriteUser(Context context){
+        String link = FirebaseConstant.BASE_URL+FirebaseConstant.USER_URL+"/"+Utils.getCurrentUserID(context)+".json";
+        String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
+       FirebaseUser user = new Gson().fromJson(json, FirebaseUser.class);
+        return user;
     }
 
     public static String getCurrentUserEmail(Context context) {
