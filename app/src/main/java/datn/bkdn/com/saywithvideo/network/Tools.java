@@ -1,14 +1,15 @@
 package datn.bkdn.com.saywithvideo.network;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-/**
- * Created by Admin on 3/21/2016.
- */
 public class Tools {
     public static String getJson(final String link) {
         final StringBuilder json = new StringBuilder();
@@ -28,17 +29,17 @@ public class Tools {
                     }
                     bf = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     String line;
-                    while((line = bf.readLine()) != null) {
+                    while ((line = bf.readLine()) != null) {
                         json.append(line);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
                     try {
-                        if(conn != null) {
+                        if (conn != null) {
                             conn.disconnect();
                         }
-                        if(bf != null) {
+                        if (bf != null) {
                             bf.close();
                         }
                     } catch (IOException e) {
@@ -54,5 +55,12 @@ public class Tools {
             e.printStackTrace();
         }
         return json.toString();
+    }
+
+    public static boolean isOnline(Context context) {
+        ConnectivityManager cm =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 }

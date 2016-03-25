@@ -2,6 +2,7 @@ package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -23,6 +24,7 @@ import com.firebase.client.ValueEventListener;
 import java.util.HashMap;
 
 import datn.bkdn.com.saywithvideo.R;
+import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
@@ -132,48 +134,52 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 edtPass.setText("");
                 break;
             case R.id.tvLogin:
-                checkisValidAccount(edtEmail.getText().toString(), edtPass.getText().toString());
+                if (!Tools.isOnline(getBaseContext())) {
+                    Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                } else {
+                    checkisValidAccount(edtEmail.getText().toString(), edtPass.getText().toString());
+                }
                 break;
             case R.id.tvregister:
                 startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
                 break;
             case R.id.tvLoginFacebook:
-//                LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "user_friends", "email"));
-                loginFacebook(AccessToken.getCurrentAccessToken());
+                if (!Tools.isOnline(getBaseContext())) {
+                    Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                } else {
+                    loginFacebook(AccessToken.getCurrentAccessToken());
+                }
                 break;
         }
     }
 
-    private void loginFacebook(final AccessToken token){
-            if(token!=null)
-            {
-                root.authWithOAuthToken("facebook", token.getToken(), new Firebase.AuthResultHandler() {
-                    @Override
-                    public void onAuthenticated(AuthData authData) {
-                        String name = authData.getProviderData().get("displayName").toString();
-                       // String email = authData.getProviderData().get("email").toString();
-                        String uid = authData.getUid();
-                        HashMap<String, String> map = new HashMap<String, String>();
-                        map.put("name", name);
-                        root.child("users").child(authData.getUid()).setValue(map);
-                        finishActivity(name, "", uid);
-                    }
+    private void loginFacebook(final AccessToken token) {
+        if (token != null) {
+            root.authWithOAuthToken("facebook", token.getToken(), new Firebase.AuthResultHandler() {
+                @Override
+                public void onAuthenticated(AuthData authData) {
+                    String name = authData.getProviderData().get("displayName").toString();
+                    // String email = authData.getProviderData().get("email").toString();
+                    String uid = authData.getUid();
+                    HashMap<String, String> map = new HashMap<String, String>();
+                    map.put("name", name);
+                    root.child("users").child(authData.getUid()).setValue(map);
+                    finishActivity(name, "", uid);
+                }
 
-                    @Override
-                    public void onAuthenticationError(FirebaseError firebaseError) {
-                        Toast.makeText(LoginActivity.this, firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                @Override
+                public void onAuthenticationError(FirebaseError firebaseError) {
+                    Toast.makeText(LoginActivity.this, firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
 
-                    }
-                });
-            }else
-            {
-                root.unauth();
-            }
+                }
+            });
+        } else {
+            root.unauth();
+        }
     }
 
-    private void finishActivity(String name, String email, String uid)
-    {
-        Utils.setCurrentUsername(LoginActivity.this,name,email,uid);
+    private void finishActivity(String name, String email, String uid) {
+        Utils.setCurrentUsername(LoginActivity.this, name, email, uid);
         Intent i = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(i);
         this.finish();
@@ -187,13 +193,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                     @Override
                     public void onAuthenticated(final AuthData authData) {
-                        Firebase base = new Firebase(Constant.FIREBASE_ROOT+"users/"+authData.getUid()+"/name/");
+                        Firebase base = new Firebase(Constant.FIREBASE_ROOT + "users/" + authData.getUid() + "/name/");
                         final String uid = authData.getUid();
                         base.addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                              String name = dataSnapshot.getValue().toString();
-                                finishActivity(name,email,uid);
+                                String name = dataSnapshot.getValue().toString();
+                                finishActivity(name, email, uid);
                             }
 
                             @Override

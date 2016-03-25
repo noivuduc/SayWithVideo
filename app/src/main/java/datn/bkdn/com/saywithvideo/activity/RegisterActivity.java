@@ -2,6 +2,7 @@ package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import datn.bkdn.com.saywithvideo.R;
+import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
@@ -134,6 +136,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 edtName.setText("");
                 break;
             case R.id.tvRegisterUser:
+                if (!Tools.isOnline(getBaseContext())) {
+                    Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                    return;
+                }
                 final String name = edtName.getText().toString();
                 final String email = edtEmail.getText().toString();
                 final String pass = edtPass.getText().toString();
@@ -143,9 +149,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     @Override
                     public void onSuccess(Map<String, Object> stringObjectMap) {
                         Intent i = new Intent(RegisterActivity.this, RegisterSuccessActivity.class);
-                        i.putExtra("email",email);
-                        i.putExtra("pass",pass);
-                        i.putExtra("name",name);
+                        i.putExtra("email", email);
+                        i.putExtra("pass", pass);
+                        i.putExtra("name", name);
                         startActivity(i);
                     }
 
@@ -156,7 +162,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                                 Toast.makeText(RegisterActivity.this, firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
                                 break;
                             case FirebaseError.INVALID_EMAIL:
-                                Toast.makeText(RegisterActivity.this,firebaseError.getMessage(),Toast.LENGTH_SHORT).show();
+                                Toast.makeText(RegisterActivity.this, firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
                                 break;
                             case FirebaseError.INVALID_PASSWORD:
                                 Toast.makeText(RegisterActivity.this, firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
