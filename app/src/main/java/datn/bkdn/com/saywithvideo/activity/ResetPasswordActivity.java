@@ -76,6 +76,7 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.tvResetPassword:
+                datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(ResetPasswordActivity.this);
                 if (!Tools.isOnline(getBaseContext())) {
                     Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
                 } else {
