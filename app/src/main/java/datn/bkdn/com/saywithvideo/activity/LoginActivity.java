@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
-import com.facebook.CallbackManager;
 import com.facebook.appevents.AppEventsLogger;
 import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
@@ -36,7 +35,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private ImageView clearEmail;
     private TextView tvRegister;
     private TextView tvLoginFacebook;
-    private CallbackManager callbackManager;
+    private TextView tvForgot;
     private Firebase root;
 
 
@@ -64,12 +63,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         edtPass = (EditText) findViewById(R.id.edtpass);
         tvLogin = (TextView) findViewById(R.id.tvLogin);
         tvRegister = (TextView) findViewById(R.id.tvregister);
+        tvForgot = (TextView) findViewById(R.id.tvForgot);
         clearEmail = (ImageView) findViewById(R.id.imgClearEmail);
         clearPass = (ImageView) findViewById(R.id.imgClearPass);
         tvLoginFacebook = (TextView) findViewById(R.id.tvLoginFacebook);
         tvLogin.setOnClickListener(this);
         tvRegister.setOnClickListener(this);
         tvLoginFacebook.setOnClickListener(this);
+        tvForgot.setOnClickListener(this);
         edtEmail.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -150,6 +151,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     loginFacebook(AccessToken.getCurrentAccessToken());
                 }
                 break;
+            case R.id.tvForgot:
+                startActivity(new Intent(LoginActivity.this, ResetPasswordActivity.class));
+                break;
         }
     }
 
@@ -215,12 +219,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         Toast.makeText(LoginActivity.this, "Email or password is wrong!", Toast.LENGTH_SHORT).show();
                     }
                 });
-    }
-
-    @Override
-    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
