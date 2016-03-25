@@ -41,8 +41,8 @@
                 android:textColor="#aeabab"
                 android:textSize="13sp" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="15dp"
@@ -50,23 +50,26 @@
 
                 <EditText
                     android:id="@+id/edtEmail"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/imgClearEmail"
                     android:background="@null"
+                    android:gravity="center_horizontal"
                     android:hint="Enter your email"
+                    android:singleLine="true"
                     android:textSize="16sp" />
 
                 <ImageView
                     android:id="@+id/imgClearEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
+                    android:layout_alignParentRight="true"
                     android:src="@mipmap/ic_action_remove"
                     android:visibility="gone" />
-            </LinearLayout>
+            </RelativeLayout>
 
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="15dp"
@@ -74,23 +77,26 @@
 
                 <EditText
                     android:id="@+id/edtName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/imgClearName"
                     android:background="@null"
+                    android:gravity="center_horizontal"
                     android:hint="Enter your name"
+                    android:singleLine="true"
                     android:textSize="16sp" />
 
                 <ImageView
                     android:id="@+id/imgClearName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
+                    android:layout_alignParentRight="true"
                     android:src="@mipmap/ic_action_remove"
                     android:visibility="gone" />
-            </LinearLayout>
+            </RelativeLayout>
 
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="15dp"
@@ -98,21 +104,24 @@
 
                 <EditText
                     android:id="@+id/edtpass"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/imgClearPass"
                     android:background="@null"
+                    android:gravity="center_horizontal"
                     android:hint="Enter password"
                     android:password="true"
+                    android:singleLine="true"
                     android:textSize="16sp" />
 
                 <ImageView
                     android:id="@+id/imgClearPass"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
+                    android:layout_alignParentRight="true"
                     android:src="@mipmap/ic_action_remove"
                     android:visibility="gone" />
-            </LinearLayout>
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/tvhaveaccount"

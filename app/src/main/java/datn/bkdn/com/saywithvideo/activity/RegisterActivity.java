@@ -57,6 +57,11 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         edtEmail.setText(Utils.getPrimaryEmail(this));
         tvregister.setOnClickListener(this);
         tvLogin.setOnClickListener(this);
+
+        clearEmail.setOnClickListener(this);
+        clearName.setOnClickListener(this);
+        clearPass.setOnClickListener(this);
+
         edtEmail.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -73,6 +78,11 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 if (edtEmail.getText().toString().equals("")) {
                     clearEmail.setVisibility(View.GONE);
                 } else {
+                    if (checkisValidInfo()) {
+                        tvregister.setVisibility(View.VISIBLE);
+                    } else {
+                        tvregister.setVisibility(View.GONE);
+                    }
                     clearEmail.setVisibility(View.VISIBLE);
                 }
             }
@@ -93,7 +103,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 if (s.toString().equals("")) {
                     clearPass.setVisibility(View.GONE);
                 } else {
-                    if (s.toString().length() > 6) {
+                    if (checkisValidInfo()) {
                         tvregister.setVisibility(View.VISIBLE);
                     } else {
                         tvregister.setVisibility(View.GONE);
@@ -117,8 +127,14 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             public void afterTextChanged(Editable s) {
                 if (s.toString().equals("")) {
                     clearName.setVisibility(View.GONE);
+                } else{
+                    if (checkisValidInfo()) {
+                        tvregister.setVisibility(View.VISIBLE);
+                    } else {
+                        tvregister.setVisibility(View.GONE);
+                    }
+                    clearName.setVisibility(View.VISIBLE);
                 }
-                clearPass.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -180,9 +196,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private boolean checkisValidInfo() {
-        String name = edtName.getText().toString();
-        String email = edtEmail.getText().toString();
-        String pass = edtPass.getText().toString();
+        String name = edtName.getText().toString().trim();
+        String email = edtEmail.getText().toString().trim();
+        String pass = edtPass.getText().toString().trim();
 
         if (isEmailValid(email) && pass.length() > 6 && name.length() > 0) return true;
         return false;
