@@ -2,9 +2,8 @@ package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -14,13 +13,21 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
+
 import java.io.File;
 import java.io.IOException;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
-import datn.bkdn.com.saywithvideo.model.Sound;
+import datn.bkdn.com.saywithvideo.model.AudioUser;
+import datn.bkdn.com.saywithvideo.model.FirebaseAudio;
+import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -34,14 +41,35 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private MediaPlayer player;
     private ListView listView;
     private ImageView imgSort;
-    private RealmResults<Sound> sounds;
+    private RealmResults<AudioUser> sounds;
     private int currentPos = -1;
-
+    private Firebase mFirebase;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sound);
         init();
+        Query q =  mFirebase.child(FirebaseConstant.AUDIO_URL).orderByChild("user_id").equalTo(Utils.getCurrentUserID(this));
+        q.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                RealmUtils.getRealmUtils(SoundActivity.this).deleteAllAudioUser(SoundActivity.this);
+                for(DataSnapshot data : dataSnapshot.getChildren()){
+                    FirebaseAudio audio = data.getValue(FirebaseAudio.class);
+                    String id = dataSnapshot.getKey();
+                    String name = audio.getName();
+                    String dateCreate = audio.getDate_create();
+                    int plays = audio.getPlays();
+                    AudioUser audioUser = new AudioUser(name,plays,id,dateCreate);
+                    RealmUtils.getRealmUtils(SoundActivity.this).addAudioUser(SoundActivity.this,audioUser);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
         String id = Utils.getCurrentUserID(this);
         sounds = RealmUtils.getRealmUtils(this).getSoundOfUser(this, id);
         adapter = new ListMySoundAdapter(this, sounds);
@@ -51,11 +79,11 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
             @Override
             public void onClick(int pos, View v) {
-                Sound sound = sounds.get(pos);
+                AudioUser sound = sounds.get(pos);
                 switch (v.getId()) {
                     case R.id.imgPlay:
                         if (currentPos != -1 && pos != currentPos) {
-                            Sound sound1 = sounds.get(currentPos);
+                            AudioUser sound1 = sounds.get(currentPos);
                             if (sound1.isPlaying()) {
                                 RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, sounds.get(currentPos).getId());
                                 player.stop();
@@ -107,6 +135,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void init() {
+        mFirebase = new Firebase(FirebaseConstant.BASE_URL);
         listView = (ListView) findViewById(R.id.lvMySound);
         rlBack = (RelativeLayout) findViewById(R.id.rlBack);
         rlSort = (RelativeLayout) findViewById(R.id.rlSort);
@@ -131,7 +160,6 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void createSoundMenu(View v, final int pos) {
-        Log.d("eeee","menu");
         PopupMenu menu = new PopupMenu(this, v);
         menu.getMenuInflater().inflate(R.menu.sound_menu, menu.getMenu());
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -139,7 +167,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()){
                     case R.id.delete:
-                        Sound sound = sounds.get(pos);
+                        AudioUser sound = sounds.get(pos);
                         File file = new File(sound.getLinkOnDisk());
                        // file.delete();
                         RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this,sound.getId());

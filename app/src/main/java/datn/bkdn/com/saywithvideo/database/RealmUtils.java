@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
+import datn.bkdn.com.saywithvideo.model.AudioUser;
 import datn.bkdn.com.saywithvideo.model.ContentAudio;
 import datn.bkdn.com.saywithvideo.model.Sound;
 import datn.bkdn.com.saywithvideo.model.User;
@@ -68,9 +69,22 @@ public class RealmUtils {
         });
     }
 
-    public RealmResults<Sound> getSoundOfUser(Context context, String id) {
+    public void addAudioUser(Context context, AudioUser audio){
         realm = RealmManager.getRealm(context);
-        RealmResults<Sound> sounds = realm.where(Sound.class).equalTo("idUser", id).findAll();
+        realm.beginTransaction();
+        realm.copyToRealm(audio);
+        realm.commitTransaction();
+    }
+
+    public void deleteAllAudioUser(Context context){
+        realm = RealmManager.getRealm(context);
+        realm.beginTransaction();
+        realm.where(AudioUser.class).findAll().clear();
+        realm.commitTransaction();
+    }
+    public RealmResults<AudioUser> getSoundOfUser(Context context, String id) {
+        realm = RealmManager.getRealm(context);
+        RealmResults<AudioUser> sounds = realm.where(AudioUser.class).findAll();
         return sounds;
     }
 

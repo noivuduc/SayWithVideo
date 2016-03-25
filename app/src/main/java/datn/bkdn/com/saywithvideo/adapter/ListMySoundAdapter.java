@@ -1,23 +1,19 @@
 package datn.bkdn.com.saywithvideo.adapter;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import java.util.List;
-
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.model.Sound;
+import datn.bkdn.com.saywithvideo.model.AudioUser;
 import io.realm.RealmBaseAdapter;
 import io.realm.RealmResults;
 
-public class ListMySoundAdapter extends RealmBaseAdapter<Sound> {
+public class ListMySoundAdapter extends RealmBaseAdapter<AudioUser> {
 
     public interface OnItemClicked {
         void onClick(int pos, View v);
@@ -29,7 +25,7 @@ public class ListMySoundAdapter extends RealmBaseAdapter<Sound> {
         this.mItemClicked = playButtonClicked;
     }
 
-    public ListMySoundAdapter(Context context, RealmResults<Sound> sounds) {
+    public ListMySoundAdapter(Context context, RealmResults<AudioUser> sounds) {
         super(context, sounds, true);
     }
 
@@ -76,11 +72,11 @@ public class ListMySoundAdapter extends RealmBaseAdapter<Sound> {
                 }
             }
         });
-        Sound sound = getItem(position);
+        AudioUser sound = getItem(position);
         viewHolder.imgPlayPause.setImageResource(sound.isPlaying() ? R.mipmap.ic_pause : R.mipmap.ic_play);
         viewHolder.tvSoundName.setText(sound.getName());
         viewHolder.tvPlays.setText(sound.getPlays() + " plays");
-        viewHolder.tvDateOfCreate.setText(sound.getDateOfCreate());
+        viewHolder.tvDateOfCreate.setText(sound.getDate_create());
         return convertView;
     }
 

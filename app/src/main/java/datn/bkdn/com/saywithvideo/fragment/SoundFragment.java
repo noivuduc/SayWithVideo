@@ -5,6 +5,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -117,64 +118,53 @@ public class SoundFragment extends Fragment {
                     case R.id.imgPlay:
                         final String audioId = sound.getId();
                         String path="";
-                        ContentAudio contentAudio;
-                        contentAudio= RealmUtils.getRealmUtils(getContext()).getContentAudio(getContext(), audioId);
-                        if(contentAudio==null) {
-                            String link = FirebaseConstant.BASE_URL+FirebaseConstant.AUDIO_CONTENT_URL+"/"+audioId+".json";
-                            String json = Tools.getJson(link);
-                            FireBaseContent c = new Gson().fromJson(json,FireBaseContent.class);
-                                        String content = c.getContent();
-                                        String path_audio =  Environment.getExternalStorageDirectory().getAbsolutePath() + "/"+audioId+".m4a";
-                                        ContentAudio audio = new ContentAudio();
-                                        audio.setId(audioId);
-                                        audio.setContent(path_audio);
-                            try {
-                                Base64.decodeToFile(content, path_audio);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            RealmUtils.getRealmUtils(getContext()).addSoundContent(getContext(), audio);
-
-                            contentAudio = RealmUtils.getRealmUtils(getContext()).getContentAudio(getContext(), audioId);
-                        }
-                        path = contentAudio.getContent();
-                        if (mCurrentPos != -1 && pos != mCurrentPos) {
-                            Sound sound1 = mSounds.get(mCurrentPos);
-                            if (sound1.isPlaying()) {
-                                RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(mCurrentPos).getId());
-                                mPlayer.stop();
-                            }
-                        }
-                        mCurrentPos = pos;
-                        if (sound.isPlaying()) {
-                            mPlayer.stop();
-                            mPlayer.reset();
-                        } else {
-                            playMp3(path);
-                        }
-                        RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(pos).getId());
-                        mAdapter.notifyDataSetChanged();
+                        ContentAudio contentAudio = getContentAudio(audioId);
+                       if(contentAudio!=null) {
+                           path = contentAudio.getContent();
+                           if (mCurrentPos != -1 && pos != mCurrentPos) {
+                               Sound sound1 = mSounds.get(mCurrentPos);
+                               if (sound1.isPlaying()) {
+                                   RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(mCurrentPos).getId());
+                                   mPlayer.stop();
+                               }
+                           }
+                           mCurrentPos = pos;
+                           if (sound.isPlaying()) {
+                               mPlayer.stop();
+                               mPlayer.reset();
+                           } else {
+                               playMp3(path);
+                           }
+                           RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(pos).getId());
+                           mAdapter.notifyDataSetChanged();
+                       }
                         break;
                     case R.id.rlFavorite:
-                        Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL+FirebaseConstant.USER_URL+"/"+ Utils.getCurrentUserID(getContext())).child("favorite");
-                        String id = sound.getId();
+                        try {
+                            Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(getContext())).child("favorite");
+                            String id = sound.getId();
 
-                        if(user.getFavorite().contains(id))
-                        {
-                            user.getFavorite().remove(id);
-                        }else
-                        {
-                            user.getFavorite().add(id);
+                            if (user.getFavorite().contains(id)) {
+                                user.getFavorite().remove(id);
+                            } else {
+                                user.getFavorite().add(id);
+                            }
+                            favoriteFirebase.setValue(user.getFavorite());
+                        }catch (Exception e){
+                            
                         }
-                        favoriteFirebase.setValue(user.getFavorite());
                         RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), sound.getId());
 
                         mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
-                        Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
-                        intent.putExtra("FilePath", sound.getLinkOnDisk());
-                        startActivity(intent);
+                        ContentAudio content = getContentAudio(sound.getId());
+                        if(content!=null) {
+                            String filePath = content.getContent();
+                            Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
+                            intent.putExtra("FilePath", filePath);
+                            startActivity(intent);
+                        }
                         break;
                     case R.id.rlOption:
                         createPopupMenu(v);
@@ -183,6 +173,36 @@ public class SoundFragment extends Fragment {
             }
         });
         mLvSound.setAdapter(mAdapter);
+    }
+
+    private ContentAudio getContentAudio(String audioId){
+        ContentAudio contentAudio;
+        contentAudio= RealmUtils.getRealmUtils(getContext()).getContentAudio(getContext(), audioId);
+        if(contentAudio==null) {
+            if (Tools.isOnline(getContext())) {
+                String link = FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_CONTENT_URL + "/" + audioId + ".json";
+                String json = Tools.getJson(link);
+                FireBaseContent c = new Gson().fromJson(json, FireBaseContent.class);
+                String content = c.getContent();
+                String path_audio = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + audioId + ".m4a";
+                ContentAudio audio = new ContentAudio();
+                audio.setId(audioId);
+                audio.setContent(path_audio);
+                try {
+                    Base64.decodeToFile(content, path_audio);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                RealmUtils.getRealmUtils(getContext()).addSoundContent(getContext(), audio);
+
+                contentAudio = RealmUtils.getRealmUtils(getContext()).getContentAudio(getContext(), audioId);
+            }else
+            {
+                Snackbar.make(getActivity().getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                return null;
+            }
+        }
+        return contentAudio;
     }
 
     private FirebaseUser user;
