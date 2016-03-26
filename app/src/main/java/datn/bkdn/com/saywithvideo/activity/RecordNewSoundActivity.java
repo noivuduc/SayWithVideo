@@ -46,6 +46,8 @@ public class RecordNewSoundActivity extends Activity {
         tvTime = (TextView) findViewById(R.id.tvTime);
         tvInfor = (TextView) findViewById(R.id.tvInfor);
 
+        mClockRecord = new ClockRecord(10000, 100);
+
         buttonRecord.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,7 +56,7 @@ public class RecordNewSoundActivity extends Activity {
                     buttonRecord.setBackgroundResource(R.drawable.selector_button_record_a_sound_pressed);
                     tvStart.setText("Done");
                     tvInfor.setText("Tap when you are done!");
-                    clockRecord();
+                    onRecord(mStartRecording);
                     mStartRecording = !mStartRecording;
                 } else {
                     onRecord(mStartRecording);
@@ -94,11 +96,11 @@ public class RecordNewSoundActivity extends Activity {
 
         try {
             mRecorder.prepare();
+            mClockRecord.startClock();
+            mRecorder.start();
         } catch (IOException e) {
             Log.e(LOG_TAG, "prepare() failed");
         }
-
-        mRecorder.start();
     }
 
     private void stopRecording() {
@@ -112,14 +114,10 @@ public class RecordNewSoundActivity extends Activity {
         mFileName = Constant.AUDIO_DIRECTORY_PATH + "AUDIO_" + idSound + ".aac";
     }
 
-    private void clockRecord() {
-        mClockRecord = new ClockRecord(10000, 100);
-        mClockRecord.startClock();
-    }
-
     private void finishRecord() {
         Intent intent = new Intent(RecordNewSoundActivity.this, EditAudioActivity.class);
         intent.putExtra("FileName", mFileName);
+        intent.putExtra("Type", "Record");
         startActivity(intent);
         this.finish();
     }
@@ -138,6 +136,8 @@ public class RecordNewSoundActivity extends Activity {
         }
     }
 
+    //  count down timer
+
     private class ClockRecord extends CountDownTimer {
         public ClockRecord(long millisInFuture, long countDownInterval) {
             super(millisInFuture, countDownInterval);
@@ -155,7 +155,6 @@ public class RecordNewSoundActivity extends Activity {
 
         public void startClock() {
             start();
-            onRecord(mStartRecording);
         }
     }
 }

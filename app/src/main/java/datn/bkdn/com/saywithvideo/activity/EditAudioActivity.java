@@ -54,6 +54,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
     private int mWidth;
     private String mOutputPath;
     private Firebase mFirebase;
+    private String mType;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -64,6 +65,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         mFirebase = new Firebase(FirebaseConstant.BASE_URL);
 
         mFilePath = getIntent().getStringExtra("FileName");
+        mType = getIntent().getStringExtra("Type");
         Log.d("Path", mFilePath);
         if (mFilePath == null) {
             finish();
@@ -271,8 +273,10 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            File file = new File(mFilePath);
-            file.delete();
+            if (mType.equals("Record")) {
+                File file = new File(mFilePath);
+                file.delete();
+            }
         }
     }
 
@@ -337,5 +341,14 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         });
 
         dialog.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mType.equals("Record")) {
+            File file = new File(mFilePath);
+            file.delete();
+        }
+        super.onBackPressed();
     }
 }
