@@ -6,6 +6,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -13,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
@@ -37,6 +40,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private TextView tvLoginFacebook;
     private TextView tvForgot;
     private Firebase root;
+    private CallbackManager callbackManager;
 
 
     @Override
@@ -44,6 +48,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         Firebase.setAndroidContext(this);
+        FacebookSdk.sdkInitialize(this);
         root = new Firebase(Constant.FIREBASE_ROOT);
 
         if (!checkCurrentUser()) {
@@ -140,6 +145,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 } else {
                     checkisValidAccount(edtEmail.getText().toString(), edtPass.getText().toString());
                 }
+                datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(LoginActivity.this);
                 break;
             case R.id.tvregister:
                 startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
@@ -158,6 +164,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void loginFacebook(final AccessToken token) {
+        Log.d("Tien", "fb " + token);
         if (token != null) {
             root.authWithOAuthToken("facebook", token.getToken(), new Firebase.AuthResultHandler() {
                 @Override
@@ -231,5 +238,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     protected void onPause() {
         super.onPause();
         AppEventsLogger.deactivateApp(this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 }

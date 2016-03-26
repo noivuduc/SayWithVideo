@@ -127,7 +127,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             public void afterTextChanged(Editable s) {
                 if (s.toString().equals("")) {
                     clearName.setVisibility(View.GONE);
-                } else{
+                } else {
                     if (checkisValidInfo()) {
                         tvregister.setVisibility(View.VISIBLE);
                     } else {
@@ -186,8 +186,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         }
                     }
                 });
-
-
+                datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(RegisterActivity.this);
                 break;
             case R.id.tvhaveaccount:
                 startActivity(new Intent(RegisterActivity.this, LoginActivity.class));

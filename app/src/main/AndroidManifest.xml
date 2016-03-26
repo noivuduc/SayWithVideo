@@ -20,7 +20,9 @@
         <activity android:name=".activity.SoundBoardActivity" />
         <activity android:name=".activity.FavoriteActivity" />
         <activity android:name=".activity.SettingActivity" />
-        <activity android:name=".activity.CaptureVideoActivity" />
+        <activity
+            android:name=".activity.CaptureVideoActivity"
+            android:screenOrientation="portrait" />
         <activity android:name=".activity.AddSoundActivity" />
         <activity android:name=".activity.RecordNewSoundActivity" />
         <activity android:name=".activity.test" />
