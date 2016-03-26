@@ -53,6 +53,7 @@
             android:value="@string/facebook_app_id" />
 
         <activity android:name=".activity.ImportSoundActivity" />
+        <activity android:name=".activity.ResetPasswordActivity"></activity>
     </application>
 
 </manifest>

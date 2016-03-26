@@ -15,14 +15,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="15dp"
             android:src="@mipmap/ic_person" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="17dp"
+            android:layout_marginTop="15dp"
             android:text="Login to Dubsmash"
             android:textColor="#494848"
             android:textSize="17sp" />
@@ -36,12 +36,21 @@
             android:text="Please enter your Dubsmash username or email and password below"
             android:textColor="#aeabab"
             android:textSize="13sp" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lll"
+        android:layout_marginTop="15dp">
 
         <RelativeLayout
+            android:id="@+id/rl1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:orientation="horizontal">
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp">
 
             <EditText
                 android:id="@+id/edtEmail"
@@ -52,7 +61,7 @@
                 android:gravity="center"
                 android:hint="Enter your email"
                 android:singleLine="true"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
 
             <ImageView
                 android:id="@+id/imgClearEmail"
@@ -66,10 +75,12 @@
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/rl2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:orientation="horizontal">
+            android:layout_below="@+id/rl1"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="15dp">
 
             <EditText
                 android:id="@+id/edtpass"
@@ -81,25 +92,46 @@
                 android:hint="Enter password"
                 android:password="true"
                 android:singleLine="true"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
 
             <ImageView
                 android:id="@+id/imgClearPass"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="5dp"
+                android:layout_toLeftOf="@+id/tvForgot"
                 android:src="@mipmap/ic_action_remove"
                 android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvForgot"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:text="Forgot?"
+                android:textColor="#44c9e7"
+                android:textSize="12sp" />
         </RelativeLayout>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/lll2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rl"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/tvregister"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:text="I don't have any account. Register?"
             android:textColor="#44c9e7"
             android:textSize="13sp"
@@ -109,7 +141,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp">
+            android:layout_marginTop="10dp">
 
             <View
                 android:layout_width="40dp"
@@ -146,13 +178,12 @@
             android:text="Login With Facebook"
             android:textColor="#fff"
             android:textSize="16sp" />
-
     </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/lll">
+        android:layout_below="@+id/lll2">
 
         <TextView
             android:id="@+id/tvLogin"
