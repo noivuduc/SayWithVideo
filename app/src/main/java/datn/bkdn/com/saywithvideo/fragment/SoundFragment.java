@@ -42,6 +42,8 @@ public class SoundFragment extends Fragment {
     private Firebase mFirebase;
     private Firebase mContent;
     private String mJsonContent;
+    private FirebaseUser user;
+
     public static SoundFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -58,6 +60,7 @@ public class SoundFragment extends Fragment {
         mLvSound = (ListView) v.findViewById(R.id.lvSound);
         return v;
     }
+
     private void init() {
 
         Firebase.setAndroidContext(getContext());
@@ -73,13 +76,14 @@ public class SoundFragment extends Fragment {
                     final String dateCreate = firebaseAudio.getDate_create();
                     final String user_id = firebaseAudio.getUser_id();
                     final String audio_id = data.getKey();
-                    int plays = firebaseAudio.getPlays();
+                    final int plays = firebaseAudio.getPlays();
                     Firebase base = new Firebase(Constant.FIREBASE_ROOT + "users/" + user_id + "/name/");
                     base.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             String userName = dataSnapshot.getValue().toString();
                             Sound sound = new Sound(audio_id, name, userName, dateCreate);
+                            sound.setPlays(plays);
                             if(user.getFavorite()!=null) {
                                 if (user.getFavorite().contains(audio_id))
                                     sound.setIsFavorite(true);
@@ -112,27 +116,30 @@ public class SoundFragment extends Fragment {
                 switch (v.getId()) {
                     case R.id.imgPlay:
                         final String audioId = sound.getId();
-                        String path="";
+                        RealmUtils.getRealmUtils(getContext()).updatePlays(getContext(), audioId);
+                        Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
+                        firebase.child(audioId).child("plays").setValue(sound.getPlays() + "");
+                        String path = "";
                         ContentAudio contentAudio = AppTools.getContentAudio(audioId, getActivity());
-                       if(contentAudio!=null) {
-                           path = contentAudio.getContent();
-                           if (mCurrentPos != -1 && pos != mCurrentPos) {
-                               Sound sound1 = mSounds.get(mCurrentPos);
-                               if (sound1.isPlaying()) {
-                                   RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(mCurrentPos).getId());
-                                   mPlayer.stop();
-                               }
-                           }
-                           mCurrentPos = pos;
-                           if (sound.isPlaying()) {
-                               mPlayer.stop();
-                               mPlayer.reset();
-                           } else {
-                               playMp3(path);
-                           }
-                           RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(pos).getId());
-                           mAdapter.notifyDataSetChanged();
-                       }
+                        if (contentAudio != null) {
+                            path = contentAudio.getContent();
+                            if (mCurrentPos != -1 && pos != mCurrentPos) {
+                                Sound sound1 = mSounds.get(mCurrentPos);
+                                if (sound1.isPlaying()) {
+                                    RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(mCurrentPos).getId());
+                                    mPlayer.stop();
+                                }
+                            }
+                            mCurrentPos = pos;
+                            if (sound.isPlaying()) {
+                                mPlayer.stop();
+                                mPlayer.reset();
+                            } else {
+                                playMp3(path);
+                            }
+                            RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(pos).getId());
+                            mAdapter.notifyDataSetChanged();
+                        }
                         break;
                     case R.id.rlFavorite:
                         try {
@@ -145,8 +152,8 @@ public class SoundFragment extends Fragment {
                                 user.getFavorite().add(id);
                             }
                             favoriteFirebase.setValue(user.getFavorite());
-                        }catch (Exception e){
-                            
+                        } catch (Exception e) {
+
                         }
                         RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), sound.getId());
 
@@ -154,7 +161,7 @@ public class SoundFragment extends Fragment {
                         break;
                     case R.id.llSoundInfor:
                         ContentAudio content = AppTools.getContentAudio(sound.getId(), getActivity());
-                        if(content!=null) {
+                        if (content != null) {
                             String filePath = content.getContent();
                             Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
                             intent.putExtra("FilePath", filePath);
@@ -170,8 +177,15 @@ public class SoundFragment extends Fragment {
         mLvSound.setAdapter(mAdapter);
     }
 
-
-    private FirebaseUser user;
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPlayer != null) {
+            if (mPlayer.isPlaying()) {
+                mPlayer.stop();
+            }
+        }
+    }
 
     @Override
     public void onResume() {

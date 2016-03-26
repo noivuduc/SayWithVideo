@@ -42,18 +42,23 @@ public class RealmUtils {
     }
 
 
-    public void deleteSound(Context context, String id) {
-        realm = RealmManager.getRealm(context);
-        realm.beginTransaction();
-        realm.where(AudioUser.class).equalTo("id", id).findAll().clear();
-        realm.commitTransaction();
+    public void deleteSound(Context context, final String id) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.where(AudioUser.class).equalTo("id", id).findAll().clear();
+            }
+        });
     }
 
-    public void deleteSoundContent(Context context, String id) {
-        realm = RealmManager.getRealm(context);
-        realm.beginTransaction();
-        realm.where(ContentAudio.class).equalTo("id", id).findAll().clear();
-        realm.commitTransaction();
+    public void deleteSoundContent(Context context, final String id) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.where(ContentAudio.class).equalTo("id", id).findAll().clear();
+            }
+        });
+
     }
 
     public void updateFavorite(Context context, final String id) {
@@ -66,11 +71,37 @@ public class RealmUtils {
         });
     }
 
+    public void updatePlays(Context context, final String id) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Sound sound = realm.where(Sound.class).equalTo("id", id).findFirst();
+                if (sound != null) {
+                    sound.setPlays(sound.getPlays() + 1);
+                }
+                AudioUser audioUser = realm.where(AudioUser.class).equalTo("id", id).findFirst();
+                if (audioUser != null) {
+                    audioUser.setPlays(audioUser.getPlays() + 1);
+                }
+
+            }
+        });
+    }
     public void updatePlaying(Context context, final String id) {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 Sound sound = realm.where(Sound.class).equalTo("id", id).findFirst();
+                sound.setIsPlaying(!sound.isPlaying());
+            }
+        });
+    }
+
+    public void updateSoundUserPlaying(Context context, final String id) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                AudioUser sound = realm.where(AudioUser.class).equalTo("id", id).findFirst();
                 sound.setIsPlaying(!sound.isPlaying());
             }
         });

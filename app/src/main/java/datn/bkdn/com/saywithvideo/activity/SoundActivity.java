@@ -50,27 +50,11 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sound);
         init();
-        Query q =  mFirebase.child(FirebaseConstant.AUDIO_URL).orderByChild("user_id").equalTo(Utils.getCurrentUserID(this));
-        q.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                RealmUtils.getRealmUtils(SoundActivity.this).deleteAllAudioUser(SoundActivity.this);
-                for(DataSnapshot data : dataSnapshot.getChildren()){
-                    FirebaseAudio audio = data.getValue(FirebaseAudio.class);
-                    String id = dataSnapshot.getKey();
-                    String name = audio.getName();
-                    String dateCreate = audio.getDate_create();
-                    int plays = audio.getPlays();
-                    AudioUser audioUser = new AudioUser(name,plays,id,dateCreate);
-                    RealmUtils.getRealmUtils(SoundActivity.this).addAudioUser(SoundActivity.this,audioUser);
-                }
-            }
+        initAdapter();
 
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
+    }
 
-            }
-        });
+    private void initAdapter() {
         String id = Utils.getCurrentUserID(this);
         sounds = RealmUtils.getRealmUtils(this).getSoundOfUser(this, id);
         adapter = new ListMySoundAdapter(this, sounds);
@@ -84,17 +68,22 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                 switch (v.getId()) {
                     case R.id.imgPlay:
                         final String audioId = sound.getId();
+
                         String path = "";
                         ContentAudio contentAudio = AppTools.getContentAudio(audioId, SoundActivity.this);
                         if (contentAudio != null) {
+                            RealmUtils.getRealmUtils(SoundActivity.this).updatePlays(SoundActivity.this, audioId);
+                            Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
+                            firebase.child(audioId).child("plays").setValue(sound.getPlays() + "");
                             if (currentPos != -1 && pos != currentPos) {
                                 AudioUser sound1 = sounds.get(currentPos);
                                 if (sound1.isPlaying()) {
-                                    RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, sounds.get(currentPos).getId());
+                                    RealmUtils.getRealmUtils(SoundActivity.this).updateSoundUserPlaying(SoundActivity.this, sounds.get(currentPos).getId());
                                     player.stop();
                                     player.reset();
                                 }
                             }
+                            path = contentAudio.getContent();
                             currentPos = pos;
                             if (sound.isPlaying()) {
                                 player.stop();
@@ -102,7 +91,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                             } else {
                                 playMp3(path);
                             }
-                            RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, sounds.get(pos).getId());
+                            RealmUtils.getRealmUtils(SoundActivity.this).updateSoundUserPlaying(SoundActivity.this, sounds.get(pos).getId());
                             adapter.notifyDataSetChanged();
                         }
                         break;
@@ -124,6 +113,32 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         });
     }
 
+    private void getMySound() {
+        Query q = mFirebase.child(FirebaseConstant.AUDIO_URL).orderByChild("user_id").equalTo(Utils.getCurrentUserID(this));
+        q.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                RealmUtils.getRealmUtils(SoundActivity.this).deleteAllAudioUser(SoundActivity.this);
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    FirebaseAudio audio = data.getValue(FirebaseAudio.class);
+                    String id = data.getKey();
+                    String name = audio.getName();
+                    String dateCreate = audio.getDate_create();
+                    int plays = audio.getPlays();
+                    AudioUser audioUser = new AudioUser(name, plays, id, dateCreate);
+                    RealmUtils.getRealmUtils(SoundActivity.this).addAudioUser(SoundActivity.this, audioUser);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+
+    }
+
     public void playMp3(String path) {
         if(player==null) {
             player = new MediaPlayer();
@@ -138,7 +153,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, sounds.get(currentPos).getId());
+                RealmUtils.getRealmUtils(SoundActivity.this).updateSoundUserPlaying(SoundActivity.this, sounds.get(currentPos).getId());
                 adapter.notifyDataSetChanged();
             }
         });
@@ -216,6 +231,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 //                        File file = new File(sound.getLinkOnDisk());
 //                       // file.delete();
                         RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this,sound.getId());
+                        RealmUtils.getRealmUtils(SoundActivity.this).deleteSoundContent(SoundActivity.this, sound.getId());
                         adapter.notifyDataSetChanged();
                         break;
 
@@ -228,6 +244,22 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
     private void finishActivity() {
         this.finish();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (player != null) {
+            if (player.isPlaying()) {
+                player.stop();
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getMySound();
     }
 
     @Override
@@ -263,7 +295,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                 adapter.notifyDataSetChanged();
                 break;
             case R.id.byDate:
-                sounds.sort("dateOfCreate", Sort.ASCENDING);
+                sounds.sort("date_create", Sort.ASCENDING);
                 adapter.notifyDataSetChanged();
                 break;
             case R.id.byPlays:
