@@ -3,9 +3,7 @@ package datn.bkdn.com.saywithvideo.fragment;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,8 +16,6 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.firebase.client.utilities.Base64;
-import com.google.gson.Gson;
 
 import java.io.IOException;
 
@@ -28,12 +24,11 @@ import datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity;
 import datn.bkdn.com.saywithvideo.adapter.ListSoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.model.ContentAudio;
-import datn.bkdn.com.saywithvideo.model.FireBaseContent;
 import datn.bkdn.com.saywithvideo.model.FirebaseAudio;
 import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.model.FirebaseUser;
 import datn.bkdn.com.saywithvideo.model.Sound;
-import datn.bkdn.com.saywithvideo.network.Tools;
+import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
@@ -118,7 +113,7 @@ public class SoundFragment extends Fragment {
                     case R.id.imgPlay:
                         final String audioId = sound.getId();
                         String path="";
-                        ContentAudio contentAudio = getContentAudio(audioId);
+                        ContentAudio contentAudio = AppTools.getContentAudio(audioId, getActivity());
                        if(contentAudio!=null) {
                            path = contentAudio.getContent();
                            if (mCurrentPos != -1 && pos != mCurrentPos) {
@@ -158,7 +153,7 @@ public class SoundFragment extends Fragment {
                         mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
-                        ContentAudio content = getContentAudio(sound.getId());
+                        ContentAudio content = AppTools.getContentAudio(sound.getId(), getActivity());
                         if(content!=null) {
                             String filePath = content.getContent();
                             Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
@@ -175,35 +170,6 @@ public class SoundFragment extends Fragment {
         mLvSound.setAdapter(mAdapter);
     }
 
-    private ContentAudio getContentAudio(String audioId){
-        ContentAudio contentAudio;
-        contentAudio= RealmUtils.getRealmUtils(getContext()).getContentAudio(getContext(), audioId);
-        if(contentAudio==null) {
-            if (Tools.isOnline(getContext())) {
-                String link = FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_CONTENT_URL + "/" + audioId + ".json";
-                String json = Tools.getJson(link);
-                FireBaseContent c = new Gson().fromJson(json, FireBaseContent.class);
-                String content = c.getContent();
-                String path_audio = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + audioId + ".m4a";
-                ContentAudio audio = new ContentAudio();
-                audio.setId(audioId);
-                audio.setContent(path_audio);
-                try {
-                    Base64.decodeToFile(content, path_audio);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                RealmUtils.getRealmUtils(getContext()).addSoundContent(getContext(), audio);
-
-                contentAudio = RealmUtils.getRealmUtils(getContext()).getContentAudio(getContext(), audioId);
-            }else
-            {
-                Snackbar.make(getActivity().getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
-                return null;
-            }
-        }
-        return contentAudio;
-    }
 
     private FirebaseUser user;
 

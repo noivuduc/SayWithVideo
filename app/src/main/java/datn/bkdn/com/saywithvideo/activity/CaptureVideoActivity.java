@@ -33,7 +33,7 @@ import datn.bkdn.com.saywithvideo.custom.VisualizerView;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.utils.CameraPreview;
 import datn.bkdn.com.saywithvideo.utils.Constant;
-import datn.bkdn.com.saywithvideo.utils.Tools;
+import datn.bkdn.com.saywithvideo.utils.AppTools;
 
 public class CaptureVideoActivity extends AppCompatActivity implements View.OnClickListener, MediaPlayer.OnCompletionListener {
 
@@ -158,7 +158,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             mMediaRecorder.setOrientationHint(90);
         }
 
-        mVideoOutPut = Constant.VIDEO_DIRECTORY_PATH + "VIDEO_" + Tools.getDate() + ".mp4";
+        mVideoOutPut = Constant.VIDEO_DIRECTORY_PATH + "VIDEO_" + AppTools.getDate() + ".mp4";
         mMediaRecorder.setOutputFile(mVideoOutPut);
         try {
             mMediaRecorder.prepare();
@@ -325,7 +325,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                 }
 
                 Container container = new DefaultMp4Builder().build(outputVideo);
-                outputPath = Constant.VIDEO_DIRECTORY_PATH + "VIDEO_" + Tools.getDate() + ".mp4";
+                outputPath = Constant.VIDEO_DIRECTORY_PATH + "VIDEO_" + AppTools.getDate() + ".mp4";
                 FileChannel fileChannel = new FileOutputStream(new File(outputPath)).getChannel();
                 container.writeContainer(fileChannel);
                 fileChannel.close();

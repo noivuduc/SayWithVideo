@@ -18,7 +18,7 @@ import java.io.IOException;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.utils.Constant;
-import datn.bkdn.com.saywithvideo.utils.Tools;
+import datn.bkdn.com.saywithvideo.utils.AppTools;
 
 
 public class RecordNewSoundActivity extends Activity {
@@ -108,7 +108,7 @@ public class RecordNewSoundActivity extends Activity {
     }
 
     public void AudioRecordActivity() {
-        String idSound = Tools.getDate();
+        String idSound = AppTools.getDate();
         mFileName = Constant.AUDIO_DIRECTORY_PATH + "AUDIO_" + idSound + ".aac";
     }
 

@@ -45,7 +45,14 @@ public class RealmUtils {
     public void deleteSound(Context context, String id) {
         realm = RealmManager.getRealm(context);
         realm.beginTransaction();
-        realm.where(Sound.class).equalTo("id", id).findAll().clear();
+        realm.where(AudioUser.class).equalTo("id", id).findAll().clear();
+        realm.commitTransaction();
+    }
+
+    public void deleteSoundContent(Context context, String id) {
+        realm = RealmManager.getRealm(context);
+        realm.beginTransaction();
+        realm.where(ContentAudio.class).equalTo("id", id).findAll().clear();
         realm.commitTransaction();
     }
 

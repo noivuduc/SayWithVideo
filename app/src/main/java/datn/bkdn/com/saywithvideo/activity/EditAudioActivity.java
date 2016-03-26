@@ -36,7 +36,7 @@ import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.model.Sound;
 import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
 import datn.bkdn.com.saywithvideo.utils.Constant;
-import datn.bkdn.com.saywithvideo.utils.Tools;
+import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
 public class EditAudioActivity extends Activity implements MarkerView.CustomListener,
@@ -255,7 +255,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
 
         @Override
         protected Void doInBackground(Void... params) {
-            mOutputPath = Constant.AUDIO_DIRECTORY_PATH + "AUDIO_" + Tools.getDate() + ".m4a";
+            mOutputPath = Constant.AUDIO_DIRECTORY_PATH + "AUDIO_" + AppTools.getDate() + ".m4a";
             try {
                 SoundFile soundFile = SoundFile.create(mFilePath, null);
                 soundFile.WriteFile(new File(mOutputPath), left / 1000, right / 1000);
