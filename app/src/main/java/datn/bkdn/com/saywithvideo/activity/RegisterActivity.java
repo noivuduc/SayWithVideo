@@ -12,9 +12,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,6 +35,21 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private ImageView clearPass;
     private ImageView clearEmail;
     private ImageView clearName;
+    private Firebase mUserFire;
+
+    private static boolean isEmailValid(String email) {
+        boolean isValid = false;
+
+        String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
+        CharSequence inputStr = email;
+
+        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(inputStr);
+        if (matcher.matches()) {
+            isValid = true;
+        }
+        return isValid;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,14 +177,26 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 final String email = edtEmail.getText().toString();
                 final String pass = edtPass.getText().toString();
 
-                Firebase userFire = new Firebase(Constant.FIREBASE_ROOT);
-                userFire.createUser(email, pass, new Firebase.ValueResultHandler<Map<String, Object>>() {
+                mUserFire = new Firebase(Constant.FIREBASE_ROOT);
+                mUserFire.createUser(email, pass, new Firebase.ValueResultHandler<Map<String, Object>>() {
                     @Override
                     public void onSuccess(Map<String, Object> stringObjectMap) {
                         Intent i = new Intent(RegisterActivity.this, RegisterSuccessActivity.class);
-                        i.putExtra("email", email);
-                        i.putExtra("pass", pass);
-                        i.putExtra("name", name);
+                        mUserFire.authWithPassword(email, pass, new Firebase.AuthResultHandler() {
+                            @Override
+                            public void onAuthenticated(AuthData authData) {
+                                Utils.setCurrentUsername(RegisterActivity.this, name, email, authData.getUid());
+                                HashMap<String, String> map = new HashMap<String, String>();
+                                map.put("name", name);
+                                mUserFire.child("users").child(authData.getUid()).setValue(map);
+                            }
+
+                            @Override
+                            public void onAuthenticationError(FirebaseError firebaseError) {
+
+                            }
+                        });
+
                         startActivity(i);
                     }
 
@@ -202,20 +231,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         if (isEmailValid(email) && pass.length() > 6 && name.length() > 0) return true;
         return false;
 
-    }
-
-    private static boolean isEmailValid(String email) {
-        boolean isValid = false;
-
-        String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
-        CharSequence inputStr = email;
-
-        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(inputStr);
-        if (matcher.matches()) {
-            isValid = true;
-        }
-        return isValid;
     }
 
 }
