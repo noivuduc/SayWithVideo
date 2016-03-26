@@ -62,7 +62,6 @@ public class SoundFragment extends Fragment {
     }
 
     private void init() {
-
         Firebase.setAndroidContext(getContext());
         user = Utils.getFavoriteUser(getContext());
         mFirebase = new Firebase(FirebaseConstant.BASE_URL);
@@ -99,7 +98,6 @@ public class SoundFragment extends Fragment {
                     });
 
                 }
-//                mAdapter.notifyDataSetChanged();
             }
 
             @Override

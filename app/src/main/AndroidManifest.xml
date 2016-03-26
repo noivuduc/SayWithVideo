@@ -15,31 +15,58 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
-        <activity android:name=".activity.MainActivity" />
-        <activity android:name=".activity.SoundActivity" />
-        <activity android:name=".activity.SoundBoardActivity" />
-        <activity android:name=".activity.FavoriteActivity" />
-        <activity android:name=".activity.SettingActivity" />
+        <activity
+            android:name=".activity.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.SoundActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.SoundBoardActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.FavoriteActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.SettingActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activity.CaptureVideoActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".activity.AddSoundActivity" />
-        <activity android:name=".activity.RecordNewSoundActivity" />
-        <activity android:name=".activity.test" />
-        <activity android:name=".activity.EditAudioActivity" />
-        <activity android:name=".activity.LoginActivity">
+        <activity
+            android:name=".activity.AddSoundActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.RecordNewSoundActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.test"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.EditAudioActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.LoginActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.RegisterActivity" />
-        <activity android:name=".activity.RegisterSuccessActivity" />
-        <activity android:name=".activity.ShowVideoActivity" />
+        <activity
+            android:name=".activity.RegisterActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.RegisterSuccessActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.ShowVideoActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activity.ShareActivity"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
@@ -54,8 +81,12 @@
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
 
-        <activity android:name=".activity.ImportSoundActivity" />
-        <activity android:name=".activity.ResetPasswordActivity"></activity>
+        <activity
+            android:name=".activity.ImportSoundActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.ResetPasswordActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
