@@ -3,11 +3,10 @@ package datn.bkdn.com.saywithvideo.activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -78,6 +77,7 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent intent = new Intent(ImportSoundActivity.this, EditAudioActivity.class);
         intent.putExtra("FileName", mSounds.get(position).getPath());
+        intent.putExtra("Type", "Import");
         startActivity(intent);
     }
 
