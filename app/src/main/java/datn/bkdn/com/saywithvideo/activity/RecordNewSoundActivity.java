@@ -95,8 +95,8 @@ public class RecordNewSoundActivity extends Activity {
 
         try {
             mRecorder.prepare();
-            mClockRecord.startClock();
             mRecorder.start();
+            mClockRecord.startClock();
         } catch (IOException e) {
             Log.e(LOG_TAG, "prepare() failed");
         }
@@ -110,7 +110,7 @@ public class RecordNewSoundActivity extends Activity {
 
     public void AudioRecordActivity() {
         String idSound = AppTools.getDate();
-        String folderPath = Constant.DIRECTORY_PATH + Constant.VIDEO;
+        String folderPath = Constant.DIRECTORY_PATH + Constant.AUDIO;
         Tools.createFolder(folderPath);
         mFileName = folderPath + "AUDIO_" + idSound + ".aac";
     }
