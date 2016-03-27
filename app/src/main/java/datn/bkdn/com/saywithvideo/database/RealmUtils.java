@@ -47,6 +47,7 @@ public class RealmUtils {
             @Override
             public void execute(Realm realm) {
                 realm.where(AudioUser.class).equalTo("id", id).findAll().clear();
+                realm.where(ContentAudio.class).equalTo("id", id).findAll().clear();
             }
         });
     }
