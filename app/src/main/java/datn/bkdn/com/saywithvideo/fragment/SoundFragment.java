@@ -40,8 +40,6 @@ public class SoundFragment extends Fragment {
     private ListView mLvSound;
     private ListSoundAdapter mAdapter;
     private Firebase mFirebase;
-    private Firebase mContent;
-    private String mJsonContent;
     private FirebaseUser user;
 
     public static SoundFragment newInstance() {

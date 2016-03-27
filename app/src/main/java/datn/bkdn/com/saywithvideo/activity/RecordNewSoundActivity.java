@@ -19,14 +19,13 @@ import java.io.IOException;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
-
+import datn.bkdn.com.saywithvideo.utils.Tools;
 
 public class RecordNewSoundActivity extends Activity {
     private boolean mStartRecording = true;
     private static final String LOG_TAG = "AudioRecordActivity";
     private static String mFileName = null;
     private RelativeLayout buttonRecord;
-    private ViewGroup vgBack;
     private TextView tvStart;
     private TextView tvTime;
     private TextView tvInfor;
@@ -34,14 +33,14 @@ public class RecordNewSoundActivity extends Activity {
     private MediaPlayer mPlayer = null;
     private ClockRecord mClockRecord;
 
-
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.activity_record_new_sound);
         AudioRecordActivity();
+
         buttonRecord = (RelativeLayout) findViewById(R.id.rlStartRecord);
-        vgBack = (ViewGroup) findViewById(R.id.rlBack);
+        ViewGroup vgBack = (ViewGroup) findViewById(R.id.rlBack);
         tvStart = (TextView) findViewById(R.id.tvStart);
         tvTime = (TextView) findViewById(R.id.tvTime);
         tvInfor = (TextView) findViewById(R.id.tvInfor);
@@ -111,7 +110,9 @@ public class RecordNewSoundActivity extends Activity {
 
     public void AudioRecordActivity() {
         String idSound = AppTools.getDate();
-        mFileName = Constant.AUDIO_DIRECTORY_PATH + "AUDIO_" + idSound + ".aac";
+        String folderPath = Constant.DIRECTORY_PATH + Constant.VIDEO;
+        Tools.createFolder(folderPath);
+        mFileName = folderPath + "AUDIO_" + idSound + ".aac";
     }
 
     private void finishRecord() {

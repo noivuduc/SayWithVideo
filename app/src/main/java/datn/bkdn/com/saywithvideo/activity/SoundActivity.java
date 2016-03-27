@@ -45,6 +45,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private RealmResults<AudioUser> sounds;
     private int currentPos = -1;
     private Firebase mFirebase;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,10 +141,11 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     }
 
     public void playMp3(String path) {
-        if(player==null) {
+        if (player == null) {
             player = new MediaPlayer();
         }
         try {
+            player.reset();
             player.setDataSource(path);
             player.prepare();
         } catch (IOException e) {
@@ -190,7 +192,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()){
+                switch (item.getItemId()) {
                     case R.id.delete:
                         AudioUser sound = sounds.get(pos);
                         /*
@@ -201,7 +203,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                         query.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                for(DataSnapshot data:dataSnapshot.getChildren()){
+                                for (DataSnapshot data : dataSnapshot.getChildren()) {
                                     data.getRef().removeValue();
                                 }
                             }
@@ -214,11 +216,11 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                         /*
                         delete content
                          */
-                      Query query1 = firebase.child(FirebaseConstant.AUDIO_CONTENT_URL).orderByChild(sound.getId());
+                        Query query1 = firebase.child(FirebaseConstant.AUDIO_CONTENT_URL).orderByChild(sound.getId());
                         query1.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                for(DataSnapshot data:dataSnapshot.getChildren()){
+                                for (DataSnapshot data : dataSnapshot.getChildren()) {
                                     data.getRef().removeValue();
                                 }
                             }
@@ -230,7 +232,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                         });
 //                        File file = new File(sound.getLinkOnDisk());
 //                       // file.delete();
-                        RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this,sound.getId());
+                        RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this, sound.getId());
                         RealmUtils.getRealmUtils(SoundActivity.this).deleteSoundContent(SoundActivity.this, sound.getId());
                         adapter.notifyDataSetChanged();
                         break;
