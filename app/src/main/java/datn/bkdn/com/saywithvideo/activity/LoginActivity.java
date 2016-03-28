@@ -6,7 +6,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -15,14 +14,19 @@ import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
 import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import datn.bkdn.com.saywithvideo.R;
@@ -42,18 +46,38 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private Firebase root;
     private CallbackManager callbackManager;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        Firebase.setAndroidContext(this);
-        FacebookSdk.sdkInitialize(this);
-        root = new Firebase(Constant.FIREBASE_ROOT);
+
+        if (Tools.isOnline(this)) {
+            Firebase.setAndroidContext(this);
+            FacebookSdk.sdkInitialize(getBaseContext());
+            callbackManager = CallbackManager.Factory.create();
+
+            LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+                @Override
+                public void onSuccess(LoginResult loginResult) {
+                    loginFacebook(AccessToken.getCurrentAccessToken());
+                }
+
+                @Override
+                public void onCancel() {
+                    Toast.makeText(LoginActivity.this, "Login facebook cancel by user", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(FacebookException error) {
+                    Toast.makeText(LoginActivity.this, "Login facebook error", Toast.LENGTH_SHORT).show();
+                }
+            });
+            root = new Firebase(Constant.FIREBASE_ROOT);
+        }
 
         if (!checkCurrentUser()) {
-            startActivity(new Intent(this, MainActivity.class));
             this.finish();
+            startActivity(new Intent(this, MainActivity.class));
         }
         init();
     }
@@ -72,6 +96,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         clearEmail = (ImageView) findViewById(R.id.imgClearEmail);
         clearPass = (ImageView) findViewById(R.id.imgClearPass);
         tvLoginFacebook = (TextView) findViewById(R.id.tvLoginFacebook);
+
         tvLogin.setOnClickListener(this);
         tvRegister.setOnClickListener(this);
         tvLoginFacebook.setOnClickListener(this);
@@ -154,7 +179,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (!Tools.isOnline(getBaseContext())) {
                     Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
                 } else {
-                    loginFacebook(AccessToken.getCurrentAccessToken());
+                    LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "user_friends", "email"));
                 }
                 break;
             case R.id.tvForgot:
@@ -164,13 +189,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void loginFacebook(final AccessToken token) {
-        Log.d("Tien", "fb " + token);
         if (token != null) {
             root.authWithOAuthToken("facebook", token.getToken(), new Firebase.AuthResultHandler() {
                 @Override
                 public void onAuthenticated(AuthData authData) {
                     String name = authData.getProviderData().get("displayName").toString();
-                    // String email = authData.getProviderData().get("email").toString();
                     String uid = authData.getUid();
                     HashMap<String, String> map = new HashMap<String, String>();
                     map.put("name", name);
@@ -192,9 +215,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void finishActivity(String name, String email, String uid) {
         Utils.setCurrentUsername(LoginActivity.this, name, email, uid);
         Intent i = new Intent(LoginActivity.this, MainActivity.class);
-        startActivity(i);
         this.finish();
-
+        startActivity(i);
     }
 
     private void checkisValidAccount(final String email, String pass) {

@@ -81,7 +81,7 @@ public class SoundFragment extends Fragment {
                             String userName = dataSnapshot.getValue().toString();
                             Sound sound = new Sound(audio_id, name, userName, dateCreate);
                             sound.setPlays(plays);
-                            if(user.getFavorite()!=null) {
+                            if (user.getFavorite() != null) {
                                 if (user.getFavorite().contains(audio_id))
                                     sound.setIsFavorite(true);
                             }
@@ -141,18 +141,20 @@ public class SoundFragment extends Fragment {
                         try {
                             Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(getContext())).child("favorite");
                             String id = sound.getId();
-
+                            Intent intent = new Intent("Favorite");
                             if (user.getFavorite().contains(id)) {
                                 user.getFavorite().remove(id);
+                                intent.putExtra("Favorite", false);
                             } else {
+                                intent.putExtra("Favorite", true);
                                 user.getFavorite().add(id);
                             }
+                            getActivity().sendBroadcast(intent);
                             favoriteFirebase.setValue(user.getFavorite());
                         } catch (Exception e) {
 
                         }
                         RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), sound.getId());
-
                         mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
