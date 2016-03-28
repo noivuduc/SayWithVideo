@@ -2,10 +2,10 @@ package datn.bkdn.com.saywithvideo.fragment;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +31,7 @@ import datn.bkdn.com.saywithvideo.model.Sound;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
+import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
 public class SoundFragment extends Fragment {
@@ -63,49 +64,14 @@ public class SoundFragment extends Fragment {
 
         Firebase.setAndroidContext(getContext());
         user = Utils.getFavoriteUser(getContext());
-        mFirebase = new Firebase(FirebaseConstant.BASE_URL);
-        mFirebase.child(FirebaseConstant.AUDIO_URL).addListenerForSingleValueEvent(new ValueEventListener() {
+        new LoadDataAsync().execute();
+        mSounds = RealmUtils.getRealmUtils(getContext()).getAllSound(getContext());
+        mSounds.addChangeListener(new RealmChangeListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                RealmUtils.getRealmUtils(getContext()).deleteAllSound(getContext());
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    FirebaseAudio firebaseAudio = data.getValue(FirebaseAudio.class);
-                    final String name = firebaseAudio.getName();
-                    final String dateCreate = firebaseAudio.getDate_create();
-                    final String user_id = firebaseAudio.getUser_id();
-                    final String audio_id = data.getKey();
-                    final int plays = firebaseAudio.getPlays();
-                    Firebase base = new Firebase(Constant.FIREBASE_ROOT + "users/" + user_id + "/name/");
-                    base.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            String userName = dataSnapshot.getValue().toString();
-                            Sound sound = new Sound(audio_id, name, userName, dateCreate);
-                            sound.setPlays(plays);
-                            if(user.getFavorite()!=null) {
-                                if (user.getFavorite().contains(audio_id))
-                                    sound.setIsFavorite(true);
-                            }
-                            RealmUtils.getRealmUtils(getContext()).addNewSound(getContext(), sound);
-
-                        }
-
-                        @Override
-                        public void onCancelled(FirebaseError firebaseError) {
-
-                        }
-                    });
-
-                }
-//                mAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
+            public void onChange() {
+                mAdapter.notifyDataSetChanged();
             }
         });
-        mSounds = RealmUtils.getRealmUtils(getContext()).getAllSound(getContext());
         mAdapter = new ListSoundAdapter(getContext(), mSounds, false);
         mAdapter.setPlayButtonClicked(new ListSoundAdapter.OnItemClicked() {
             @Override
@@ -207,7 +173,6 @@ public class SoundFragment extends Fragment {
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                Log.d("stop", "stop");
                 RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(mCurrentPos).getId());
                 mAdapter.notifyDataSetChanged();
             }
@@ -219,5 +184,54 @@ public class SoundFragment extends Fragment {
         menu.getMenuInflater().inflate(R.menu.popup_menu, menu.getMenu());
         menu.show();
 
+    }
+
+    public class LoadDataAsync extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            mFirebase = new Firebase(FirebaseConstant.BASE_URL);
+            mFirebase.child(FirebaseConstant.AUDIO_URL).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    RealmUtils.getRealmUtils(getContext()).deleteAllSound(getContext());
+                    for (DataSnapshot data : dataSnapshot.getChildren()) {
+                        FirebaseAudio firebaseAudio = data.getValue(FirebaseAudio.class);
+                        final String name = firebaseAudio.getName();
+                        final String dateCreate = firebaseAudio.getDate_create();
+                        final String user_id = firebaseAudio.getUser_id();
+                        final String audio_id = data.getKey();
+                        final int plays = firebaseAudio.getPlays();
+                        Firebase base = new Firebase(Constant.FIREBASE_ROOT + "users/" + user_id + "/name/");
+                        base.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String userName = dataSnapshot.getValue().toString();
+                                Sound sound = new Sound(audio_id, name, userName, dateCreate);
+                                sound.setPlays(plays);
+                                if (user.getFavorite() != null) {
+                                    if (user.getFavorite().contains(audio_id))
+                                        sound.setIsFavorite(true);
+                                }
+                                RealmUtils.getRealmUtils(getContext()).addNewSound(getContext(), sound);
+
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+
+                            }
+                        });
+
+                    }
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+            return null;
+        }
     }
 }

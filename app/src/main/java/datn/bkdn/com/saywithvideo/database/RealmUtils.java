@@ -42,17 +42,18 @@ public class RealmUtils {
     }
 
 
-    public void deleteSound(Context context, final String id) {
+    public void deleteSound(final Context context, final String id) {
+        realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                realm.where(AudioUser.class).equalTo("id", id).findAll().clear();
-                realm.where(ContentAudio.class).equalTo("id", id).findAll().clear();
+                realm.where(AudioUser.class).equalTo("id", id).findAll().removeLast();
             }
         });
     }
 
     public void deleteSoundContent(Context context, final String id) {
+        realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -63,6 +64,7 @@ public class RealmUtils {
     }
 
     public void updateFavorite(Context context, final String id) {
+        realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -73,6 +75,7 @@ public class RealmUtils {
     }
 
     public void updatePlays(Context context, final String id) {
+        realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -89,6 +92,7 @@ public class RealmUtils {
         });
     }
     public void updatePlaying(Context context, final String id) {
+        realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -99,6 +103,7 @@ public class RealmUtils {
     }
 
     public void updateSoundUserPlaying(Context context, final String id) {
+        realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -108,18 +113,25 @@ public class RealmUtils {
         });
     }
 
-    public void addAudioUser(Context context, AudioUser audio){
+    public void addAudioUser(Context context, final AudioUser audio) {
         realm = RealmManager.getRealm(context);
-        realm.beginTransaction();
-        realm.copyToRealm(audio);
-        realm.commitTransaction();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.copyToRealm(audio);
+            }
+        });
     }
 
     public void deleteAllAudioUser(Context context){
         realm = RealmManager.getRealm(context);
-        realm.beginTransaction();
-        realm.where(AudioUser.class).findAll().clear();
-        realm.commitTransaction();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.where(AudioUser.class).findAll().clear();
+            }
+        });
+
     }
     public RealmResults<AudioUser> getSoundOfUser(Context context, String id) {
         realm = RealmManager.getRealm(context);
@@ -134,28 +146,32 @@ public class RealmUtils {
         return sounds;
     }
 
-    public void addSoundContent(Context context, ContentAudio audio){
+    public void addSoundContent(Context context, final ContentAudio audio) {
         realm = RealmManager.getRealm(context);
-        realm.beginTransaction();
-        realm.copyToRealm(audio);
-        realm.commitTransaction();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.copyToRealm(audio);
+            }
+        });
     }
 
     public ContentAudio getContentAudio(Context context, String id){
         realm = RealmManager.getRealm(context);
         RealmResults<ContentAudio> audios = realm.where(ContentAudio.class).equalTo("id",id).findAll();
         if(audios.size()>0){
-            Log.d("nnnnn","nnnn");
             return audios.get(0);
         }
         return null;
     }
 
     public void deleteAllSound(Context context){
-        realm = RealmManager.getRealm(context);
-        realm.beginTransaction();
-        realm.where(Sound.class).findAll().clear();
-        realm.commitTransaction();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.where(Sound.class).findAll().clear();
+            }
+        });
     }
 
     public RealmResults<Sound> getFavoriteSound(Context context) {
