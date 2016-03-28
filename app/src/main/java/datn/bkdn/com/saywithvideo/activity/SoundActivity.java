@@ -2,7 +2,6 @@ package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
@@ -114,8 +113,34 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         });
     }
 
+    private void getMySound() {
+        Query q = mFirebase.child(FirebaseConstant.AUDIO_URL).orderByChild("user_id").equalTo(Utils.getCurrentUserID(this));
+        q.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                RealmUtils.getRealmUtils(SoundActivity.this).deleteAllAudioUser(SoundActivity.this);
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    FirebaseAudio audio = data.getValue(FirebaseAudio.class);
+                    String id = data.getKey();
+                    String name = audio.getName();
+                    String dateCreate = audio.getDate_create();
+                    int plays = audio.getPlays();
+                    AudioUser audioUser = new AudioUser(name, plays, id, dateCreate);
+                    RealmUtils.getRealmUtils(SoundActivity.this).addAudioUser(SoundActivity.this, audioUser);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+
+    }
+
     public void playMp3(String path) {
-        if (player == null) {
+        if(player==null) {
             player = new MediaPlayer();
         }
         try {
@@ -206,7 +231,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 //                        File file = new File(sound.getLinkOnDisk());
 //                       // file.delete();
                         RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this,sound.getId());
-                        // RealmUtils.getRealmUtils(SoundActivity.this).deleteSoundContent(SoundActivity.this, sound.getId());
+                        RealmUtils.getRealmUtils(SoundActivity.this).deleteSoundContent(SoundActivity.this, sound.getId());
                         adapter.notifyDataSetChanged();
                         break;
 
@@ -234,7 +259,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onResume() {
         super.onResume();
-        new LoadDataAsync().execute();
+        getMySound();
     }
 
     @Override
@@ -280,34 +305,5 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
         }
         return true;
-    }
-
-    public class LoadDataAsync extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            Query q = mFirebase.child(FirebaseConstant.AUDIO_URL).orderByChild("user_id").equalTo(Utils.getCurrentUserID(SoundActivity.this));
-            q.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    RealmUtils.getRealmUtils(SoundActivity.this).deleteAllAudioUser(SoundActivity.this);
-                    for (DataSnapshot data : dataSnapshot.getChildren()) {
-                        FirebaseAudio audio = data.getValue(FirebaseAudio.class);
-                        String id = data.getKey();
-                        String name = audio.getName();
-                        String dateCreate = audio.getDate_create();
-                        int plays = audio.getPlays();
-                        AudioUser audioUser = new AudioUser(name, plays, id, dateCreate);
-                        RealmUtils.getRealmUtils(SoundActivity.this).addAudioUser(SoundActivity.this, audioUser);
-                    }
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-
-                }
-            });
-            return null;
-        }
     }
 }

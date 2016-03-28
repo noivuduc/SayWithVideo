@@ -1,9 +1,11 @@
 package datn.bkdn.com.saywithvideo.utils;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -21,5 +23,15 @@ public class Tools {
             view = new View(activity);
         }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    public static void createFolder(String path) {
+        Log.d("Tien", path);
+        File file = new File(path);
+        if (file.isDirectory()) {
+            return;
+        } else {
+            file.mkdirs();
+        }
     }
 }
