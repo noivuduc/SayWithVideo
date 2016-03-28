@@ -11,7 +11,6 @@ import android.media.audiofx.Visualizer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -31,9 +30,10 @@ import java.nio.channels.FileChannel;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.custom.VisualizerView;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
+import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.CameraPreview;
 import datn.bkdn.com.saywithvideo.utils.Constant;
-import datn.bkdn.com.saywithvideo.utils.AppTools;
+import datn.bkdn.com.saywithvideo.utils.Tools;
 
 public class CaptureVideoActivity extends AppCompatActivity implements View.OnClickListener, MediaPlayer.OnCompletionListener {
 
@@ -61,7 +61,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         init();
         mFileName = getIntent().getStringExtra("FileName");
         mFilePath = getIntent().getStringExtra("FilePath");
-        Log.d("filePath", mFilePath);
+
         mMediaPlayer = new MediaPlayer();
         try {
             mMediaPlayer.setDataSource(mFilePath);
@@ -85,13 +85,11 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mCamera = getCameraInstance();
         mPreview = new CameraPreview(this, mCamera);
         mFlPreview = (FrameLayout) findViewById(R.id.cameraPreview);
-        int w=getResources().getDisplayMetrics().widthPixels;
-        RelativeLayout.LayoutParams params=new RelativeLayout.LayoutParams(w,w);
+        int w = getResources().getDisplayMetrics().widthPixels;
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(w, w);
         mFlPreview.setLayoutParams(params);
         mFlPreview.addView(mPreview);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
-        Log.d("mPreview", mPreview.getWidth() + " " + mPreview.getHeight());
     }
 
     private void setupVisualizerFxAndUI() {
@@ -124,10 +122,10 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mVisualizerView.reset();
     }
 
-    public static Camera getCameraInstance() {
+    public Camera getCameraInstance() {
         Camera camera = null;
         try {
-            camera = Camera.open();
+            camera = Camera.open(findFrontFacingCamera());
         } catch (Exception e) {
         }
         return camera;
@@ -151,10 +149,9 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mMediaRecorder.setVideoSize(mFlPreview.getWidth(), mFlPreview.getHeight());
         mMediaRecorder.setVideoFrameRate(30);
         mMediaRecorder.setVideoEncodingBitRate(3000000);
-        if(mCameraFront){
+        if (mCameraFront) {
             mMediaRecorder.setOrientationHint(270);
-        }
-        else{
+        } else {
             mMediaRecorder.setOrientationHint(90);
         }
 
@@ -196,8 +193,10 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             if (findFrontFacingCamera() < 0) {
                 Toast.makeText(this, "No front facing camera found.", Toast.LENGTH_LONG).show();
                 mRlSwitchCamera.setVisibility(View.GONE);
+                mCamera = Camera.open(findBackFacingCamera());
+            } else {
+                mCamera = Camera.open(findFrontFacingCamera());
             }
-            mCamera = Camera.open(findFrontFacingCamera());
             mPreview.refreshCamera(mCamera);
         }
     }
@@ -287,9 +286,9 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                     runOnUiThread(new Runnable() {
                         public void run() {
                             try {
-                                mMediaPlayer.start();
-                                mMediaRecorder.start();
                                 mVisualizer.setEnabled(true);
+                                mMediaRecorder.start();
+                                mMediaPlayer.start();
                             } catch (final Exception ex) {
                             }
                         }
@@ -325,7 +324,9 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                 }
 
                 Container container = new DefaultMp4Builder().build(outputVideo);
-                outputPath = Constant.VIDEO_DIRECTORY_PATH + "VIDEO_" + AppTools.getDate() + ".mp4";
+                String folderPath = Constant.DIRECTORY_PATH + Constant.VIDEO;
+                Tools.createFolder(folderPath);
+                outputPath = folderPath + "VIDEO_" + AppTools.getDate() + ".mp4";
                 FileChannel fileChannel = new FileOutputStream(new File(outputPath)).getChannel();
                 container.writeContainer(fileChannel);
                 fileChannel.close();
@@ -342,7 +343,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             File file = new File(mVideoOutPut);
             file.delete();
             Toast.makeText(getBaseContext(), "Mux video success", Toast.LENGTH_SHORT).show();
-            RealmUtils.getRealmUtils(CaptureVideoActivity.this).addVideo(CaptureVideoActivity.this,mFileName,outputPath);
+            RealmUtils.getRealmUtils(CaptureVideoActivity.this).addVideo(CaptureVideoActivity.this, mFileName, outputPath);
             Intent intent = new Intent(CaptureVideoActivity.this, ShowVideoActivity.class);
             intent.putExtra("VideoPath", outputPath);
             startActivity(intent);

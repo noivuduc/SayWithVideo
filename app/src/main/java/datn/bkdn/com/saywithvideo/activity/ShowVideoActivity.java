@@ -105,6 +105,28 @@ public class ShowVideoActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (mMediaPlayer != null) {
+            mMediaPlayer.stop();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mMediaPlayer != null) {
+            try {
+                mMediaPlayer.reset();
+                mMediaPlayer.setDataSource(mVideoPath);
+                mMediaPlayer.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mMediaPlayer != null) {
