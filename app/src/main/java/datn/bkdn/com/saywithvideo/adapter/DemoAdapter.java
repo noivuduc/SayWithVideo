@@ -1,24 +1,37 @@
 package datn.bkdn.com.saywithvideo.adapter;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.Collections;
+import java.util.List;
+
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.model.Sound;
-import io.realm.RealmBaseAdapter;
 import io.realm.RealmResults;
 
-public class ListSoundAdapter extends RealmBaseAdapter<Sound> {
-
+/**
+ * Created by Admin on 3/28/2016.
+ */
+public class DemoAdapter extends BaseAdapter {
     public OnItemClicked mItemClicked;
+    private List<Sound> mSounds = Collections.emptyList();
+    private Context mContext;
 
-    public ListSoundAdapter(Context context, RealmResults<Sound> sounds) {
-        super(context, sounds, true);
+    public DemoAdapter(Context context) {
+        this.mContext = context;
+    }
+
+    public void updateList(RealmResults<Sound> sounds) {
+        this.mSounds = sounds;
+        notifyDataSetChanged();
     }
 
     public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
@@ -26,11 +39,25 @@ public class ListSoundAdapter extends RealmBaseAdapter<Sound> {
     }
 
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
+    public int getCount() {
+        return mSounds.size();
+    }
 
+    @Override
+    public Object getItem(int position) {
+        return mSounds.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    @Override
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.item_list_sound, parent, false);
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.item_list_sound, parent, false);
             viewHolder = new ViewHolder();
             viewHolder.tvSoundName = (TextView) convertView.findViewById(R.id.tvSoundName);
             viewHolder.tvSoundAuthor = (TextView) convertView.findViewById(R.id.tvSoundAuthor);
@@ -78,7 +105,7 @@ public class ListSoundAdapter extends RealmBaseAdapter<Sound> {
                 }
             }
         });
-        Sound sound = getItem(position);
+        Sound sound = (Sound) getItem(position);
         viewHolder.imgFavorite.setImageResource(sound.isFavorite() ? R.mipmap.favorite_selected : R.mipmap.favorite_unselected);
         viewHolder.imgPlayPause.setImageResource(sound.isPlaying() ? R.mipmap.ic_pause : R.mipmap.ic_play);
         viewHolder.tvSoundName.setText(sound.getName());
@@ -101,5 +128,4 @@ public class ListSoundAdapter extends RealmBaseAdapter<Sound> {
         private RelativeLayout rlOption;
         private RelativeLayout rlFavorite;
     }
-
 }

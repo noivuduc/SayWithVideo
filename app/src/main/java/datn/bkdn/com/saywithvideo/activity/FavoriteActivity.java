@@ -43,7 +43,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_favorite);
         init();
         mSounds = RealmUtils.getRealmUtils(this).getFavoriteSound(this);
-        mAdapter = new ListSoundAdapter(this, mSounds, false);
+        // mAdapter = new ListSoundAdapter(this, mSounds, false);
         mAdapter.setPlayButtonClicked(new ListSoundAdapter.OnItemClicked() {
             @Override
             public void onClick(int pos, View v) {

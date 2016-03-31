@@ -135,13 +135,13 @@ public class RealmUtils {
     }
     public RealmResults<AudioUser> getSoundOfUser(Context context, String id) {
         realm = RealmManager.getRealm(context);
-        RealmResults<AudioUser> sounds = realm.where(AudioUser.class).findAll();
+        RealmResults<AudioUser> sounds = realm.where(AudioUser.class).findAllAsync();
         return sounds;
     }
 
     public RealmResults<Sound> getAllSound(Context context) {
         realm = RealmManager.getRealm(context);
-        RealmResults<Sound> sounds = realm.where(Sound.class).findAll();
+        RealmResults<Sound> sounds = realm.where(Sound.class).findAllAsync();
         //realm.close();
         return sounds;
     }
@@ -158,14 +158,12 @@ public class RealmUtils {
 
     public ContentAudio getContentAudio(Context context, String id){
         realm = RealmManager.getRealm(context);
-        RealmResults<ContentAudio> audios = realm.where(ContentAudio.class).equalTo("id",id).findAll();
-        if(audios.size()>0){
-            return audios.get(0);
-        }
-        return null;
+        ContentAudio audios = realm.where(ContentAudio.class).equalTo("id", id).findFirst();
+        return audios;
     }
 
     public void deleteAllSound(Context context){
+        realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -176,7 +174,7 @@ public class RealmUtils {
 
     public RealmResults<Sound> getFavoriteSound(Context context) {
         realm = RealmManager.getRealm(context);
-        RealmResults<Sound> sounds = realm.where(Sound.class).equalTo("isFavorite", true).findAll();
+        RealmResults<Sound> sounds = realm.where(Sound.class).equalTo("isFavorite", true).findAllAsync();
         return sounds;
     }
 
@@ -231,6 +229,6 @@ public class RealmUtils {
 
     public RealmResults<Video> getVideo(Context context) {
         realm = RealmManager.getRealm(context);
-        return realm.where(Video.class).findAll();
+        return realm.where(Video.class).findAllAsync();
     }
 }

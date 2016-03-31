@@ -18,7 +18,7 @@ public class RealmManager {
         return Realm.getInstance(defaultConfig);
     }
 
-    private static RealmConfiguration getConfig(Context context) {
+    public static RealmConfiguration getConfig(Context context) {
         RealmConfiguration defaultConfig = new RealmConfiguration.Builder(context)
                 .schemaVersion(1)
                 .deleteRealmIfMigrationNeeded()
