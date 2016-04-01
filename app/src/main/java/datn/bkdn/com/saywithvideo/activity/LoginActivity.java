@@ -40,9 +40,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText edtPass;
     private ImageView clearPass;
     private ImageView clearEmail;
-    private TextView tvRegister;
-    private TextView tvLoginFacebook;
-    private TextView tvForgot;
     private Firebase root;
     private CallbackManager callbackManager;
 
@@ -83,19 +80,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private boolean checkCurrentUser() {
-        if (Utils.getCurrentUserEmail(this).equals("null")) return true;
-        return false;
+        return Utils.getCurrentUserEmail(this).equals("null");
     }
 
     private void init() {
         edtEmail = (EditText) findViewById(R.id.edtEmail);
         edtPass = (EditText) findViewById(R.id.edtpass);
         tvLogin = (TextView) findViewById(R.id.tvLogin);
-        tvRegister = (TextView) findViewById(R.id.tvregister);
-        tvForgot = (TextView) findViewById(R.id.tvForgot);
+        TextView tvRegister = (TextView) findViewById(R.id.tvregister);
+        TextView tvForgot = (TextView) findViewById(R.id.tvForgot);
         clearEmail = (ImageView) findViewById(R.id.imgClearEmail);
         clearPass = (ImageView) findViewById(R.id.imgClearPass);
-        tvLoginFacebook = (TextView) findViewById(R.id.tvLoginFacebook);
+        TextView tvLoginFacebook = (TextView) findViewById(R.id.tvLoginFacebook);
 
         tvLogin.setOnClickListener(this);
         tvRegister.setOnClickListener(this);
@@ -166,7 +162,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.tvLogin:
                 if (!Tools.isOnline(getBaseContext())) {
-                    Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                    if (getCurrentFocus() != null) {
+                        Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                    }
                 } else {
                     checkisValidAccount(edtEmail.getText().toString(), edtPass.getText().toString());
                 }
@@ -177,7 +175,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.tvLoginFacebook:
                 if (!Tools.isOnline(getBaseContext())) {
-                    Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                    if (getCurrentFocus() != null) {
+                        Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                    }
                 } else {
                     LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "user_friends", "email"));
                 }
@@ -195,7 +195,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 public void onAuthenticated(AuthData authData) {
                     String name = authData.getProviderData().get("displayName").toString();
                     String uid = authData.getUid();
-                    HashMap<String, String> map = new HashMap<String, String>();
+                    HashMap<String, String> map = new HashMap<>();
                     map.put("name", name);
                     root.child("users").child(authData.getUid()).setValue(map);
                     finishActivity(name, "", uid);
