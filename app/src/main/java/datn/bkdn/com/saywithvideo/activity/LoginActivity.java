@@ -162,9 +162,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.tvLogin:
                 if (!Tools.isOnline(getBaseContext())) {
-                    if (getCurrentFocus() != null) {
-                        Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
-                    }
+                    Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
                 } else {
                     checkisValidAccount(edtEmail.getText().toString(), edtPass.getText().toString());
                 }
@@ -175,9 +173,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.tvLoginFacebook:
                 if (!Tools.isOnline(getBaseContext())) {
-                    if (getCurrentFocus() != null) {
-                        Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
-                    }
+                    Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
                 } else {
                     LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "user_friends", "email"));
                 }
@@ -220,7 +216,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void checkisValidAccount(final String email, String pass) {
-
+        if (!Tools.isOnline(LoginActivity.this)) {
+            Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+            return;
+        }
         root.authWithPassword(email, pass,
                 new Firebase.AuthResultHandler() {
 

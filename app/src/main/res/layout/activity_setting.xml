@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -36,7 +37,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="Le Viet Tien"
             android:textColor="#000" />
 
         <View
@@ -64,7 +64,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:singleLine="true"
-            android:text="viettienbk@gmail.com"
             android:textColor="#000" />
 
         <View

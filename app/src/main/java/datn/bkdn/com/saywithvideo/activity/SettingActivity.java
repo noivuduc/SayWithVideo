@@ -7,7 +7,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -20,16 +19,17 @@ import com.firebase.client.FirebaseError;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.model.FirebaseUser;
 import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
 public class SettingActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private TextView mTvFullName;
-    private TextView mTvEmail;
     private static final String FULLNAME = "Add your name ...";
     private static final String EMAIL = "Verify your mail";
     private static final String CHANGE_PASSWORD = "Add your new password ...";
+    private TextView mTvFullName;
+    private TextView mTvEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,12 +37,12 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_setting);
 
         init();
-
-        mTvFullName.setText(Utils.getCurrentUserName(this));
-        mTvEmail.setText(Utils.getCurrentUserEmail(this));
     }
 
     private void init() {
+        if (Tools.isOnline(SettingActivity.this)) {
+            Firebase.setAndroidContext(SettingActivity.this);
+        }
         LinearLayout mLlFullName = (LinearLayout) findViewById(R.id.llFullName);
         LinearLayout mLlEmail = (LinearLayout) findViewById(R.id.llEmail);
         TextView mTvChangePassword = (TextView) findViewById(R.id.tvChangePassword);
@@ -54,6 +54,15 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         mLlEmail.setOnClickListener(this);
         mTvChangePassword.setOnClickListener(this);
         mTvLogout.setOnClickListener(this);
+
+        String email = Utils.getCurrentUserEmail(this);
+        if (email.equals("")) {
+            mLlEmail.setEnabled(false);
+            mTvChangePassword.setEnabled(false);
+        } else {
+            mTvEmail.setText(email);
+        }
+        mTvFullName.setText(Utils.getCurrentUserName(this));
     }
 
     @Override
@@ -61,12 +70,12 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         switch (v.getId()) {
             case R.id.llFullName:
                 if (showMessage()) {
-                    showDialog(FULLNAME);
+                    showChangeFullNameDialog();
                 }
                 break;
             case R.id.llEmail:
                 if (showMessage()) {
-                    showDialog(EMAIL);
+                    showChangeEmailDialog();
                 }
                 break;
             case R.id.tvChangePassword:
@@ -82,17 +91,17 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private boolean showMessage() {
-        if (Tools.isOnline(this) && getCurrentFocus() != null) {
-            Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+        if (!Tools.isOnline(SettingActivity.this)) {
+            Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
             return false;
         }
         return true;
     }
 
-    private void showDialog(final String title) {
+    private void showChangeFullNameDialog() {
         final Dialog dialog = new Dialog(SettingActivity.this);
         dialog.setContentView(R.layout.dialog_setting);
-        dialog.setTitle(title);
+        dialog.setTitle(FULLNAME);
 
         TextView mTvCancel = (TextView) dialog.findViewById(R.id.tvCancel);
         final EditText mEdtContent = (EditText) dialog.findViewById(R.id.edtContent);
@@ -111,15 +120,14 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         mTvSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch (title) {
-                    case FULLNAME:
-                        Log.d("Tien", "Save fullname");
-                        break;
-                    case EMAIL:
-                        Log.d("Tien", "Save email");
-                        break;
+                String fullName = mEdtContent.getText().toString().trim();
+                if (fullName.equals("")) {
+                    Snackbar.make(findViewById(R.id.root), "Add your name", Snackbar.LENGTH_LONG).show();
+                    datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(SettingActivity.this, dialog.getCurrentFocus());
+                } else {
+                    changeFullName(mEdtContent.getText().toString());
+                    dialog.dismiss();
                 }
-                dialog.dismiss();
             }
         });
 
@@ -151,6 +159,25 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             }
         });
     }
+
+    private void changeFullName(final String content) {
+        Firebase mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
+        FirebaseUser user = new FirebaseUser();
+        user.setName(content);
+        mFirebase.child(Utils.getCurrentUserID(this)).setValue(user, new Firebase.CompletionListener() {
+            @Override
+            public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                if (firebaseError == null) {
+                    mTvFullName.setText(content);
+                    Utils.updateCurrentUserName(SettingActivity.this, content);
+                    Toast.makeText(SettingActivity.this, "Change full name success.", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(SettingActivity.this, "Change full name error.", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
 
     private void showChangePasswordDialog() {
         final Dialog dialog = new Dialog(SettingActivity.this);
@@ -256,6 +283,112 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                     mImgClearNew.setVisibility(View.VISIBLE);
                 } else {
                     mImgClearNew.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+    }
+
+    private void showChangeEmailDialog() {
+        final Dialog dialog = new Dialog(SettingActivity.this);
+        dialog.setContentView(R.layout.dialog_change_email);
+        dialog.setTitle(EMAIL);
+
+        final EditText mEdtPassword = (EditText) dialog.findViewById(R.id.edtPassword);
+        final EditText mEdtNewMail = (EditText) dialog.findViewById(R.id.edtNewMail);
+        final ImageView mImgClearPassword = (ImageView) dialog.findViewById(R.id.imgClearPassword);
+        final ImageView mImgClearNewMail = (ImageView) dialog.findViewById(R.id.imgClearNewMail);
+        TextView mTvSave = (TextView) dialog.findViewById(R.id.tvSave);
+        TextView mTvCancel = (TextView) dialog.findViewById(R.id.tvCancel);
+
+        dialog.show();
+
+        mTvCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        mTvSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String password = mEdtPassword.getText().toString().trim();
+                final String newEmail = mEdtNewMail.getText().toString().trim();
+                if (password.equals("")) {
+                    Snackbar.make(findViewById(R.id.root), "Add your password", Snackbar.LENGTH_SHORT).show();
+                } else if (newEmail.equals("")) {
+                    Snackbar.make(findViewById(R.id.root), "Add your new email", Snackbar.LENGTH_SHORT).show();
+                } else {
+                    Firebase mFirebase = new Firebase(FirebaseConstant.BASE_URL);
+                    mFirebase.changeEmail(Utils.getCurrentUserEmail(SettingActivity.this), password, newEmail, new Firebase.ResultHandler() {
+                        @Override
+                        public void onSuccess() {
+                            Utils.updateCurrentEmail(SettingActivity.this, newEmail);
+                            mTvEmail.setText(newEmail);
+                            Toast.makeText(getBaseContext(), "Change email success.", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onError(FirebaseError firebaseError) {
+                            Toast.makeText(getBaseContext(), "Change email error.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    dialog.dismiss();
+                }
+                datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(SettingActivity.this, dialog.getCurrentFocus());
+            }
+        });
+
+        mImgClearPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEdtPassword.setText("");
+            }
+        });
+        mImgClearNewMail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEdtNewMail.setText("");
+            }
+        });
+
+        mEdtPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!mEdtPassword.getText().toString().equals("")) {
+                    mImgClearPassword.setVisibility(View.VISIBLE);
+                } else {
+                    mImgClearPassword.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+        mEdtNewMail.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!mEdtNewMail.getText().toString().equals("")) {
+                    mImgClearNewMail.setVisibility(View.VISIBLE);
+                } else {
+                    mImgClearNewMail.setVisibility(View.INVISIBLE);
                 }
             }
         });

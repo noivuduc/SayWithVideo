@@ -61,7 +61,7 @@ public class SoundFragment extends Fragment {
 
     private void init() {
         Firebase.setAndroidContext(getContext());
-        user = Utils.getFavoriteUser(getContext());
+//        user = Utils.getFavoriteUser(getContext());
         mFirebase = new Firebase(FirebaseConstant.BASE_URL);
         mFirebase.child(FirebaseConstant.AUDIO_URL).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -81,10 +81,10 @@ public class SoundFragment extends Fragment {
                             String userName = dataSnapshot.getValue().toString();
                             Sound sound = new Sound(audio_id, name, userName, dateCreate);
                             sound.setPlays(plays);
-                            if (user.getFavorite() != null) {
-                                if (user.getFavorite().contains(audio_id))
-                                    sound.setIsFavorite(true);
-                            }
+//                            if (user.getFavorite() != null) {
+//                                if (user.getFavorite().contains(audio_id))
+//                                    sound.setIsFavorite(true);
+//                            }
                             RealmUtils.getRealmUtils(getContext()).addNewSound(getContext(), sound);
 
                         }
