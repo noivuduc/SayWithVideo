@@ -2,6 +2,7 @@ package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
@@ -18,22 +19,32 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+import com.soikonomakis.rxfirebase.RxFirebase;
 
 import java.io.IOException;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter;
+import datn.bkdn.com.saywithvideo.database.ContentAudio;
+import datn.bkdn.com.saywithvideo.database.RealmAudioUser;
+import datn.bkdn.com.saywithvideo.database.RealmManager;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
-import datn.bkdn.com.saywithvideo.model.AudioUser;
-import datn.bkdn.com.saywithvideo.model.ContentAudio;
-import datn.bkdn.com.saywithvideo.model.FirebaseAudio;
-import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.database.Sound;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseAudio;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
+import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
+import io.realm.Realm;
+import io.realm.RealmAsyncTask;
+import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
-public class SoundActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
+public class SoundActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener, RealmChangeListener {
     private ListMySoundAdapter adapter;
     private RelativeLayout rlBack;
     private RelativeLayout rlSort;
@@ -42,8 +53,10 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private MediaPlayer player;
     private ListView listView;
     private ImageView imgSort;
-    private RealmResults<AudioUser> sounds;
-    private int currentPos = -1;
+    private Realm realm;
+    private RealmAsyncTask asyncTransaction;
+    private RealmResults<Sound> mSounds;
+    private int mCurrentPos = -1;
     private Firebase mFirebase;
 
     @Override
@@ -55,17 +68,16 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
-    private void initAdapter() {
-        String id = Utils.getCurrentUserID(this);
-        sounds = RealmUtils.getRealmUtils(this).getSoundOfUser(this, id);
-        adapter = new ListMySoundAdapter(this, sounds);
-        listView.setAdapter(adapter);
 
+    private void initAdapter() {
+        getData();
+        adapter = new ListMySoundAdapter(this, mSounds);
+        listView.setAdapter(adapter);
         adapter.setPlayButtonClicked(new ListMySoundAdapter.OnItemClicked() {
 
             @Override
             public void onClick(int pos, View v) {
-                AudioUser sound = sounds.get(pos);
+                Sound sound = mSounds.get(pos);
                 switch (v.getId()) {
                     case R.id.imgPlay:
                         final String audioId = sound.getId();
@@ -73,26 +85,26 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                         String path = "";
                         ContentAudio contentAudio = AppTools.getContentAudio(audioId, SoundActivity.this);
                         if (contentAudio != null) {
-                            RealmUtils.getRealmUtils(SoundActivity.this).updatePlays(SoundActivity.this, audioId);
-                            Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
-                            firebase.child(audioId).child("plays").setValue(sound.getPlays() + "");
-                            if (currentPos != -1 && pos != currentPos) {
-                                AudioUser sound1 = sounds.get(currentPos);
+                            sound.setPlays(sound.getPlays() + 1);
+                            new AsyncUpdatePlay().execute(audioId, sound.getPlays() + "");
+                            if (mCurrentPos != -1 && pos != mCurrentPos) {
+                                Sound sound1 = mSounds.get(mCurrentPos);
                                 if (sound1.isPlaying()) {
-                                    RealmUtils.getRealmUtils(SoundActivity.this).updateSoundUserPlaying(SoundActivity.this, sounds.get(currentPos).getId());
+                                    String id = mSounds.get(mCurrentPos).getId();
+                                    new AsyncUpdatePlaying().execute(id);
                                     player.stop();
                                     player.reset();
                                 }
                             }
                             path = contentAudio.getContent();
-                            currentPos = pos;
+                            mCurrentPos = pos;
                             if (sound.isPlaying()) {
                                 player.stop();
                                 player.reset();
                             } else {
                                 playMp3(path);
                             }
-                            RealmUtils.getRealmUtils(SoundActivity.this).updateSoundUserPlaying(SoundActivity.this, sounds.get(pos).getId());
+                            new AsyncUpdatePlaying().execute(mSounds.get(pos).getId());
                             adapter.notifyDataSetChanged();
                         }
                         break;
@@ -114,38 +126,11 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         });
     }
 
-    private void getMySound() {
-        Query q = mFirebase.child(FirebaseConstant.AUDIO_URL).orderByChild("user_id").equalTo(Utils.getCurrentUserID(this));
-        q.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                RealmUtils.getRealmUtils(SoundActivity.this).deleteAllAudioUser(SoundActivity.this);
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    FirebaseAudio audio = data.getValue(FirebaseAudio.class);
-                    String id = data.getKey();
-                    String name = audio.getName();
-                    String dateCreate = audio.getDate_create();
-                    int plays = audio.getPlays();
-                    AudioUser audioUser = new AudioUser(name, plays, id, dateCreate);
-                    RealmUtils.getRealmUtils(SoundActivity.this).addAudioUser(SoundActivity.this, audioUser);
-                }
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
-
-
-    }
-
     public void playMp3(String path) {
         if (player == null) {
             player = new MediaPlayer();
         }
         try {
-            player.reset();
             player.setDataSource(path);
             player.prepare();
         } catch (IOException e) {
@@ -155,7 +140,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                RealmUtils.getRealmUtils(SoundActivity.this).updateSoundUserPlaying(SoundActivity.this, sounds.get(currentPos).getId());
+                new AsyncUpdatePlaying().execute(mSounds.get(mCurrentPos).getId());
                 adapter.notifyDataSetChanged();
             }
         });
@@ -194,7 +179,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.delete:
-                        AudioUser sound = sounds.get(pos);
+                        final Sound sound = mSounds.get(pos);
                         /*
                         delete audio
                          */
@@ -204,7 +189,9 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 for (DataSnapshot data : dataSnapshot.getChildren()) {
-                                    data.getRef().removeValue();
+                                    if (data.getKey().equals(sound.getId())) {
+                                        data.getRef().removeValue();
+                                    }
                                 }
                             }
 
@@ -221,7 +208,9 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 for (DataSnapshot data : dataSnapshot.getChildren()) {
-                                    data.getRef().removeValue();
+                                    if (data.getKey().equals(sound.getId())) {
+                                        data.getRef().removeValue();
+                                    }
                                 }
                             }
 
@@ -232,10 +221,34 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                         });
 //                        File file = new File(sound.getLinkOnDisk());
 //                       // file.delete();
-                        RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this, sound.getId());
-                        RealmUtils.getRealmUtils(SoundActivity.this).deleteSoundContent(SoundActivity.this, sound.getId());
+                        new AsyncTask<String, Void, Void>() {
+
+                            @Override
+                            protected Void doInBackground(String... params) {
+                                String id = params[0];
+                                RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this, id);
+                                RealmUtils.getRealmUtils(SoundActivity.this).deleteSoundContent(SoundActivity.this, id);
+                                return null;
+                            }
+                        }.execute(sound.getId());
+
+                         /*
+                    Dec no_sound
+                     */
+                        new AsyncTask<Void, Void, Void>() {
+
+                            @Override
+                            protected Void doInBackground(Void... params) {
+                                String userID = Utils.getCurrentUserID(SoundActivity.this);
+                                FirebaseUser f = AppTools.getInfoUser(userID);
+                                Firebase ff = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + userID).child("no_sound");
+                                ff.setValue(f.getNo_sound() - 1);
+                                return null;
+                            }
+                        }.execute();
                         adapter.notifyDataSetChanged();
                         break;
+
 
                 }
                 return false;
@@ -256,18 +269,41 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                 player.stop();
             }
         }
+        realm.close();
+    }
+
+    private void getData() {
+        String id = Utils.getCurrentUserID(this);
+        realm = RealmManager.getRealm(this);
+        mSounds = realm.where(Sound.class).equalTo("idUser", id).findAll();
+        mSounds.addChangeListener(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        getMySound();
+
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         finishActivity();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        cancelAsyncTransaction();
+        mSounds = null;
+        realm.close();
+    }
+
+    private void cancelAsyncTransaction() {
+        if (asyncTransaction != null && !asyncTransaction.isCancelled()) {
+            asyncTransaction.cancel();
+            asyncTransaction = null;
+        }
     }
 
     @Override
@@ -293,19 +329,92 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.byName:
-                sounds.sort("name", Sort.ASCENDING);
+                mSounds.sort("name", Sort.ASCENDING);
                 adapter.notifyDataSetChanged();
                 break;
             case R.id.byDate:
-                sounds.sort("date_create", Sort.ASCENDING);
+                mSounds.sort("date_create", Sort.ASCENDING);
                 adapter.notifyDataSetChanged();
                 break;
             case R.id.byPlays:
-                sounds.sort("plays", Sort.ASCENDING);
+                mSounds.sort("plays", Sort.ASCENDING);
                 adapter.notifyDataSetChanged();
                 break;
 
         }
         return true;
+    }
+
+    @Override
+    public void onChange() {
+        adapter.notifyDataSetChanged();
+    }
+
+    private void loadData() {
+        mFirebase.child(FirebaseConstant.AUDIO_URL).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                RealmUtils.getRealmUtils(SoundActivity.this).deleteAllAudioUser(SoundActivity.this);
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    FirebaseAudio firebaseAudio = data.getValue(FirebaseAudio.class);
+                    final String name = firebaseAudio.getName();
+                    final String dateCreate = firebaseAudio.getDate_create();
+                    final String user_id = firebaseAudio.getUser_id();
+                    final String audio_id = data.getKey();
+                    final int plays = firebaseAudio.getPlays();
+                    Firebase base = new Firebase(Constant.FIREBASE_ROOT + "users/" + user_id + "/name/");
+                    RxFirebase.getInstance().
+                            observeValueEvent(base).
+                            subscribeOn(Schedulers.newThread()).
+                            subscribe(new Action1<DataSnapshot>() {
+                                @Override
+                                public void call(DataSnapshot dataSnapshot) {
+                                    RealmAudioUser sound = new RealmAudioUser(name, plays, audio_id, dateCreate);
+                                    sound.setPlays(plays);
+                                    adapter.notifyDataSetChanged();
+                                    new AsyncAddSound().execute(sound);
+                                }
+                            });
+//
+
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+    }
+
+    class AsyncAddSound extends AsyncTask<RealmAudioUser, Void, Void> {
+
+        @Override
+        protected Void doInBackground(RealmAudioUser... sound) {
+            RealmUtils.getRealmUtils(SoundActivity.this).addAudioUser(SoundActivity.this, sound[0]);
+            return null;
+        }
+    }
+
+    class AsyncUpdatePlaying extends AsyncTask<String, Void, Void> {
+        @Override
+        protected Void doInBackground(String... params) {
+            String id = params[0];
+            RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, id);
+            return null;
+        }
+    }
+
+    public class AsyncUpdatePlay extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            String audioId = params[0];
+            String plays = params[1];
+            RealmUtils.getRealmUtils(SoundActivity.this).updatePlays(SoundActivity.this, audioId);
+            Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
+            firebase.child(audioId).child("plays").setValue(plays);
+            return null;
+        }
     }
 }

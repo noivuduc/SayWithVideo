@@ -16,7 +16,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.network.Tools;
 
 public class ResetPasswordActivity extends AppCompatActivity implements View.OnClickListener {

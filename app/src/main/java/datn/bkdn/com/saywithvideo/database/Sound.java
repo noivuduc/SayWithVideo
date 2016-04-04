@@ -1,6 +1,4 @@
-package datn.bkdn.com.saywithvideo.model;
-
-import java.util.Comparator;
+package datn.bkdn.com.saywithvideo.database;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
@@ -21,14 +19,6 @@ public class Sound extends RealmObject {
     private String dateOfCreate;
     private String idUser;
     private RealmList<User> listFavorite;
-
-    public String getIdUser() {
-        return idUser;
-    }
-
-    public void setIdUser(String idUser) {
-        this.idUser = idUser;
-    }
 
     public Sound() {
     }
@@ -61,6 +51,14 @@ public class Sound extends RealmObject {
         this.linkDown = linkDown;
         this.linkOnDisk = linkOnDisk;
         this.dateOfCreate = dateOfCreate;
+    }
+
+    public String getIdUser() {
+        return idUser;
+    }
+
+    public void setIdUser(String idUser) {
+        this.idUser = idUser;
     }
 
     public RealmList<User> getListFavorite() {

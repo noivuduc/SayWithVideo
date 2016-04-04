@@ -21,6 +21,7 @@ import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.model.FirebaseUser;
 import datn.bkdn.com.saywithvideo.model.Sound;
+import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 
@@ -67,9 +68,9 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                         mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
-//                        if (Tools.isOnline(FavoriteActivity.this)) {
-//
-//                        }
+                        if (Tools.isOnline(FavoriteActivity.this)) {
+
+                        }
                         Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(FavoriteActivity.this)).child("favorite");
                         String id = sound.getId();
                         if (user.getFavorite().contains(id)) {

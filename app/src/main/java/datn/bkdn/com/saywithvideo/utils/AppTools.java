@@ -23,10 +23,10 @@ public class AppTools {
         return format.format(date);
     }
 
-    public static ContentAudio getContentAudio(String audioId, Activity context) {
+    public static ContentAudio getContentAudio(String audioId, Activity context){
         ContentAudio contentAudio;
-        contentAudio = RealmUtils.getRealmUtils(context).getContentAudio(context, audioId);
-        if (contentAudio == null) {
+        contentAudio= RealmUtils.getRealmUtils(context).getContentAudio(context, audioId);
+        if(contentAudio==null) {
             if (datn.bkdn.com.saywithvideo.network.Tools.isOnline(context)) {
                 String link = FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_CONTENT_URL + "/" + audioId + ".json";
                 String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
@@ -44,7 +44,8 @@ public class AppTools {
                 RealmUtils.getRealmUtils(context).addSoundContent(context, audio);
 
                 contentAudio = RealmUtils.getRealmUtils(context).getContentAudio(context, audioId);
-            } else {
+            }else
+            {
                 Snackbar.make(context.getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
                 return null;
             }

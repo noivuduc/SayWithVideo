@@ -35,6 +35,7 @@ public class Utils {
         String sname = pref.getString(CURRENT_USER_NAME, "null");
         if (mail.equals("null") && sname.equals("null")) {
             SharedPreferences.Editor editor = pref.edit();
+            //editor.clear();
             editor.putString(CURRENT_USER_EMAIL, email);
             editor.putString(CURRENT_USER_NAME, name);
             editor.putString(CURRENT_USER_ID, id);
@@ -44,24 +45,10 @@ public class Utils {
         return false;
     }
 
-    public static void updateCurrentUserName(Context context, String name) {
-        SharedPreferences pref = context.getSharedPreferences(CURRENT_USER, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putString(CURRENT_USER_NAME, name);
-        editor.apply();
-    }
-
-    public static void updateCurrentEmail(Context context, String email) {
-        SharedPreferences pref = context.getSharedPreferences(CURRENT_USER, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putString(CURRENT_USER_EMAIL, email);
-        editor.apply();
-    }
-
-    public static FirebaseUser getFavoriteUser(Context context) {
-        String link = FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(context) + ".json";
+    public static FirebaseUser getFavoriteUser(Context context){
+        String link = FirebaseConstant.BASE_URL+FirebaseConstant.USER_URL+"/"+Utils.getCurrentUserID(context)+".json";
         String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
-        FirebaseUser user = new Gson().fromJson(json, FirebaseUser.class);
+       FirebaseUser user = new Gson().fromJson(json, FirebaseUser.class);
         return user;
     }
 

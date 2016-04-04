@@ -9,24 +9,20 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.model.Sound;
+import datn.bkdn.com.saywithvideo.database.Sound;
 import io.realm.RealmBaseAdapter;
 import io.realm.RealmResults;
 
 public class ListSoundAdapter extends RealmBaseAdapter<Sound> {
 
-    public interface OnItemClicked {
-        void onClick(int pos, View v);
-    }
-
     public OnItemClicked mItemClicked;
+
+    public ListSoundAdapter(Context context, RealmResults<Sound> sounds) {
+        super(context, sounds, true);
+    }
 
     public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
         this.mItemClicked = playButtonClicked;
-    }
-
-    public ListSoundAdapter(Context context, RealmResults<Sound> sounds, boolean autoUpdate) {
-        super(context, sounds, autoUpdate);
     }
 
     @Override
@@ -82,13 +78,17 @@ public class ListSoundAdapter extends RealmBaseAdapter<Sound> {
                 }
             }
         });
-        Sound sound = realmResults.get(position);
+        Sound sound = getItem(position);
         viewHolder.imgFavorite.setImageResource(sound.isFavorite() ? R.mipmap.favorite_selected : R.mipmap.favorite_unselected);
         viewHolder.imgPlayPause.setImageResource(sound.isPlaying() ? R.mipmap.ic_pause : R.mipmap.ic_play);
         viewHolder.tvSoundName.setText(sound.getName());
         viewHolder.tvSoundAuthor.setText(sound.getAuthor());
 
         return convertView;
+    }
+
+    public interface OnItemClicked {
+        void onClick(int pos, View v);
     }
 
     private class ViewHolder {
@@ -102,7 +102,4 @@ public class ListSoundAdapter extends RealmBaseAdapter<Sound> {
         private RelativeLayout rlFavorite;
     }
 
-    public RealmResults<Sound> getRealmResults() {
-        return realmResults;
-    }
 }

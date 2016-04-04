@@ -196,6 +196,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                                 Utils.setCurrentUsername(RegisterActivity.this, name, email, authData.getUid());
                                 HashMap<String, String> map = new HashMap<String, String>();
                                 map.put("name", name);
+                                map.put("no_sound", "0");
+                                map.put("no_favorite", "0");
                                 mUserFire.child("users").child(authData.getUid()).setValue(map);
                             }
 
