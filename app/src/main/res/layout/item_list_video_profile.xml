@@ -1,51 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_margin="5dp"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp">
+
     <ImageView
         android:id="@+id/videoView"
-        android:layout_width="80dp"
-        android:layout_height="80dp" />
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:scaleType="centerCrop" />
+
     <LinearLayout
         android:id="@+id/llinfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="5dp"
         android:layout_toLeftOf="@+id/imgshare"
         android:layout_toRightOf="@+id/videoView"
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:orientation="vertical">
+
         <TextView
             android:id="@+id/tvVideoName"
-            android:textColor="#000"
-            android:textStyle="bold"
-            android:textSize="17sp"
-            android:text="Your video name"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="Your video name"
+            android:textColor="#000"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+
         <TextView
             android:id="@+id/tvTimeVideo"
-            android:textSize="12sp"
-            android:text="hom qua"
-            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="hom qua"
+            android:textSize="12sp" />
     </LinearLayout>
+
     <ImageView
         android:id="@+id/imgoption"
-        android:layout_alignParentRight="true"
         android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:src="@mipmap/ic_action_navigation_more_vert"
-        android:layout_height="wrap_content" />
+        android:src="@mipmap/ic_action_navigation_more_vert" />
+
     <ImageView
         android:id="@+id/imgshare"
-        android:layout_marginRight="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_toLeftOf="@+id/imgoption"
         android:layout_width="wrap_content"
+        android:layout_height="60dp"
         android:layout_centerVertical="true"
-        android:src="@mipmap/ic_share"
-        android:layout_height="wrap_content" />
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_toLeftOf="@+id/imgoption"
+        android:src="@mipmap/ic_share" />
 </RelativeLayout>

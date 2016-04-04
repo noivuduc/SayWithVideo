@@ -22,7 +22,6 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
 
     private EditText mEdtEmail;
     private TextView mTvResetPassword;
-    private Firebase mFirebase;
     private ImageView mImgClearEmail;
 
     @Override
@@ -78,9 +77,11 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
             case R.id.tvResetPassword:
                 datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(ResetPasswordActivity.this);
                 if (!Tools.isOnline(getBaseContext())) {
-                    Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                    if (getCurrentFocus() != null) {
+                        Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                    }
                 } else {
-                    mFirebase = new Firebase(FirebaseConstant.BASE_URL);
+                    Firebase mFirebase = new Firebase(FirebaseConstant.BASE_URL);
                     mFirebase.resetPassword(mEdtEmail.getText().toString().trim(), new Firebase.ResultHandler() {
                         @Override
                         public void onSuccess() {
