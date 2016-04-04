@@ -9,7 +9,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.model.Sound;
+import datn.bkdn.com.saywithvideo.database.Sound;
 import io.realm.RealmBaseAdapter;
 import io.realm.RealmResults;
 

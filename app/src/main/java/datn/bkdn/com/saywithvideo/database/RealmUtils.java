@@ -1,17 +1,11 @@
 package datn.bkdn.com.saywithvideo.database;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-import datn.bkdn.com.saywithvideo.model.AudioUser;
-import datn.bkdn.com.saywithvideo.model.ContentAudio;
-import datn.bkdn.com.saywithvideo.model.Sound;
-import datn.bkdn.com.saywithvideo.model.User;
-import datn.bkdn.com.saywithvideo.model.Video;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -41,13 +35,26 @@ public class RealmUtils {
 
     }
 
+    public void addNewFavorite(Context context, FavoriteAudio sound) {
+
+        realm = RealmManager.getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealm(sound);
+        realm.commitTransaction();
+        //  realm.close();
+
+//        Realm.setDefaultConfiguration(config1);
+
+    }
+
+
 
     public void deleteSound(final Context context, final String id) {
         realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                realm.where(AudioUser.class).equalTo("id", id).findAll().removeLast();
+                realm.where(RealmAudioUser.class).equalTo("id", id).findAll().removeLast();
             }
         });
     }
@@ -63,6 +70,16 @@ public class RealmUtils {
 
     }
 
+    public void deleteFavoriteAudio(Context context, final String id) {
+        realm = RealmManager.getRealm(context);
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.where(FavoriteAudio.class).equalTo("id", id).findAll().clear();
+            }
+        });
+
+    }
     public void updateFavorite(Context context, final String id) {
         realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
@@ -83,7 +100,7 @@ public class RealmUtils {
                 if (sound != null) {
                     sound.setPlays(sound.getPlays() + 1);
                 }
-                AudioUser audioUser = realm.where(AudioUser.class).equalTo("id", id).findFirst();
+                RealmAudioUser audioUser = realm.where(RealmAudioUser.class).equalTo("id", id).findFirst();
                 if (audioUser != null) {
                     audioUser.setPlays(audioUser.getPlays() + 1);
                 }
@@ -107,13 +124,13 @@ public class RealmUtils {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                AudioUser sound = realm.where(AudioUser.class).equalTo("id", id).findFirst();
+                RealmAudioUser sound = realm.where(RealmAudioUser.class).equalTo("id", id).findFirst();
                 sound.setIsPlaying(!sound.isPlaying());
             }
         });
     }
 
-    public void addAudioUser(Context context, final AudioUser audio) {
+    public void addAudioUser(Context context, final RealmAudioUser audio) {
         realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -128,14 +145,15 @@ public class RealmUtils {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                realm.where(AudioUser.class).findAll().clear();
+                realm.where(RealmAudioUser.class).findAll().clear();
             }
         });
 
     }
-    public RealmResults<AudioUser> getSoundOfUser(Context context, String id) {
+
+    public RealmResults<RealmAudioUser> getSoundOfUser(Context context, String id) {
         realm = RealmManager.getRealm(context);
-        RealmResults<AudioUser> sounds = realm.where(AudioUser.class).findAllAsync();
+        RealmResults<RealmAudioUser> sounds = realm.where(RealmAudioUser.class).findAllAsync();
         return sounds;
     }
 
@@ -172,9 +190,9 @@ public class RealmUtils {
         });
     }
 
-    public RealmResults<Sound> getFavoriteSound(Context context) {
+    public RealmResults<FavoriteAudio> getFavoriteSound(Context context) {
         realm = RealmManager.getRealm(context);
-        RealmResults<Sound> sounds = realm.where(Sound.class).equalTo("isFavorite", true).findAllAsync();
+        RealmResults<FavoriteAudio> sounds = realm.where(FavoriteAudio.class).equalTo("isFavorite", true).findAllAsync();
         return sounds;
     }
 
@@ -193,12 +211,11 @@ public class RealmUtils {
         return false;
     }
 
+
     public RealmResults<User> getUserWithEmail(Context context, String email) {
         realm = RealmManager.getRealm(context);
         RealmResults<User> users3 = realm.where(User.class).findAll();
-        Log.d("size", users3.size() + "");
         RealmResults<User> users = realm.where(User.class).equalTo("email", email).findAll();
-        Log.d("size", users.size() + "");
         return users;
     }
 

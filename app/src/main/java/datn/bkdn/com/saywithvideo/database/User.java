@@ -1,4 +1,4 @@
-package datn.bkdn.com.saywithvideo.model;
+package datn.bkdn.com.saywithvideo.database;
 
 import java.util.UUID;
 

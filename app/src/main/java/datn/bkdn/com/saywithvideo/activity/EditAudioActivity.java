@@ -31,9 +31,10 @@ import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.custom.MarkerView;
 import datn.bkdn.com.saywithvideo.custom.VisualizerView;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
-import datn.bkdn.com.saywithvideo.model.FirebaseAudio;
-import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
-import datn.bkdn.com.saywithvideo.model.Sound;
+import datn.bkdn.com.saywithvideo.database.Sound;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseAudio;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
@@ -43,12 +44,12 @@ import datn.bkdn.com.saywithvideo.utils.Utils;
 public class EditAudioActivity extends Activity implements MarkerView.CustomListener,
         MediaPlayer.OnCompletionListener, View.OnClickListener {
 
+    private static final int MIN_SECOND = 1;
+    private static final int MAX_SECOND = 10;
     private MarkerView mMarkerLeft;
     private MarkerView mMarkerRight;
     private VisualizerView mVisualizerView;
     private ImageView mImgPlay;
-    private static final int MIN_SECOND = 1;
-    private static final int MAX_SECOND = 10;
     private float mPixelPerSecond;
     private String mFilePath;
     private MediaPlayer mMediaPlayer;
@@ -60,6 +61,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
     private TextView mTvStart;
     private TextView mTvEnd;
     private int mDuration;
+    private String idSound;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -140,7 +142,6 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
                     }
                 }, Visualizer.getMaxCaptureRate() / 2, true, false);
     }
-
 
     @Override
     public void markerDraw() {
@@ -264,47 +265,6 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         mImgPlay.setImageResource(R.mipmap.ic_pause);
     }
 
-    private class EditAudio extends AsyncTask<Void, Void, Void> {
-
-        private float start;
-        private float end;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            start = Float.parseFloat(mTvStart.getText().toString());
-            end = Float.parseFloat(mTvEnd.getText().toString());
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            String folderPath = Constant.DIRECTORY_PATH + Constant.AUDIO;
-            Tools.createFolder(folderPath);
-            mOutputPath = folderPath + "AUDIO_" + AppTools.getDate() + ".m4a";
-            try {
-                SoundFile soundFile = SoundFile.create(mFilePath, null);
-                soundFile.WriteFile(new File(mOutputPath), start, end);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (SoundFile.InvalidInputException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (mType.equals("Record")) {
-                File file = new File(mFilePath);
-                file.delete();
-            }
-        }
-    }
-
-    private String idSound;
-
     private void createSound(String name) {
         idSound = UUID.randomUUID().toString();
         Date date = new Date();
@@ -336,6 +296,9 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
                 }
             }
         });
+
+        FirebaseUser f = AppTools.getInfoUser(id);
+        mFirebase.child(FirebaseConstant.USER_URL).child(id).child("no_sound").setValue((f.getNo_sound() + 1) + "");
     }
 
     public void createDialog() {
@@ -374,5 +337,44 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
             file.delete();
         }
         super.onBackPressed();
+    }
+
+    private class EditAudio extends AsyncTask<Void, Void, Void> {
+
+        private float start;
+        private float end;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            start = Float.parseFloat(mTvStart.getText().toString());
+            end = Float.parseFloat(mTvEnd.getText().toString());
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            String folderPath = Constant.DIRECTORY_PATH + Constant.AUDIO;
+            Tools.createFolder(folderPath);
+            mOutputPath = folderPath + "AUDIO_" + AppTools.getDate() + ".m4a";
+            try {
+                SoundFile soundFile = SoundFile.create(mFilePath, null);
+                soundFile.WriteFile(new File(mOutputPath), start, end);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (SoundFile.InvalidInputException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (mType.equals("Record")) {
+                File file = new File(mFilePath);
+                file.delete();
+            }
+        }
     }
 }

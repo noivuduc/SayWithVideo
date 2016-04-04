@@ -1,4 +1,4 @@
-package datn.bkdn.com.saywithvideo.model;
+package datn.bkdn.com.saywithvideo.firebase;
 
 /**
  * Created by Admin on 3/21/2016.

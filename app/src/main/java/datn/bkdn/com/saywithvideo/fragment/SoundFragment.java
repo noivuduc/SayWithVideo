@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,36 +19,37 @@ import com.firebase.client.ValueEventListener;
 import com.soikonomakis.rxfirebase.RxFirebase;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity;
 import datn.bkdn.com.saywithvideo.adapter.DemoAdapter;
 import datn.bkdn.com.saywithvideo.adapter.ListSoundAdapter;
+import datn.bkdn.com.saywithvideo.database.ContentAudio;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
-import datn.bkdn.com.saywithvideo.model.ContentAudio;
-import datn.bkdn.com.saywithvideo.model.FirebaseAudio;
-import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
-import datn.bkdn.com.saywithvideo.model.FirebaseUser;
-import datn.bkdn.com.saywithvideo.model.Sound;
+import datn.bkdn.com.saywithvideo.database.Sound;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseAudio;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
+import datn.bkdn.com.saywithvideo.model.Audio;
+import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
-import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
 import io.realm.RealmAsyncTask;
-import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class SoundFragment extends Fragment implements RealmChangeListener {
+public class SoundFragment extends Fragment {
     private int mCurrentPos = -1;
-    private RealmResults<Sound> mSounds;
+    private List<Audio> mSounds = new ArrayList<>();
     private MediaPlayer mPlayer;
     private ListView mLvSound;
     private ListSoundAdapter mAdapter;
     private Firebase mFirebase;
-    private FirebaseUser user;
     private Realm realm;
     private DemoAdapter dotAdapter;
     private RealmAsyncTask asyncTransaction;
@@ -71,92 +71,75 @@ public class SoundFragment extends Fragment implements RealmChangeListener {
         return v;
     }
 
+
     @Override
     public void onStart() {
         super.onStart();
-        realm = RealmManager.getRealm(getContext());
-        mSounds = realm.where(Sound.class).findAll();
-        mSounds.addChangeListener(this);
-        dotAdapter.updateList(mSounds);
+    }
 
+    private Audio convertAudio(Sound sound) {
+        Audio audio = new Audio(sound.getId(), sound.getName(), sound.getAuthor(), false, sound.isFavorite(), sound.getPlays(), sound.getDateOfCreate());
+        return audio;
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        cancelAsyncTransaction();
-        mSounds.removeChangeListeners();
-        mSounds = null;
-        realm.close();
     }
-
-    @Override
-    public void onChange() {
-        dotAdapter.notifyDataSetChanged();
-    }
-
-    private void cancelAsyncTransaction() {
-        if (asyncTransaction != null && !asyncTransaction.isCancelled()) {
-            asyncTransaction.cancel();
-            asyncTransaction = null;
-        }
-    }
-
     private void loadData() {
-        mFirebase.child(FirebaseConstant.AUDIO_URL).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                RealmUtils.getRealmUtils(getContext()).deleteAllSound(getContext());
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    FirebaseAudio firebaseAudio = data.getValue(FirebaseAudio.class);
-                    final String name = firebaseAudio.getName();
-                    final String dateCreate = firebaseAudio.getDate_create();
-                    final String user_id = firebaseAudio.getUser_id();
-                    final String audio_id = data.getKey();
-                    final int plays = firebaseAudio.getPlays();
-                    Firebase base = new Firebase(Constant.FIREBASE_ROOT + "users/" + user_id + "/name/");
-                    RxFirebase.getInstance().
-                            observeValueEvent(base).
-                            subscribeOn(Schedulers.newThread()).
-                            subscribe(new Action1<DataSnapshot>() {
+        RxFirebase.getInstance().
+                observeValueEvent(mFirebase.child(FirebaseConstant.AUDIO_URL)).
+                subscribeOn(Schedulers.newThread()).
+                subscribe(new Action1<DataSnapshot>() {
+                    @Override
+                    public void call(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot data : dataSnapshot.getChildren()) {
+                            FirebaseAudio firebaseAudio = data.getValue(FirebaseAudio.class);
+                            final String name = firebaseAudio.getName();
+                            final String dateCreate = firebaseAudio.getDate_create();
+                            final String user_id = firebaseAudio.getUser_id();
+                            final String audio_id = data.getKey();
+                            final int plays = firebaseAudio.getPlays();
+                            String userName = Utils.getUserName(user_id);
+                            final Sound sound = new Sound(audio_id, name, userName, dateCreate);
+                            sound.setPlays(plays);
+                            sound.setIdUser(user_id);
+                            Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + user_id + "/favorite/");
+                            firebase.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
-                                public void call(DataSnapshot dataSnapshot) {
-                                    String userName = dataSnapshot.getValue().toString();
-                                    Sound sound = new Sound(audio_id, name, userName, dateCreate);
-                                    sound.setPlays(plays);
-                                    if (user.getFavorite() != null) {
-                                        if (user.getFavorite().contains(audio_id))
-                                            sound.setIsFavorite(true);
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.hasChild(audio_id)) {
+                                        sound.setIsFavorite(true);
                                     }
                                     new AsyncAddSound().execute(sound);
+                                    Audio audio = convertAudio(sound);
+                                    mSounds.add(audio);
+                                    dotAdapter.notifyDataSetChanged();
+                                }
+
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+
                                 }
                             });
-//
 
-                }
-            }
 
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
+                        }
+                    }
+                });
     }
+
 
     private void init() {
         Firebase.setAndroidContext(getContext());
         mFirebase = new Firebase(FirebaseConstant.BASE_URL);
-        user = Utils.getFavoriteUser(getContext());
-        mAdapter = new ListSoundAdapter(getContext(), mSounds);
-        dotAdapter = new DemoAdapter(getContext());
-        loadData();
+        dotAdapter = new DemoAdapter(getContext(), mSounds);
         dotAdapter.setPlayButtonClicked(new DemoAdapter.OnItemClicked() {
             @Override
             public void onClick(int pos, View v) {
-                Sound sound = mSounds.get(pos);
+                Audio sound = mSounds.get(pos);
                 switch (v.getId()) {
                     case R.id.imgPlay:
-                        Log.d("1112", "1112");
                         final String audioId = sound.getId();
                         String path = "";
                         ContentAudio contentAudio = AppTools.getContentAudio(audioId, getActivity());
@@ -164,8 +147,9 @@ public class SoundFragment extends Fragment implements RealmChangeListener {
                             new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
                             path = contentAudio.getContent();
                             if (mCurrentPos != -1 && pos != mCurrentPos) {
-                                Sound sound1 = mSounds.get(mCurrentPos);
+                                Audio sound1 = mSounds.get(mCurrentPos);
                                 if (sound1.isPlaying()) {
+                                    sound1.setIsPlaying(!sound1.isPlaying());
                                     String id = mSounds.get(mCurrentPos).getId();
                                     new AsyncUpdatePlaying().execute(id);
                                     mPlayer.stop();
@@ -179,22 +163,52 @@ public class SoundFragment extends Fragment implements RealmChangeListener {
                                 playMp3(path);
                             }
                             new AsyncUpdatePlaying().execute(sound.getId());
+                            sound.setIsPlaying(!sound.isPlaying());
                             dotAdapter.notifyDataSetChanged();
                         }
                         break;
                     case R.id.rlFavorite:
                         try {
-                            Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(getContext())).child("favorite");
-                            String id = sound.getId();
+                            final String id = sound.getId();
+                            sound.setIsFavorite(!sound.isFavorite());
+                            final FirebaseUser f = AppTools.getInfoUser(Utils.getCurrentUserID(getContext()));
+                            final Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(getContext()) + "/favorite");
+                            favoriteFirebase.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    final Firebase ff = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(getContext()) + "/");
+                                    if (dataSnapshot.hasChild(id)) {
+                                        new AsyncTask<Void, Void, Void>() {
 
-                            if (user.getFavorite().contains(id)) {
-                                user.getFavorite().remove(id);
-                            } else {
-                                user.getFavorite().add(id);
-                            }
-                            favoriteFirebase.setValue(user.getFavorite());
+                                            @Override
+                                            protected Void doInBackground(Void... params) {
+                                                favoriteFirebase.child(id).removeValue();
+                                                ff.child("no_favorite").setValue(f.getNo_favorite() - 1);
+                                                return null;
+                                            }
+                                        }.execute();
+
+                                    } else {
+                                        new AsyncTask<Void, Void, Void>() {
+
+                                            @Override
+                                            protected Void doInBackground(Void... params) {
+                                                favoriteFirebase.child(id).setValue("true");
+                                                ff.child("no_favorite").setValue(f.getNo_favorite() + 1);
+                                                return null;
+                                            }
+                                        }.execute();
+
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+
+                                }
+                            });
                         } catch (Exception e) {
-
+                            e.printStackTrace();
                         }
                         new AsyncTask<String, Void, Void>() {
                             @Override
@@ -237,6 +251,20 @@ public class SoundFragment extends Fragment implements RealmChangeListener {
     @Override
     public void onResume() {
         super.onResume();
+        if (!Tools.isOnline(getContext())) {
+            mSounds.clear();
+            realm = RealmManager.getRealm(getContext());
+            RealmResults<Sound> Sounds = realm.where(Sound.class).findAll();
+            for (Sound sound : Sounds) {
+                Audio audio = convertAudio(sound);
+                mSounds.add(audio);
+            }
+
+        } else {
+            mSounds.clear();
+            RealmUtils.getRealmUtils(getContext()).deleteAllSound(getContext());
+            loadData();
+        }
     }
 
     public void playMp3(String path) {
@@ -255,8 +283,8 @@ public class SoundFragment extends Fragment implements RealmChangeListener {
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                RealmUtils.getRealmUtils(getContext()).updatePlaying(getContext(), mSounds.get(mCurrentPos).getId());
-                mAdapter.notifyDataSetChanged();
+                new AsyncUpdatePlaying().execute(mSounds.get(mCurrentPos).getId());
+                dotAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -292,7 +320,6 @@ public class SoundFragment extends Fragment implements RealmChangeListener {
         protected Void doInBackground(String... params) {
             String audioId = params[0];
             String plays = params[1];
-            RealmUtils.getRealmUtils(getContext()).updatePlays(getContext(), audioId);
             Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
             firebase.child(audioId).child("plays").setValue(plays);
             return null;

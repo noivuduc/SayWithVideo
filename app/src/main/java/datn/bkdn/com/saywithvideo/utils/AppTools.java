@@ -12,10 +12,11 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import datn.bkdn.com.saywithvideo.database.ContentAudio;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
-import datn.bkdn.com.saywithvideo.model.ContentAudio;
-import datn.bkdn.com.saywithvideo.model.FireBaseContent;
-import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.firebase.FireBaseContent;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 
 public class AppTools {
     public static String getDate() {
@@ -63,5 +64,12 @@ public class AppTools {
             }
         }
         return contentAudio;
+    }
+
+    public static FirebaseUser getInfoUser(String id) {
+        String link = FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + id + ".json";
+        String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
+        FirebaseUser f = new Gson().fromJson(json, FirebaseUser.class);
+        return f;
     }
 }

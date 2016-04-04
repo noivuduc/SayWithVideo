@@ -1,4 +1,4 @@
-package datn.bkdn.com.saywithvideo.model;
+package datn.bkdn.com.saywithvideo.firebase;
 
 public class FirebaseAudio {
     private String name;

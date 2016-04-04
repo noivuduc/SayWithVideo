@@ -11,24 +11,20 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.model.Video;
+import datn.bkdn.com.saywithvideo.database.Video;
 import io.realm.RealmBaseAdapter;
 import io.realm.RealmResults;
 
 public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
 
-    public interface OnItemClicked {
-        void onClick(int pos, View v);
-    }
-
     public OnItemClicked mItemClicked;
-
-    public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
-        this.mItemClicked = playButtonClicked;
-    }
 
     public ListMyVideoAdapter(Context context, RealmResults<Video> videos) {
         super(context, videos, true);
+    }
+
+    public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
+        this.mItemClicked = playButtonClicked;
     }
 
     @Override
@@ -80,6 +76,10 @@ public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
         viewHolder.videoView.setImageBitmap(thump);
         viewHolder.tvDateOfCreate.setText(video.getTime());
         return convertView;
+    }
+
+    public interface OnItemClicked {
+        void onClick(int pos, View v);
     }
 
     private class ViewHolder {
