@@ -35,6 +35,7 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
 
         mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         mSearchView = (SearchView) findViewById(R.id.searchView);
+
         mLvSound = (ListView) findViewById(R.id.lvSound);
         mSearchView.setQueryHint("Search Snips");
         mSearchView.setFocusable(true);

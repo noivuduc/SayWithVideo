@@ -4,14 +4,15 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.util.Patterns;
 
 import com.google.gson.Gson;
 
 import java.util.regex.Pattern;
 
-import datn.bkdn.com.saywithvideo.model.FirebaseConstant;
-import datn.bkdn.com.saywithvideo.model.FirebaseUser;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 
 public class Utils {
     private static final String CURRENT_USER = "current_user";
@@ -45,11 +46,12 @@ public class Utils {
         return false;
     }
 
-    public static FirebaseUser getFavoriteUser(Context context){
-        String link = FirebaseConstant.BASE_URL+FirebaseConstant.USER_URL+"/"+Utils.getCurrentUserID(context)+".json";
+    public static String getUserName(String id) {
+        String link = FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + id + ".json";
+        Log.d("liiii", link);
         String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
-       FirebaseUser user = new Gson().fromJson(json, FirebaseUser.class);
-        return user;
+        FirebaseUser user = new Gson().fromJson(json, FirebaseUser.class);
+        return user.getName();
     }
 
     public static String getCurrentUserEmail(Context context) {
@@ -73,6 +75,7 @@ public class Utils {
         editor.clear();
         editor.apply();
     }
+
 
     public static void updateCurrentUserName(Context context, String name) {
         SharedPreferences pref = context.getSharedPreferences(CURRENT_USER, Context.MODE_PRIVATE);

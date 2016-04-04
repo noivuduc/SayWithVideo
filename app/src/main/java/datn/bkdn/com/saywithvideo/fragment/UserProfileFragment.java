@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,12 +12,14 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.Set;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.activity.FavoriteActivity;
 import datn.bkdn.com.saywithvideo.activity.MainActivity;
-import datn.bkdn.com.saywithvideo.activity.RecordNewSoundActivity;
 import datn.bkdn.com.saywithvideo.activity.SettingActivity;
 import datn.bkdn.com.saywithvideo.activity.ShareActivity;
 import datn.bkdn.com.saywithvideo.activity.ShowVideoActivity;
@@ -26,7 +27,8 @@ import datn.bkdn.com.saywithvideo.activity.SoundActivity;
 import datn.bkdn.com.saywithvideo.activity.SoundBoardActivity;
 import datn.bkdn.com.saywithvideo.adapter.ListMyVideoAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
-import datn.bkdn.com.saywithvideo.model.Video;
+import datn.bkdn.com.saywithvideo.database.Video;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 
@@ -98,11 +100,44 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     @Override
     public void onResume() {
         super.onResume();
-        mTvUserName.setText(Utils.getCurrentUserName(getContext()));
-        int num = RealmUtils.getRealmUtils(getContext()).getFavoriteSound(getContext()).size();
-        int numsound = RealmUtils.getRealmUtils(getContext()).getSoundOfUser(getContext(), Utils.getCurrentUserID(getContext())).size();
-        mNumFavorite.setText("" + num);
-        mNumSound.setText(numsound + "");
+        String id=Utils.getCurrentUserID(getContext());
+        Firebase baseUser = new Firebase(FirebaseConstant.BASE_URL+FirebaseConstant.USER_URL+id+"/");
+        baseUser.child("no_favorite").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mNumFavorite.setText("" + dataSnapshot.getValue());
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+        baseUser.child("no_sound").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mNumSound.setText(dataSnapshot.getValue() + "");
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+        baseUser.child("name").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mTvUserName.setText(dataSnapshot.getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+
+
     }
 
 
