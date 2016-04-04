@@ -1,11 +1,13 @@
 package datn.bkdn.com.saywithvideo.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -42,6 +44,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private ImageView clearEmail;
     private Firebase root;
     private CallbackManager callbackManager;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +95,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         clearEmail = (ImageView) findViewById(R.id.imgClearEmail);
         clearPass = (ImageView) findViewById(R.id.imgClearPass);
         TextView tvLoginFacebook = (TextView) findViewById(R.id.tvLoginFacebook);
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Please wait...");
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgressDialog.setIndeterminate(true);
 
         tvLogin.setOnClickListener(this);
         tvRegister.setOnClickListener(this);
@@ -164,6 +171,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (!Tools.isOnline(getBaseContext())) {
                     Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
                 } else {
+                    mProgressDialog.show();
                     checkisValidAccount(edtEmail.getText().toString(), edtPass.getText().toString());
                 }
                 datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(LoginActivity.this);
@@ -175,6 +183,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (!Tools.isOnline(getBaseContext())) {
                     Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
                 } else {
+                    mProgressDialog.show();
                     LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "user_friends", "email"));
                 }
                 break;
@@ -206,6 +215,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         } else {
             root.unauth();
         }
+        mProgressDialog.show();
     }
 
     private void finishActivity(String name, String email, String uid) {
@@ -218,6 +228,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void checkisValidAccount(final String email, String pass) {
         if (!Tools.isOnline(LoginActivity.this)) {
             Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+            mProgressDialog.show();
             return;
         }
         root.authWithPassword(email, pass,
@@ -225,6 +236,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                     @Override
                     public void onAuthenticated(final AuthData authData) {
+                        Log.d("tien", "login thanh cong");
                         Firebase base = new Firebase(Constant.FIREBASE_ROOT + "users/" + authData.getUid() + "/name/");
                         final String uid = authData.getUid();
                         base.addValueEventListener(new ValueEventListener() {
@@ -247,6 +259,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         Toast.makeText(LoginActivity.this, "Email or password is wrong!", Toast.LENGTH_SHORT).show();
                     }
                 });
+        mProgressDialog.show();
     }
 
     @Override
