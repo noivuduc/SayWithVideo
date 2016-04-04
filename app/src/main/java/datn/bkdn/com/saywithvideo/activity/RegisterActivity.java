@@ -1,5 +1,6 @@
 package datn.bkdn.com.saywithvideo.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -36,6 +37,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private ImageView clearEmail;
     private ImageView clearName;
     private Firebase mUserFire;
+    private ProgressDialog mProgressDialog;
 
     private static boolean isEmailValid(String email) {
         boolean isValid = false;
@@ -70,6 +72,11 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         clearEmail = (ImageView) findViewById(R.id.imgClearEmail);
         clearName = (ImageView) findViewById(R.id.imgClearName);
         clearPass = (ImageView) findViewById(R.id.imgClearPass);
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Please wait...");
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgressDialog.setIndeterminate(true);
 
         edtEmail.setText(Utils.getPrimaryEmail(this));
         tvregister.setOnClickListener(this);
@@ -173,6 +180,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
                     return;
                 }
+                mProgressDialog.show();
                 final String name = edtName.getText().toString();
                 final String email = edtEmail.getText().toString();
                 final String pass = edtPass.getText().toString();
@@ -196,7 +204,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
                             }
                         });
-
+                        mProgressDialog.dismiss();
                         startActivity(i);
                     }
 
@@ -213,6 +221,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                                 Toast.makeText(RegisterActivity.this, firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
                                 break;
                         }
+                        mProgressDialog.dismiss();
                     }
                 });
                 datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(RegisterActivity.this);

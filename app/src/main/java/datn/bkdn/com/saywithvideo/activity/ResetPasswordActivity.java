@@ -1,5 +1,6 @@
 package datn.bkdn.com.saywithvideo.activity;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,7 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
     private EditText mEdtEmail;
     private TextView mTvResetPassword;
     private ImageView mImgClearEmail;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,11 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
         mEdtEmail = (EditText) findViewById(R.id.edtEmail);
         mTvResetPassword = (TextView) findViewById(R.id.tvResetPassword);
         mImgClearEmail = (ImageView) findViewById(R.id.imgClearEmail);
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Please wait...");
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
     }
 
     @Override
@@ -81,16 +88,19 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
                         Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
                     }
                 } else {
+                    mProgressDialog.show();
                     Firebase mFirebase = new Firebase(FirebaseConstant.BASE_URL);
                     mFirebase.resetPassword(mEdtEmail.getText().toString().trim(), new Firebase.ResultHandler() {
                         @Override
                         public void onSuccess() {
+                            mProgressDialog.dismiss();
                             Toast.makeText(getBaseContext(), "Change password success", Toast.LENGTH_LONG).show();
                             finish();
                         }
 
                         @Override
                         public void onError(FirebaseError firebaseError) {
+                            mProgressDialog.dismiss();
                             Toast.makeText(getBaseContext(), "Change password error", Toast.LENGTH_LONG).show();
                         }
                     });

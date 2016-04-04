@@ -7,13 +7,13 @@
         android:id="@+id/rlTop"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="#f1ce08"
         android:orientation="horizontal">
 
         <RelativeLayout
             android:id="@+id/rlBack"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:background="@drawable/background_button_back_addsound"
             android:paddingLeft="10dp"
             android:paddingRight="10dp">
 
@@ -31,6 +31,7 @@
             android:layout_height="match_parent"
             android:layout_toLeftOf="@+id/rlSort"
             android:layout_toRightOf="@+id/rlBack"
+            android:background="#f1ce08"
             android:paddingLeft="10dp"
             android:paddingRight="10dp">
 
