@@ -73,4 +73,18 @@ public class Utils {
         editor.clear();
         editor.apply();
     }
+
+    public static void updateCurrentUserName(Context context, String name) {
+        SharedPreferences pref = context.getSharedPreferences(CURRENT_USER, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(CURRENT_USER_NAME, name);
+        editor.apply();
+    }
+
+    public static void updateCurrentEmail(Context context, String email) {
+        SharedPreferences pref = context.getSharedPreferences(CURRENT_USER, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(CURRENT_USER_EMAIL, email);
+        editor.apply();
+    }
 }
