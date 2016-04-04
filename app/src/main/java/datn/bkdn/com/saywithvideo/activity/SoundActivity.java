@@ -32,6 +32,7 @@ import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseAudio;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
@@ -230,8 +231,24 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                                 return null;
                             }
                         }.execute(sound.getId());
+
+                         /*
+                    Dec no_sound
+                     */
+                        new AsyncTask<Void, Void, Void>() {
+
+                            @Override
+                            protected Void doInBackground(Void... params) {
+                                String userID = Utils.getCurrentUserID(SoundActivity.this);
+                                FirebaseUser f = AppTools.getInfoUser(userID);
+                                Firebase ff = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + userID).child("no_sound");
+                                ff.setValue(f.getNo_sound() - 1);
+                                return null;
+                            }
+                        }.execute();
                         adapter.notifyDataSetChanged();
                         break;
+
 
                 }
                 return false;
@@ -259,6 +276,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         String id = Utils.getCurrentUserID(this);
         realm = RealmManager.getRealm(this);
         mSounds = realm.where(Sound.class).equalTo("idUser", id).findAll();
+        mSounds.addChangeListener(this);
     }
 
     @Override
