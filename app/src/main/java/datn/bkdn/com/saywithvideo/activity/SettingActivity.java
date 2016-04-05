@@ -85,7 +85,9 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 break;
             case R.id.tvLogout:
                 Utils.clearPref(SettingActivity.this);
-                startActivity(new Intent(SettingActivity.this, LoginActivity.class));
+                Intent intent = new Intent(SettingActivity.this, LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
                 break;
         }
     }
@@ -120,12 +122,26 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         mTvSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String fullName = mEdtContent.getText().toString().trim();
+                final String fullName = mEdtContent.getText().toString().trim();
                 if (fullName.equals("")) {
                     Snackbar.make(findViewById(R.id.root), "Add your name", Snackbar.LENGTH_LONG).show();
                     datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(SettingActivity.this, dialog.getCurrentFocus());
                 } else {
-                    changeFullName(mEdtContent.getText().toString());
+                    Firebase mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
+                    FirebaseUser user = new FirebaseUser();
+                    user.setName(fullName);
+                    mFirebase.child(Utils.getCurrentUserID(SettingActivity.this)).setValue(user, new Firebase.CompletionListener() {
+                        @Override
+                        public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                            if (firebaseError == null) {
+                                mTvFullName.setText(fullName);
+                                Utils.updateCurrentUserName(SettingActivity.this, fullName);
+                                Toast.makeText(SettingActivity.this, "Change full name success.", Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(SettingActivity.this, "Change full name error.", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
                     dialog.dismiss();
                 }
             }
@@ -155,24 +171,6 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                     mImgClear.setVisibility(View.VISIBLE);
                 } else {
                     mImgClear.setVisibility(View.INVISIBLE);
-                }
-            }
-        });
-    }
-
-    private void changeFullName(final String content) {
-        Firebase mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
-        FirebaseUser user = new FirebaseUser();
-        user.setName(content);
-        mFirebase.child(Utils.getCurrentUserID(this)).setValue(user, new Firebase.CompletionListener() {
-            @Override
-            public void onComplete(FirebaseError firebaseError, Firebase firebase) {
-                if (firebaseError == null) {
-                    mTvFullName.setText(content);
-                    Utils.updateCurrentUserName(SettingActivity.this, content);
-                    Toast.makeText(SettingActivity.this, "Change full name success.", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(SettingActivity.this, "Change full name error.", Toast.LENGTH_LONG).show();
                 }
             }
         });

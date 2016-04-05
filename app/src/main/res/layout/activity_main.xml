@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -12,38 +11,42 @@
         app:pstsActivateTextColor="#f2d05e"
         app:pstsDeactivateTextColor="#FFCCCCCC"
         app:pstsDividerColor="@android:color/transparent"
-        app:pstsIndicatorHeight="4dp"
-        app:pstsUnderlineHeight="0dp"
-        app:pstsTabBackground="@android:color/secondary_text_light_nodisable"
         app:pstsIndicatorColor="#f2d05e"
+        app:pstsIndicatorHeight="4dp"
         app:pstsShouldExpand="true"
+        app:pstsTabBackground="@android:color/secondary_text_light_nodisable"
         app:pstsTabSwitch="true"
-        app:pstsTextAllCaps="false"/>
+        app:pstsTextAllCaps="false"
+        app:pstsUnderlineHeight="0dp" />
+
     <LinearLayout
         android:id="@+id/ll"
-        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
         android:layout_below="@+id/tab"
         android:background="@mipmap/shadow"
-        android:layout_width="match_parent"
-        android:layout_height="8dp"/>
+        android:orientation="horizontal" />
+
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/tab"
-        />
+        android:layout_below="@+id/tab" />
+
     <android.support.design.widget.CoordinatorLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_margin="25dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_marginBottom="-15dp"
+        android:layout_marginRight="15dp">
+
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
-            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@mipmap/ic_settings"/>
+            android:src="@mipmap/ic_setting"
+            android:visibility="gone" />
     </android.support.design.widget.CoordinatorLayout>
 </RelativeLayout>
 

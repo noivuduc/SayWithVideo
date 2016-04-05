@@ -94,7 +94,7 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
                         @Override
                         public void onSuccess() {
                             mProgressDialog.dismiss();
-                            Toast.makeText(getBaseContext(), "Change password success", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getBaseContext(), "Change password success\nPassword sent to your email.", Toast.LENGTH_LONG).show();
                             finish();
                         }
 

@@ -24,6 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/imgClearPassword"
             android:layout_toRightOf="@+id/tv2"
+            android:inputType="textPassword"
             android:singleLine="true" />
 
         <ImageView
@@ -56,6 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/imgClearNewMail"
             android:layout_toRightOf="@+id/tv3"
+            android:inputType="textEmailAddress"
             android:singleLine="true" />
 
         <ImageView

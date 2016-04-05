@@ -7,7 +7,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -19,6 +18,9 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphRequestAsyncTask;
+import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
@@ -28,10 +30,13 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
+import org.json.JSONObject;
+
 import java.util.Arrays;
 import java.util.HashMap;
 
 import datn.bkdn.com.saywithvideo.R;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
@@ -59,17 +64,42 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
                 @Override
                 public void onSuccess(LoginResult loginResult) {
-                    loginFacebook(AccessToken.getCurrentAccessToken());
+                    GraphRequestAsyncTask request = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
+                        @Override
+                        public void onCompleted(JSONObject user, GraphResponse graphResponse) {
+                            final String id = "facebook:" + user.optString("id");
+                            Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
+                            firebase.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    boolean exists = dataSnapshot.child(id).exists();
+                                    if (exists) {
+                                        String name = (String) dataSnapshot.child(id).child("name").getValue();
+                                        finishActivity(name, "", id);
+                                    } else {
+                                        loginFacebook(AccessToken.getCurrentAccessToken());
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+
+                                }
+                            });
+                        }
+                    }).executeAsync();
                 }
 
                 @Override
                 public void onCancel() {
                     Toast.makeText(LoginActivity.this, "Login facebook cancel by user", Toast.LENGTH_SHORT).show();
+                    mProgressDialog.dismiss();
                 }
 
                 @Override
                 public void onError(FacebookException error) {
                     Toast.makeText(LoginActivity.this, "Login facebook error", Toast.LENGTH_SHORT).show();
+                    mProgressDialog.dismiss();
                 }
             });
             root = new Firebase(Constant.FIREBASE_ROOT);
@@ -221,6 +251,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void finishActivity(String name, String email, String uid) {
         Utils.setCurrentUsername(LoginActivity.this, name, email, uid);
         Intent i = new Intent(LoginActivity.this, MainActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         this.finish();
         startActivity(i);
     }
@@ -228,27 +259,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void checkisValidAccount(final String email, String pass) {
         if (!Tools.isOnline(LoginActivity.this)) {
             Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
-            mProgressDialog.show();
             return;
         }
+        mProgressDialog.show();
         root.authWithPassword(email, pass,
                 new Firebase.AuthResultHandler() {
 
                     @Override
                     public void onAuthenticated(final AuthData authData) {
-                        Log.d("tien", "login thanh cong");
                         Firebase base = new Firebase(Constant.FIREBASE_ROOT + "users/" + authData.getUid() + "/name/");
                         final String uid = authData.getUid();
                         base.addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
+                                mProgressDialog.dismiss();
                                 String name = dataSnapshot.getValue().toString();
                                 finishActivity(name, email, uid);
                             }
 
                             @Override
                             public void onCancelled(FirebaseError firebaseError) {
-
+                                mProgressDialog.dismiss();
                             }
                         });
 
@@ -256,10 +287,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                     @Override
                     public void onAuthenticationError(FirebaseError error) {
+                        mProgressDialog.dismiss();
                         Toast.makeText(LoginActivity.this, "Email or password is wrong!", Toast.LENGTH_SHORT).show();
                     }
                 });
-        mProgressDialog.show();
     }
 
     @Override

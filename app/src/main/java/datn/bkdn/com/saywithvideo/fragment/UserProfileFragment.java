@@ -32,7 +32,7 @@ import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 
-public class UserProfileFragment extends Fragment implements View.OnClickListener,ListMyVideoAdapter.OnItemClicked {
+public class UserProfileFragment extends Fragment implements View.OnClickListener, ListMyVideoAdapter.OnItemClicked {
 
     private boolean mIsVolume;
     private ListView mLvMyVideo;
@@ -49,6 +49,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     private ImageView mImgBackgroundVideo;
     private RealmResults<Video> mVideos;
     private ListMyVideoAdapter mAdapter;
+
     public static UserProfileFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -80,7 +81,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         if (mVideos.size() != 0) {
             mLlCreateDub.setVisibility(View.INVISIBLE);
         }
-         mAdapter= new ListMyVideoAdapter(getContext(), mVideos);
+        mAdapter = new ListMyVideoAdapter(getContext(), mVideos);
         mAdapter.setPlayButtonClicked(this);
         mLvMyVideo.setAdapter(mAdapter);
         init();
@@ -100,8 +101,8 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     @Override
     public void onResume() {
         super.onResume();
-        String id=Utils.getCurrentUserID(getContext());
-        Firebase baseUser = new Firebase(FirebaseConstant.BASE_URL+FirebaseConstant.USER_URL+id+"/");
+        String id = Utils.getCurrentUserID(getContext());
+        Firebase baseUser = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + id + "/");
         baseUser.child("no_favorite").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -137,7 +138,6 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         });
 
 
-
     }
 
 
@@ -168,18 +168,19 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
 
     /**
      * List video event
+     *
      * @param pos
      * @param v
      */
     @Override
     public void onClick(int pos, View v) {
         Video video = mVideos.get(pos);
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.llinfo:
                 Intent intent = new Intent(getActivity(), ShowVideoActivity.class);
                 intent.putExtra("VideoPath", video.getPath());
                 startActivity(intent);
-                 break;
+                break;
             case R.id.imgshare:
                 Intent i = new Intent(getActivity(), ShareActivity.class);
                 i.putExtra("filePath", video.getPath());
