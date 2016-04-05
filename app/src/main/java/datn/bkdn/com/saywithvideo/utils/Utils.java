@@ -48,7 +48,7 @@ public class Utils {
 
     public static String getUserName(String id) {
         String link = FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + id + ".json";
-        Log.d("liiii", link);
+        Log.d("Utils.getUserName", link);
         String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
         FirebaseUser user = new Gson().fromJson(json, FirebaseUser.class);
         return user.getName();

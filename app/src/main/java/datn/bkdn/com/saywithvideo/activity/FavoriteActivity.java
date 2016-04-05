@@ -197,8 +197,6 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void finishActivity() {
-        mSounds.removeChangeListeners();
-        mSounds=null;
         this.finish();
     }
 

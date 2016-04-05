@@ -1,6 +1,7 @@
 package datn.bkdn.com.saywithvideo.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,7 @@ public class DemoAdapter extends ArrayAdapter<Audio> {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
+        Log.d("getview","run");
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_list_sound, parent, false);
             viewHolder = new ViewHolder();
@@ -55,6 +57,15 @@ public class DemoAdapter extends ArrayAdapter<Audio> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
+
+        viewHolder.rlFavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mItemClicked != null) {
+                    mItemClicked.onClick(position, v);
+                }
+            }
+        });
         viewHolder.imgPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -71,14 +82,6 @@ public class DemoAdapter extends ArrayAdapter<Audio> {
                 }
             }
         });
-        viewHolder.rlFavorite.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mItemClicked != null) {
-                    mItemClicked.onClick(position, v);
-                }
-            }
-        });
         viewHolder.linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,11 +90,12 @@ public class DemoAdapter extends ArrayAdapter<Audio> {
                 }
             }
         });
-        Audio sound = (Audio) getItem(position);
+
+        Audio sound =getItem(position);
         viewHolder.imgFavorite.setImageResource(sound.isFavorite() ? R.mipmap.favorite_selected : R.mipmap.favorite_unselected);
         viewHolder.imgPlayPause.setImageResource(sound.isPlaying() ? R.mipmap.ic_pause : R.mipmap.ic_play);
         viewHolder.tvSoundName.setText(sound.getName());
-        viewHolder.tvSoundAuthor.setText(sound.getAuthor());
+        viewHolder.tvSoundAuthor.setText("upload by "+sound.getAuthor());
 
         return convertView;
     }

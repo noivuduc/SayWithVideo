@@ -104,27 +104,29 @@ public class SoundFragment extends Fragment {
                             final Sound sound = new Sound(audio_id, name, userName, dateCreate);
                             sound.setPlays(plays);
                             sound.setIdUser(user_id);
-                            Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(getContext()) + "/favorite/");
-                            RxFirebase.getInstance()
-                                    .observeValueEvent(firebase)
-                                    .subscribeOn(Schedulers.newThread())
-                                    .subscribe(new Action1<DataSnapshot>() {
-                                        @Override
-                                        public void call(DataSnapshot dataSnapshot) {
-                                            if (dataSnapshot.hasChild(audio_id)) {
-                                                sound.setIsFavorite(true);
-                                            }
-                                            new AsyncAddSound().execute(sound);
-                                            Audio audio = convertAudio(sound);
-                                            mSounds.add(audio);
-                                            dotAdapter.notifyDataSetChanged();
-                                        }
-                                    });
+                            Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + user_id + "/favorite/");
+                            firebase.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.hasChild(audio_id)) {
+                                        sound.setIsFavorite(true);
+                                    }
+                                    new AsyncAddSound().execute(sound);
+                                    Audio audio = convertAudio(sound);
+                                    mSounds.add(audio);
+                                }
+
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+
+                                }
+                            });
 
 
                         }
                     }
                 });
+        dotAdapter.notifyDataSetChanged();
     }
 
 
@@ -177,6 +179,7 @@ public class SoundFragment extends Fragment {
                                     final Firebase ff = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(getContext()) + "/");
                                     if (dataSnapshot.hasChild(id)) {
                                         new AsyncTask<Void, Void, Void>() {
+
                                             @Override
                                             protected Void doInBackground(Void... params) {
                                                 favoriteFirebase.child(id).removeValue();
@@ -187,6 +190,7 @@ public class SoundFragment extends Fragment {
 
                                     } else {
                                         new AsyncTask<Void, Void, Void>() {
+
                                             @Override
                                             protected Void doInBackground(Void... params) {
                                                 favoriteFirebase.child(id).setValue("true");
@@ -198,7 +202,7 @@ public class SoundFragment extends Fragment {
                                     }
                                 }
 
-                                @Override
+                                @Override//////////////////
                                 public void onCancelled(FirebaseError firebaseError) {
 
                                 }
@@ -236,7 +240,6 @@ public class SoundFragment extends Fragment {
 
     @Override
     public void onPause() {
-        realm.close();
         super.onPause();
         if (mPlayer != null) {
             if (mPlayer.isPlaying()) {
@@ -248,9 +251,9 @@ public class SoundFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        realm = RealmManager.getRealm(getContext());
         if (!Tools.isOnline(getContext())) {
             mSounds.clear();
+            realm = RealmManager.getRealm(getContext());
             RealmResults<Sound> Sounds = realm.where(Sound.class).findAll();
             for (Sound sound : Sounds) {
                 Audio audio = convertAudio(sound);

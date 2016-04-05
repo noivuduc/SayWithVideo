@@ -246,6 +246,34 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                                 return null;
                             }
                         }.execute();
+
+                         /*
+                    delete all user's favorite has this sound
+                     */
+                        new AsyncTask<Void,Void,Void>(){
+                            @Override
+                            protected Void doInBackground(Void... params) {
+                                final Firebase f = new Firebase(FirebaseConstant.BASE_URL+FirebaseConstant.USER_URL);
+                                RxFirebase.getInstance().
+                                        observeValueEvent(f).
+                                        subscribeOn(Schedulers.newThread()).
+                                        subscribe(new Action1<DataSnapshot>() {
+                                            @Override
+                                            public void call(DataSnapshot dataSnapshot) {
+                                                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                                                    String key = data.getKey();
+                                                    FirebaseUser fu = AppTools.getInfoUser(key);
+                                                    if (fu.getNo_favorite() > 0) {
+                                                        f.child(key).child("favorite").child(sound.getId()).removeValue();
+                                                        f.child("no_favorite").setValue(fu.getNo_favorite() - 1);
+                                                    }
+
+                                                }
+                                            }
+                                        });
+                                return null;
+                            }
+                        }.execute();
                         adapter.notifyDataSetChanged();
                         break;
 
