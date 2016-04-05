@@ -228,9 +228,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void checkisValidAccount(final String email, String pass) {
         if (!Tools.isOnline(LoginActivity.this)) {
             Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
-            mProgressDialog.show();
             return;
         }
+        mProgressDialog.show();
         root.authWithPassword(email, pass,
                 new Firebase.AuthResultHandler() {
 
@@ -242,13 +242,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         base.addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
+                                mProgressDialog.dismiss();
                                 String name = dataSnapshot.getValue().toString();
                                 finishActivity(name, email, uid);
                             }
 
                             @Override
                             public void onCancelled(FirebaseError firebaseError) {
-
+                                mProgressDialog.dismiss();
                             }
                         });
 
@@ -256,10 +257,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                     @Override
                     public void onAuthenticationError(FirebaseError error) {
+                        mProgressDialog.dismiss();
                         Toast.makeText(LoginActivity.this, "Email or password is wrong!", Toast.LENGTH_SHORT).show();
                     }
                 });
-        mProgressDialog.show();
     }
 
     @Override
