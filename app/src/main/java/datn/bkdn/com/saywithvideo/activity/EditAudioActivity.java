@@ -2,12 +2,14 @@ package datn.bkdn.com.saywithvideo.activity;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.audiofx.Visualizer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -60,17 +62,14 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
     private String mType;
     private TextView mTvStart;
     private TextView mTvEnd;
-    private int mDuration;
-    private String idSound;
+    private ProgressDialog mProgressDialog;
 
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.activity_edit_audio);
-        if (datn.bkdn.com.saywithvideo.network.Tools.isOnline(this)) {
-            Firebase.setAndroidContext(this);
-            mFirebase = new Firebase(FirebaseConstant.BASE_URL);
-        }
+        Firebase.setAndroidContext(this);
+        mFirebase = new Firebase(FirebaseConstant.BASE_URL);
 
         mFilePath = getIntent().getStringExtra("FileName");
         mType = getIntent().getStringExtra("Type");
@@ -91,7 +90,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
             mMediaPlayer.setOnCompletionListener(this);
             mPixelPerSecond = (float) mVisualizerView.getWidth() / mMediaPlayer.getDuration();
             Log.d("mPixelPerSecond", "" + mPixelPerSecond);
-            mDuration = mMediaPlayer.getDuration();
+            int mDuration = mMediaPlayer.getDuration();
             mTvEnd.setText(mDuration / 1000 + "." + mDuration / 100 % 10);
         } catch (IOException e) {
             e.printStackTrace();
@@ -110,6 +109,11 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         mImgPlay = (ImageView) findViewById(R.id.imgPlay);
         mTvStart = (TextView) findViewById(R.id.tvStart);
         mTvEnd = (TextView) findViewById(R.id.tvEnd);
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Please wait...");
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
         mMarkerLeft.setListener(this);
         mMarkerRight.setListener(this);
@@ -216,6 +220,13 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
                 }
                 break;
             case R.id.tvNext:
+                Log.d("Tien", "start next");
+                Tools.hideKeyboard(EditAudioActivity.this);
+                if (!datn.bkdn.com.saywithvideo.network.Tools.isOnline(this)) {
+                    Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+
                 float start = Float.parseFloat(mTvStart.getText().toString());
                 float end = Float.parseFloat(mTvEnd.getText().toString());
                 if (end - start > MAX_SECOND) {
@@ -266,7 +277,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
     }
 
     private void createSound(String name) {
-        idSound = UUID.randomUUID().toString();
+        String idSound = UUID.randomUUID().toString();
         Date date = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy");
         final String id = Utils.getCurrentUserID(EditAudioActivity.this);
@@ -287,7 +298,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
                     String audio_id = firebase.getKey();
                     try {
                         String audioContent = Base64.encodeFromFile(mOutputPath);
-                        HashMap<String, String> hashMap = new HashMap<String, String>();
+                        HashMap<String, String> hashMap = new HashMap<>();
                         hashMap.put("content", audioContent);
                         mFirebase.child(FirebaseConstant.AUDIO_CONTENT_URL).child(audio_id).setValue(hashMap);
                     } catch (IOException e) {
@@ -347,6 +358,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            mProgressDialog.show();
             start = Float.parseFloat(mTvStart.getText().toString());
             end = Float.parseFloat(mTvEnd.getText().toString());
         }
@@ -358,7 +370,9 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
             mOutputPath = folderPath + "AUDIO_" + AppTools.getDate() + ".m4a";
             try {
                 SoundFile soundFile = SoundFile.create(mFilePath, null);
-                soundFile.WriteFile(new File(mOutputPath), start, end);
+                if (soundFile != null) {
+                    soundFile.WriteFile(new File(mOutputPath), start, end);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (SoundFile.InvalidInputException e) {
@@ -375,6 +389,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
                 File file = new File(mFilePath);
                 file.delete();
             }
+            mProgressDialog.dismiss();
         }
     }
 }

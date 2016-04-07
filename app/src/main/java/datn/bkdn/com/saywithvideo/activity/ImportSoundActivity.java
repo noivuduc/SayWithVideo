@@ -45,7 +45,7 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void init() {
-        mAdapter = new ListImportSoundAdapter(this, mSounds);
+        mAdapter = new ListImportSoundAdapter(this, new ArrayList<>(mSounds));
         mLvSound.setAdapter(mAdapter);
         mLvSound.setOnItemClickListener(this);
 
@@ -65,12 +65,13 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
+        mAdapter.clear();
+        mAdapter.addAll(filter(newText));
         return false;
     }
 
@@ -80,6 +81,7 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
         intent.putExtra("FileName", mSounds.get(position).getPath());
         intent.putExtra("Type", "Import");
         startActivity(intent);
+        finish();
     }
 
     @Override
@@ -108,7 +110,7 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
                 new String[]{MediaStore.Audio.Media.DISPLAY_NAME, MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ARTIST}, null, null,
                 "LOWER(" + MediaStore.Audio.Media.TITLE + ") ASC");
 
-        if (mCursor.moveToFirst()) {
+        if (mCursor != null && mCursor.moveToFirst()) {
             do {
                 ImportSound sound = new ImportSound();
                 sound.setName(mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)));
@@ -116,7 +118,18 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
                 sound.setAuthor(mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)));
                 mSounds.add(sound);
             } while (mCursor.moveToNext());
+
+            mCursor.close();
         }
-        mCursor.close();
+    }
+
+    private List<ImportSound> filter(String s) {
+        List<ImportSound> importSounds = new ArrayList<>();
+        for (ImportSound sound : mSounds) {
+            if (sound.getName().contains(s)) {
+                importSounds.add(sound);
+            }
+        }
+        return importSounds;
     }
 }

@@ -133,7 +133,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="Tien Cho"
+        android:text=""
         android:textColor="#4dcac4"
         android:textSize="15sp"
         android:textStyle="bold" />

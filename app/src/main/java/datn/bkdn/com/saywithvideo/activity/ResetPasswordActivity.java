@@ -94,14 +94,14 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
                         @Override
                         public void onSuccess() {
                             mProgressDialog.dismiss();
-                            Toast.makeText(getBaseContext(), "Change password success\nPassword sent to your email.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getBaseContext(), "Reset password success\nPassword sent to your email.", Toast.LENGTH_LONG).show();
                             finish();
                         }
 
                         @Override
                         public void onError(FirebaseError firebaseError) {
                             mProgressDialog.dismiss();
-                            Toast.makeText(getBaseContext(), "Change password error", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getBaseContext(), "Reset password error", Toast.LENGTH_LONG).show();
                         }
                     });
                 }
