@@ -1,25 +1,30 @@
 package datn.bkdn.com.saywithvideo.model;
 
+import org.parceler.Parcel;
+
 /**
  * Created by Admin on 4/3/2016.
  */
+@Parcel
 public class Audio {
-    private String id;
+    private String date_create;
     private String name;
     private String author;
+    private int plays;
+    private String user_id;
+    private String id;
     private boolean isPlaying;
     private boolean isFavorite;
-    private int plays;
-    private String dateOfCreate;
+
+    public Audio() {
+    }
 
     public Audio(String id, String name, String author, boolean isPlaying, boolean isFavorite, int plays, String dateOfCreate) {
         this.id = id;
         this.name = name;
-        this.author = author;
         this.isPlaying = isPlaying;
         this.isFavorite = isFavorite;
         this.plays = plays;
-        this.dateOfCreate = dateOfCreate;
     }
 
     public String getId() {
@@ -30,12 +35,12 @@ public class Audio {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getDate_create() {
+        return date_create;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDate_create(String date_create) {
+        this.date_create = date_create;
     }
 
     public String getAuthor() {
@@ -45,6 +50,23 @@ public class Audio {
     public void setAuthor(String author) {
         this.author = author;
     }
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 
     public boolean isPlaying() {
         return isPlaying;
@@ -70,11 +92,4 @@ public class Audio {
         this.plays = plays;
     }
 
-    public String getDateOfCreate() {
-        return dateOfCreate;
-    }
-
-    public void setDateOfCreate(String dateOfCreate) {
-        this.dateOfCreate = dateOfCreate;
-    }
 }

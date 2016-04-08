@@ -4,7 +4,6 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.util.Patterns;
 
 import com.google.gson.Gson;
@@ -48,7 +47,6 @@ public class Utils {
 
     public static String getUserName(String id) {
         String link = FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + id + ".json";
-        Log.d("Utils.getUserName", link);
         String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
         FirebaseUser user = new Gson().fromJson(json, FirebaseUser.class);
         return user.getName();
