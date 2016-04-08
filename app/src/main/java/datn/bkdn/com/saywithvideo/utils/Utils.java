@@ -51,6 +51,7 @@ public class Utils {
         Log.d("Utils.getUserName", link);
         String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
         FirebaseUser user = new Gson().fromJson(json, FirebaseUser.class);
+        Log.d("user nam", user.getName());
         return user.getName();
     }
 
