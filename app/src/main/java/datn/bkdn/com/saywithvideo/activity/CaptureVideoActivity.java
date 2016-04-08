@@ -39,7 +39,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
 
     private Camera mCamera;
     private CameraPreview mPreview;
-    private RelativeLayout mRlBack;
     private RelativeLayout mRlCaptureVideo;
     private RelativeLayout mRlSwitchCamera;
     private Visualizer mVisualizer;
@@ -73,7 +72,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void init() {
-        mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
+        RelativeLayout mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         mRlCaptureVideo = (RelativeLayout) findViewById(R.id.rlCaptureVideo);
         mRlSwitchCamera = (RelativeLayout) findViewById(R.id.rlSwitchCamera);
         mVisualizerView = (VisualizerView) findViewById(R.id.visualizerView);

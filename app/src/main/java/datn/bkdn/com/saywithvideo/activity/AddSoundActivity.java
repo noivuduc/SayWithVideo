@@ -10,17 +10,14 @@ import android.widget.RelativeLayout;
 import datn.bkdn.com.saywithvideo.R;
 
 public class AddSoundActivity extends AppCompatActivity implements View.OnClickListener {
-    private LinearLayout mLlRecord;
-    private LinearLayout mLlImport;
-    private RelativeLayout mRlBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_sound);
-        mLlRecord = (LinearLayout) findViewById(R.id.llRecord);
-        mLlImport = (LinearLayout) findViewById(R.id.llImport);
-        mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
+        LinearLayout mLlRecord = (LinearLayout) findViewById(R.id.llRecord);
+        LinearLayout mLlImport = (LinearLayout) findViewById(R.id.llImport);
+        RelativeLayout mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
 
         mLlRecord.setOnClickListener(this);
         mLlImport.setOnClickListener(this);
