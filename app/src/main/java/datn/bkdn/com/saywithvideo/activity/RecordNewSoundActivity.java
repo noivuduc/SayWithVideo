@@ -37,15 +37,9 @@ public class RecordNewSoundActivity extends Activity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.activity_record_new_sound);
+
         AudioRecordActivity();
-
-        buttonRecord = (RelativeLayout) findViewById(R.id.rlStartRecord);
-        ViewGroup vgBack = (ViewGroup) findViewById(R.id.rlBack);
-        tvStart = (TextView) findViewById(R.id.tvStart);
-        tvTime = (TextView) findViewById(R.id.tvTime);
-        tvInfor = (TextView) findViewById(R.id.tvInfor);
-
-        mClockRecord = new ClockRecord(10000, 100);
+        init();
 
         buttonRecord.setOnClickListener(new OnClickListener() {
             @Override
@@ -53,17 +47,28 @@ public class RecordNewSoundActivity extends Activity {
                 if (mStartRecording) {
                     tvTime.setVisibility(View.VISIBLE);
                     buttonRecord.setBackgroundResource(R.drawable.selector_button_record_a_sound_pressed);
-                    tvStart.setText("Done");
-                    tvInfor.setText("Tap when you are done!");
-                    onRecord(mStartRecording);
+                    String s = "Done";
+                    String s2 = "Tap when you are done!";
+                    tvStart.setText(s);
+                    tvInfor.setText(s2);
+                    onRecord(true);
                     mStartRecording = !mStartRecording;
                 } else {
-                    onRecord(mStartRecording);
+                    onRecord(false);
                     finishRecord();
                     mClockRecord.cancel();
                 }
             }
         });
+    }
+
+    private void init() {
+        buttonRecord = (RelativeLayout) findViewById(R.id.rlStartRecord);
+        ViewGroup vgBack = (ViewGroup) findViewById(R.id.rlBack);
+        tvStart = (TextView) findViewById(R.id.tvStart);
+        tvTime = (TextView) findViewById(R.id.tvTime);
+        tvInfor = (TextView) findViewById(R.id.tvInfor);
+        mClockRecord = new ClockRecord(10100, 50);
 
         vgBack.setOnClickListener(new OnClickListener() {
             @Override
@@ -95,7 +100,6 @@ public class RecordNewSoundActivity extends Activity {
 
         try {
             mRecorder.prepare();
-            mRecorder.start();
             mClockRecord.startClock();
         } catch (IOException e) {
             Log.e(LOG_TAG, "prepare() failed");
@@ -103,6 +107,7 @@ public class RecordNewSoundActivity extends Activity {
     }
 
     private void stopRecording() {
+        mClockRecord.cancel();
         mRecorder.stop();
         mRecorder.release();
         mRecorder = null;
@@ -137,25 +142,26 @@ public class RecordNewSoundActivity extends Activity {
         }
     }
 
-    //  count down timer
-
     private class ClockRecord extends CountDownTimer {
+
         public ClockRecord(long millisInFuture, long countDownInterval) {
             super(millisInFuture, countDownInterval);
         }
 
         @Override
         public void onTick(long millisUntilFinished) {
-            tvTime.setText(millisUntilFinished / 1000 + "." + (millisUntilFinished / 100) % 10 + " sec");
+            String s = millisUntilFinished / 1000 + "." + (millisUntilFinished / 100) % 10 + " sec";
+            tvTime.setText(s);
+        }
+
+        public void startClock() {
+            mRecorder.start();
+            start();
         }
 
         @Override
         public void onFinish() {
             finishRecord();
-        }
-
-        public void startClock() {
-            start();
         }
     }
 }

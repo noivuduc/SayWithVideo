@@ -5,6 +5,7 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -44,7 +45,8 @@ import io.realm.Sort;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class SoundActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener, RealmChangeListener {
+public class SoundActivity extends AppCompatActivity implements View.OnClickListener,
+        PopupMenu.OnMenuItemClickListener, RealmChangeListener {
     private ListMySoundAdapter adapter;
     private RelativeLayout rlBack;
     private RelativeLayout rlSort;
@@ -62,6 +64,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("Sound", "oncreate");
         setContentView(R.layout.activity_sound);
         init();
         initAdapter();
@@ -250,10 +253,10 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                          /*
                     delete all user's favorite has this sound
                      */
-                        new AsyncTask<Void,Void,Void>(){
+                        new AsyncTask<Void, Void, Void>() {
                             @Override
                             protected Void doInBackground(Void... params) {
-                                final Firebase f = new Firebase(FirebaseConstant.BASE_URL+FirebaseConstant.USER_URL);
+                                final Firebase f = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
                                 RxFirebase.getInstance().
                                         observeValueEvent(f).
                                         subscribeOn(Schedulers.newThread()).

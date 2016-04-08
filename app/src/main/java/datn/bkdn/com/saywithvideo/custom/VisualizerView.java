@@ -18,9 +18,8 @@ public class VisualizerView extends View {
     private Paint mClearPaint = new Paint();
     private int mDuration;
     private float mCurrentPosition;
-    private float mStartPosition;
-    private float mEndPosition;
     private boolean mIsStop;
+    private int mStartPosition;
 
     public VisualizerView(Context context) {
         super(context);
@@ -37,14 +36,6 @@ public class VisualizerView extends View {
         init();
     }
 
-    public void setStartPosition(float startPosition) {
-        this.mStartPosition = startPosition * getWidth() / mDuration;
-    }
-
-    public void setEndPosition(float endPosition) {
-        this.mEndPosition = endPosition * getWidth() / mDuration;
-    }
-
     private void init() {
         mForePaint.setStrokeWidth(1f);
         mForePaint.setAntiAlias(true);
@@ -53,8 +44,7 @@ public class VisualizerView extends View {
         mPaint.setStrokeWidth(3f);
         mPaint.setColor(Color.RED);
 
-        mClearPaint.setColor(Color.TRANSPARENT);
-        mEndPosition = -1;
+        mClearPaint.setColor(Color.WHITE);
 
         start();
     }
@@ -71,6 +61,11 @@ public class VisualizerView extends View {
         mIsStop = false;
     }
 
+    public void setStartPosition(int mStartPosition) {
+        this.mStartPosition = mStartPosition * getWidth() / mDuration;
+        invalidate();
+    }
+
     public void setDuration(int duration) {
         mDuration = duration;
     }
@@ -85,8 +80,10 @@ public class VisualizerView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (mIsStop || (mEndPosition != -1 && mCurrentPosition > mEndPosition)) {
+        if (mIsStop) {
             canvas.drawRect(getLeft(), getTop(), getWidth(), getHeight(), mClearPaint);
+            mIsStop = false;
+            mCurrentPosition = 0;
             return;
         }
         if (mBytes == null) {

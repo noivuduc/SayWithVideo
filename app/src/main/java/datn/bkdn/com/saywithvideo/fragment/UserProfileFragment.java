@@ -35,7 +35,6 @@ import io.realm.RealmResults;
 public class UserProfileFragment extends Fragment implements View.OnClickListener, ListMyVideoAdapter.OnItemClicked {
 
     private boolean mIsVolume;
-    private ListView mLvMyVideo;
     private ImageView mImgVolume;
     private LinearLayout mLnSound;
     private LinearLayout mLnSoundboards;
@@ -45,10 +44,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     private TextView mTvUserName;
     private TextView mNumFavorite;
     private TextView mNumSound;
-    private TextView mNumSoundBoard;
-    private ImageView mImgBackgroundVideo;
     private RealmResults<Video> mVideos;
-    private ListMyVideoAdapter mAdapter;
 
     public static UserProfileFragment newInstance() {
 
@@ -62,7 +58,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.from(getContext()).inflate(R.layout.fragment_user_profile, container, false);
+        View v = inflater.inflate(R.layout.fragment_user_profile, container, false);
 
         mLnSound = (LinearLayout) v.findViewById(R.id.lnSounds);
         mLnSoundboards = (LinearLayout) v.findViewById(R.id.lnSoundboards);
@@ -72,16 +68,16 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         mTvUserName = (TextView) v.findViewById(R.id.tvNameUser);
         mNumFavorite = (TextView) v.findViewById(R.id.tvNumberSoundFavorite);
         mNumSound = (TextView) v.findViewById(R.id.tvNumberSound);
-        mNumSoundBoard = (TextView) v.findViewById(R.id.tvNumberSoundBoards);
+//        mNumSoundBoard = (TextView) v.findViewById(R.id.tvNumberSoundBoards);
         mImgVolume = (ImageView) v.findViewById(R.id.imgVolume);
-        mImgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
-        mLvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
+//        mImgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
+        ListView mLvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
 
         mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
         if (mVideos.size() != 0) {
             mLlCreateDub.setVisibility(View.INVISIBLE);
         }
-        mAdapter = new ListMyVideoAdapter(getContext(), mVideos);
+        ListMyVideoAdapter mAdapter = new ListMyVideoAdapter(getContext(), mVideos);
         mAdapter.setPlayButtonClicked(this);
         mLvMyVideo.setAdapter(mAdapter);
         init();
@@ -106,7 +102,8 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         baseUser.child("no_favorite").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mNumFavorite.setText("" + dataSnapshot.getValue());
+                String content = dataSnapshot.getValue() == null ? "0" : dataSnapshot.getValue().toString();
+                mNumFavorite.setText(content);
             }
 
             @Override
@@ -117,7 +114,8 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         baseUser.child("no_sound").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mNumSound.setText(dataSnapshot.getValue() + "");
+                String content = dataSnapshot.getValue() == null ? "0" : dataSnapshot.getValue().toString();
+                mNumSound.setText(content);
             }
 
             @Override
@@ -166,12 +164,6 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    /**
-     * List video event
-     *
-     * @param pos
-     * @param v
-     */
     @Override
     public void onClick(int pos, View v) {
         Video video = mVideos.get(pos);

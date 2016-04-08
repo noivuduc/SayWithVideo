@@ -13,7 +13,6 @@ import datn.bkdn.com.saywithvideo.utils.PagerSlidingTabStrip;
 
 public class MainActivity extends AppCompatActivity {
 
-    private PagerSlidingTabStrip mTabStrip;
     private ViewPager mPager;
 
     @Override
@@ -21,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mPager = (ViewPager) findViewById(R.id.pager);
-        mTabStrip = (PagerSlidingTabStrip) findViewById(R.id.tab);
+        PagerSlidingTabStrip mTabStrip = (PagerSlidingTabStrip) findViewById(R.id.tab);
         MainPagerAdapter adapter = new MainPagerAdapter(getSupportFragmentManager());
         mPager.setAdapter(adapter);
         mTabStrip.setViewPager(mPager);
