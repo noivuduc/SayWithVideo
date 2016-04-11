@@ -1,5 +1,6 @@
 package datn.bkdn.com.saywithvideo.adapter;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,6 +18,8 @@ import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 
 import datn.bkdn.com.saywithvideo.R;
+import datn.bkdn.com.saywithvideo.database.RealmUtils;
+import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.utils.Utils;
@@ -25,9 +28,10 @@ import datn.bkdn.com.saywithvideo.utils.Utils;
  * Created by Admin on 4/7/2016.
  */
 public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHolder,Audio>{
-
-    public SoundAdapter(Query query, Class<Audio> itemClass) {
+    private Context mContext;
+    public SoundAdapter(Query query, Class<Audio> itemClass, Context context) {
         super(query, itemClass);
+        this.mContext = context;
     }
 
     @Override
@@ -84,7 +88,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
     protected void itemAdded(final Audio item, final String key, int position) {
         String author = Utils.getUserName(item.getUser_id());
         item.setAuthor(author);
-        final Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "b5f84345-7814-4219-8471-3207b0daf49e" + "/favorite/");
+        final Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(mContext) + "/favorite/");
         new AsyncTask<Void,Void,Void>(){
 
             @Override
@@ -111,6 +115,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
 
     @Override
     protected void itemChanged(Audio oldItem, Audio newItem, String key, int position) {
+
     }
 
     @Override
@@ -156,6 +161,13 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
             rlFavorite = (RelativeLayout) mView.findViewById(R.id.rlFavorite);
         }
     }
+    class AsyncAddSound extends AsyncTask<Sound, Void, Void> {
 
+        @Override
+        protected Void doInBackground(Sound... sound) {
+            RealmUtils.getRealmUtils(mContext).addNewSound(mContext, sound[0]);
+            return null;
+        }
+    }
 }
 

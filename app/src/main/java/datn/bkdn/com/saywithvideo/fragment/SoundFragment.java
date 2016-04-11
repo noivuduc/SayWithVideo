@@ -15,7 +15,8 @@ import android.widget.PopupMenu;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
-import com.soikonomakis.rxfirebase.RxFirebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,8 +38,6 @@ import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
 import io.realm.RealmAsyncTask;
 import io.realm.RealmResults;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 public class SoundFragment extends Fragment {
     private int mCurrentPos = -1;
@@ -87,7 +86,7 @@ public class SoundFragment extends Fragment {
     private void init() {
         Firebase.setAndroidContext(getContext());
         mFirebase = new Firebase(FirebaseConstant.BASE_URL+FirebaseConstant.AUDIO_URL);
-        mAdapter = new SoundAdapter(mFirebase,Audio.class);
+        mAdapter = new SoundAdapter(mFirebase,Audio.class,getContext());
         mAdapter.setPlayButtonClicked(new SoundAdapter.OnItemClicked() {
             @Override
             public void onClick(Audio sound, View v, int pos) {
@@ -123,48 +122,36 @@ public class SoundFragment extends Fragment {
                             sound.setIsFavorite(!sound.isFavorite());
                             final FirebaseUser f = AppTools.getInfoUser(Utils.getCurrentUserID(getContext()));
                             final Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(getContext()) + "/favorite");
-                            RxFirebase.getInstance()
-                                    .observeValueEvent(favoriteFirebase)
-                                    .subscribeOn(Schedulers.newThread())
-                                    .subscribe(new Action1<DataSnapshot>() {
-                                        @Override
-                                        public void call(DataSnapshot dataSnapshot) {
-                                            final Firebase ff = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(getContext()) + "/");
-                                            if(dataSnapshot.hasChild(id)){
-                                                new AsyncTask<Void,Void,Void>(){
+                            new AsyncTask<Void,Void,Void>(){
 
-                                                    @Override
-                                                    protected Void doInBackground(Void... params) {
-                                                        favoriteFirebase.child(id).removeValue();
-                                                        ff.child("no_favorite").setValue(f.getNo_favorite()- 1);
-                                                        return null;
-                                                    }
-                                                }.execute();
+                                @Override
+                                protected Void doInBackground(Void... params) {
+                                    favoriteFirebase.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            final Firebase ff = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(getContext()) + "/");
+                                            if(dataSnapshot.hasChild(id)){
+                                                favoriteFirebase.child(id).removeValue();
+                                                ff.child("no_favorite").setValue(f.getNo_favorite()- 1);
                                             }else
                                             {
-                                                new AsyncTask<Void,Void,Void>(){
-
-                                                    @Override
-                                                    protected Void doInBackground(Void... params) {
-                                                        favoriteFirebase.child(id).setValue("true");
-                                                        ff.child("no_favorite").setValue(f.getNo_favorite() + 1);
-                                                        return null;
-                                                    }
-                                                }.execute();
-
+                                                favoriteFirebase.child(id).setValue("true");
+                                                ff.child("no_favorite").setValue(f.getNo_favorite() + 1);
                                             }
                                         }
+
+                                        @Override
+                                        public void onCancelled(FirebaseError firebaseError) {
+
+                                        }
                                     });
+                                    return null;
+                                }
+                            }.execute();
+
                         } catch (Exception e){
-//e) {
                             e.printStackTrace();
                         }
-//                        new AsyncTask<String, Void, Void>() {
-//                            @                            protected Void doInBackground(String... params) {
-//                                RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), params[0]);
-//                                return null;
-//                            }
-//                        }.execute(sound.getId());
 
                         mAdapter.notifyDataSetChanged();
                         break;

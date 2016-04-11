@@ -5,12 +5,12 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -25,7 +25,7 @@ import com.soikonomakis.rxfirebase.RxFirebase;
 import java.io.IOException;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter;
+import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter2;
 import datn.bkdn.com.saywithvideo.database.ContentAudio;
 import datn.bkdn.com.saywithvideo.database.RealmAudioUser;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
@@ -34,6 +34,7 @@ import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseAudio;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
+import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
@@ -41,19 +42,18 @@ import io.realm.Realm;
 import io.realm.RealmAsyncTask;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class SoundActivity extends AppCompatActivity implements View.OnClickListener,
         PopupMenu.OnMenuItemClickListener, RealmChangeListener {
-    private ListMySoundAdapter adapter;
+    private ListMySoundAdapter2 adapter;
     private RelativeLayout rlBack;
     private RelativeLayout rlSort;
     private TextView tvAddSound;
     private EditText tvSearch;
     private MediaPlayer player;
-    private ListView listView;
+    private RecyclerView mRecycle;
     private ImageView imgSort;
     private Realm realm;
     private RealmAsyncTask asyncTransaction;
@@ -64,7 +64,6 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("Sound", "oncreate");
         setContentView(R.layout.activity_sound);
         init();
         initAdapter();
@@ -73,19 +72,17 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
 
     private void initAdapter() {
-        getData();
-        adapter = new ListMySoundAdapter(this, mSounds);
-        listView.setAdapter(adapter);
-        adapter.setPlayButtonClicked(new ListMySoundAdapter.OnItemClicked() {
+        Query query = mFirebase.orderByChild("user_id").equalTo(Utils.getCurrentUserID(this));
+        adapter = new ListMySoundAdapter2(query, Audio.class);
+        mRecycle.setAdapter(adapter);
+        adapter.setPlayButtonClicked(new ListMySoundAdapter2.OnItemClicked() {
 
             @Override
-            public void onClick(int pos, View v) {
-                Sound sound = mSounds.get(pos);
+            public void onClick(int pos, View v, Audio sound) {
                 switch (v.getId()) {
                     case R.id.imgPlay:
                         final String audioId = sound.getId();
-
-                        String path = "";
+                        String path;
                         ContentAudio contentAudio = AppTools.getContentAudio(audioId, SoundActivity.this);
                         if (contentAudio != null) {
                             sound.setPlays(sound.getPlays() + 1);
@@ -93,10 +90,9 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                             if (mCurrentPos != -1 && pos != mCurrentPos) {
                                 Sound sound1 = mSounds.get(mCurrentPos);
                                 if (sound1.isPlaying()) {
-                                    String id = mSounds.get(mCurrentPos).getId();
-                                    new AsyncUpdatePlaying().execute(id);
                                     player.stop();
                                     player.reset();
+                                    sound1.setIsPlaying(!sound1.isPlaying());
                                 }
                             }
                             path = contentAudio.getContent();
@@ -107,7 +103,6 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                             } else {
                                 playMp3(path);
                             }
-                            new AsyncUpdatePlaying().execute(mSounds.get(pos).getId());
                             adapter.notifyDataSetChanged();
                         }
                         break;
@@ -122,7 +117,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                         }
                         break;
                     case R.id.rlOption:
-                        createSoundMenu(v, pos);
+                        createSoundMenu(v, sound);
                         break;
                 }
             }
@@ -150,13 +145,14 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void init() {
-        mFirebase = new Firebase(FirebaseConstant.BASE_URL);
-        listView = (ListView) findViewById(R.id.lvMySound);
+        mFirebase = new Firebase(FirebaseConstant.BASE_URL+FirebaseConstant.AUDIO_URL);
+        mRecycle = (RecyclerView) findViewById(R.id.recycleViewMySound);
         rlBack = (RelativeLayout) findViewById(R.id.rlBack);
         rlSort = (RelativeLayout) findViewById(R.id.rlSort);
         imgSort = (ImageView) findViewById(R.id.imgSort);
         tvSearch = (EditText) findViewById(R.id.edtSearch);
         tvAddSound = (TextView) findViewById(R.id.tvAddsound);
+        mRecycle.setLayoutManager(new LinearLayoutManager(this));
         setEvent();
     }
 
@@ -174,7 +170,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         menu.show();
     }
 
-    private void createSoundMenu(View v, final int pos) {
+    private void createSoundMenu(View v, final Audio sound) {
         PopupMenu menu = new PopupMenu(this, v);
         menu.getMenuInflater().inflate(R.menu.sound_menu, menu.getMenu());
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -182,7 +178,6 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.delete:
-                        final Sound sound = mSounds.get(pos);
                         /*
                         delete audio
                          */
@@ -222,18 +217,19 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
                             }
                         });
+
 //                        File file = new File(sound.getLinkOnDisk());
 //                       // file.delete();
-                        new AsyncTask<String, Void, Void>() {
-
-                            @Override
-                            protected Void doInBackground(String... params) {
-                                String id = params[0];
-                                RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this, id);
-                                RealmUtils.getRealmUtils(SoundActivity.this).deleteSoundContent(SoundActivity.this, id);
-                                return null;
-                            }
-                        }.execute(sound.getId());
+//                        new AsyncTask<String, Void, Void>() {
+//
+//                            @Override
+//                            protected Void doInBackground(String... params) {
+//                                String id = params[0];
+//                                RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this, id);
+//                                RealmUtils.getRealmUtils(SoundActivity.this).deleteSoundContent(SoundActivity.this, id);
+//                                return null;
+//                            }
+//                        }.execute(sound.getId());
 
                          /*
                     Dec no_sound
@@ -257,23 +253,25 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                             @Override
                             protected Void doInBackground(Void... params) {
                                 final Firebase f = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
-                                RxFirebase.getInstance().
-                                        observeValueEvent(f).
-                                        subscribeOn(Schedulers.newThread()).
-                                        subscribe(new Action1<DataSnapshot>() {
-                                            @Override
-                                            public void call(DataSnapshot dataSnapshot) {
-                                                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                                                    String key = data.getKey();
-                                                    FirebaseUser fu = AppTools.getInfoUser(key);
-                                                    if (fu.getNo_favorite() > 0) {
-                                                        f.child(key).child("favorite").child(sound.getId()).removeValue();
-                                                        f.child("no_favorite").setValue(fu.getNo_favorite() - 1);
-                                                    }
-
-                                                }
+                                f.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        for (DataSnapshot data : dataSnapshot.getChildren()) {
+                                            String key = data.getKey();
+                                            FirebaseUser fu = AppTools.getInfoUser(key);
+                                            if (fu.getNo_favorite() > 0) {
+                                                f.child(key).child("favorite").child(sound.getId()).removeValue();
+                                                f.child(key).child("no_favorite").setValue(fu.getNo_favorite() - 1);
                                             }
-                                        });
+
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(FirebaseError firebaseError) {
+
+                                    }
+                                });
                                 return null;
                             }
                         }.execute();
@@ -300,7 +298,6 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                 player.stop();
             }
         }
-        realm.close();
     }
 
     private void getData() {
@@ -325,16 +322,6 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStop() {
         super.onStop();
-        cancelAsyncTransaction();
-        mSounds = null;
-        realm.close();
-    }
-
-    private void cancelAsyncTransaction() {
-        if (asyncTransaction != null && !asyncTransaction.isCancelled()) {
-            asyncTransaction.cancel();
-            asyncTransaction = null;
-        }
     }
 
     @Override
@@ -360,16 +347,18 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.byName:
-                mSounds.sort("name", Sort.ASCENDING);
-                adapter.notifyDataSetChanged();
+               // mSounds.sort("name", Sort.ASCENDING);
+                adapter.sortByName();
                 break;
             case R.id.byDate:
-                mSounds.sort("date_create", Sort.ASCENDING);
-                adapter.notifyDataSetChanged();
+//                mSounds.sort("date_create", Sort.ASCENDING);
+//                adapter.notifyDataSetChanged();
+                adapter.sortByDateUpload();
                 break;
             case R.id.byPlays:
-                mSounds.sort("plays", Sort.ASCENDING);
-                adapter.notifyDataSetChanged();
+//                mSounds.sort("plays", Sort.ASCENDING);
+//                adapter.notifyDataSetChanged();
+                adapter.sortByPlays();
                 break;
 
         }
