@@ -164,6 +164,12 @@ public class RealmUtils {
         return sounds;
     }
 
+    public boolean checkExistSound(Context context, String id){
+        realm = RealmManager.getRealm(context);
+        int s = realm.where(Sound.class).equalTo("id",id).findAll().size();
+        return s>0?true:false;
+    }
+
     public void addSoundContent(Context context, final ContentAudio audio) {
         realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {

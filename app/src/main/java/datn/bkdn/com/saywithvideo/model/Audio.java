@@ -22,6 +22,8 @@ public class Audio {
     public Audio(String id, String name, String author, boolean isPlaying, boolean isFavorite, int plays, String dateOfCreate) {
         this.id = id;
         this.name = name;
+        this.author = author;
+        this.date_create = dateOfCreate;
         this.isPlaying = isPlaying;
         this.isFavorite = isFavorite;
         this.plays = plays;
