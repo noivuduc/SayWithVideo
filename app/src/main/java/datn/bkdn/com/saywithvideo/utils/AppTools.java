@@ -3,7 +3,6 @@ package datn.bkdn.com.saywithvideo.utils;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.support.design.widget.Snackbar;
 
 import com.firebase.client.utilities.Base64;
 import com.google.gson.Gson;
@@ -25,7 +24,6 @@ public class AppTools {
     }
 
     public static String getContentAudio(final String audioId, final Activity context) {
-            if (datn.bkdn.com.saywithvideo.network.Tools.isOnline(context)) {
                 String link = FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_CONTENT_URL + "/" + audioId + ".json";
                 String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
                 FireBaseContent c = new Gson().fromJson(json, FireBaseContent.class);
@@ -45,11 +43,7 @@ public class AppTools {
                     }
                 }.execute();
                 return path_audio;
-            }else
-            {
-                Snackbar.make(context.getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
-                return null;
-            }
+
 
 
     }

@@ -5,9 +5,11 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +31,7 @@ import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 import datn.bkdn.com.saywithvideo.model.Audio;
+import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
@@ -93,6 +96,7 @@ public class SoundFragment extends Fragment {
         mSounds = realm.where(Sound.class).findAll();
 
         for (Sound s : mSounds) {
+            Log.d("SoundFragment.initData",s.isFavorite()+"");
             Audio audio = convertAudio(s);
             mAdapterItems.add(audio);
             mAdapterKeys.add(audio.getId());
@@ -115,6 +119,10 @@ public class SoundFragment extends Fragment {
                 final String audioId = sound.getId();
                 switch (v.getId()) {
                     case R.id.imgPlay:
+                        if(!Tools.isOnline(getContext())){
+                            Snackbar.make( getActivity().getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                            break;
+                        }
                         if (sound.getLink_on_Disk() == null)
                         {
                             getPath(audioId);
@@ -126,7 +134,6 @@ public class SoundFragment extends Fragment {
 
                         }
                         new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
-
                         if (mCurrentPos != -1 && pos != mCurrentPos) {
                             Audio sound1 = mAdapter.getItems().get(mCurrentPos);
                             if (sound1.isPlaying()) {
@@ -140,7 +147,11 @@ public class SoundFragment extends Fragment {
                             mPlayer.stop();
                             mPlayer.reset();
                         } else {
-                            playMp3(mFilePath);
+                            try {
+                                playMp3(mFilePath);
+                            }catch (Exception e){
+
+                            }
                         }
                         sound.setIsPlaying(!sound.isPlaying());
                         mAdapter.notifyDataSetChanged();
@@ -220,17 +231,15 @@ public class SoundFragment extends Fragment {
 
     private void getPath(final String audioId){
         new AsyncTask<Void,String,String>(){
-
             @Override
             protected String doInBackground(Void... params) {
                 String  path = AppTools.getContentAudio(audioId, getActivity());
                 return path;
             }
-
             @Override
             protected void onPostExecute(String aVoid) {
-                mFilePath = aVoid;
                 super.onPostExecute(aVoid);
+                mFilePath = aVoid;
             }
         }.execute();
     }
