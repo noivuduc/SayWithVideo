@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
+import datn.bkdn.com.saywithvideo.model.Audio;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -47,8 +48,6 @@ public class RealmUtils {
 
     }
 
-
-
     public void deleteSound(final Context context, final String id) {
         realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
@@ -70,6 +69,14 @@ public class RealmUtils {
 
     }
 
+    public void setSoundPath(Context context, String id, String path) {
+        realm = RealmManager.getRealm(context);
+        realm.beginTransaction();
+        Sound sound = realm.where(Sound.class).equalTo("id", id).findFirst();
+        sound.setLinkOnDisk(path);
+        realm.commitTransaction();
+    }
+
     public void deleteFavoriteAudio(Context context, final String id) {
         realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
@@ -80,6 +87,7 @@ public class RealmUtils {
         });
 
     }
+
     public void updateFavorite(Context context, final String id) {
         realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
@@ -108,6 +116,7 @@ public class RealmUtils {
             }
         });
     }
+
     public void updatePlaying(Context context, final String id) {
         realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
@@ -130,6 +139,16 @@ public class RealmUtils {
         });
     }
 
+    public void updateSound(Context context, String id, Audio sound) {
+        realm = RealmManager.getRealm(context);
+        realm.beginTransaction();
+        Sound s = realm.where(Sound.class).equalTo("id", id).findFirst();
+        s.setIsFavorite(sound.isFavorite());
+        s.setAuthor(sound.getAuthor());
+        s.setPlays(sound.getPlays());
+        realm.commitTransaction();
+    }
+
     public void addAudioUser(Context context, final RealmAudioUser audio) {
         realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
@@ -140,7 +159,7 @@ public class RealmUtils {
         });
     }
 
-    public void deleteAllAudioUser(Context context){
+    public void deleteAllAudioUser(Context context) {
         realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -164,10 +183,10 @@ public class RealmUtils {
         return sounds;
     }
 
-    public boolean checkExistSound(Context context, String id){
+    public boolean checkExistSound(Context context, String id) {
         realm = RealmManager.getRealm(context);
-        int s = realm.where(Sound.class).equalTo("id",id).findAll().size();
-        return s>0?true:false;
+        int s = realm.where(Sound.class).equalTo("id", id).findAll().size();
+        return s > 0 ? true : false;
     }
 
     public void addSoundContent(Context context, final ContentAudio audio) {
@@ -180,13 +199,13 @@ public class RealmUtils {
         });
     }
 
-    public ContentAudio getContentAudio(Context context, String id){
+    public ContentAudio getContentAudio(Context context, String id) {
         realm = RealmManager.getRealm(context);
         ContentAudio audios = realm.where(ContentAudio.class).equalTo("id", id).findFirst();
         return audios;
     }
 
-    public void deleteAllSound(Context context){
+    public void deleteAllSound(Context context) {
         realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -253,5 +272,10 @@ public class RealmUtils {
     public RealmResults<Video> getVideo(Context context) {
         realm = RealmManager.getRealm(context);
         return realm.where(Video.class).findAllAsync();
+    }
+
+    public Video getVideoProfile(Context context) {
+        RealmResults<Video> videos = realm.where(Video.class).equalTo("isProfile", true).findAll();
+        return videos.size() > 0 ? videos.get(0) : null;
     }
 }
