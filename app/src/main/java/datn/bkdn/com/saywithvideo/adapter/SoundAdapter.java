@@ -29,15 +29,12 @@ import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
 
-<<<<<<< HEAD
 /**
  * Created by Admin on 4/7/2016.
  */
-public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHolder, Audio> {
-=======
 
 public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHolder,Audio>{
->>>>>>> 64169e73ad02fab794b168cc7180540e0d79cd80
+
     private Context mContext;
 
     public SoundAdapter(Query query, Class<Audio> itemClass, Context context) {
