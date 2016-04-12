@@ -1,10 +1,15 @@
 package datn.bkdn.com.saywithvideo.fragment;
 
 import android.content.Intent;
+import android.graphics.SurfaceTexture;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Surface;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -16,6 +21,8 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+
+import java.io.IOException;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.activity.FavoriteActivity;
@@ -32,7 +39,7 @@ import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 
-public class UserProfileFragment extends Fragment implements View.OnClickListener, ListMyVideoAdapter.OnItemClicked {
+public class UserProfileFragment extends Fragment implements View.OnClickListener, ListMyVideoAdapter.OnItemClicked, TextureView.SurfaceTextureListener {
 
     private boolean mIsVolume;
     private ImageView mImgVolume;
@@ -45,6 +52,9 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     private TextView mNumFavorite;
     private TextView mNumSound;
     private RealmResults<Video> mVideos;
+    private TextureView mTextureView;
+    private MediaPlayer mMediaPlayer;
+    private String mVideoPath;
 
     public static UserProfileFragment newInstance() {
 
@@ -68,12 +78,14 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         mTvUserName = (TextView) v.findViewById(R.id.tvNameUser);
         mNumFavorite = (TextView) v.findViewById(R.id.tvNumberSoundFavorite);
         mNumSound = (TextView) v.findViewById(R.id.tvNumberSound);
-//        mNumSoundBoard = (TextView) v.findViewById(R.id.tvNumberSoundBoards);
+        mTextureView = (TextureView) v.findViewById(R.id.video);
         mImgVolume = (ImageView) v.findViewById(R.id.imgVolume);
-//        mImgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
+        ImageView mImgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
         ListView mLvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
+        mMediaPlayer = new MediaPlayer();
 
         mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
+        Log.d("size", "" + mVideos.size());
         if (mVideos.size() != 0) {
             mLlCreateDub.setVisibility(View.INVISIBLE);
         }
@@ -81,6 +93,18 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         mAdapter.setPlayButtonClicked(this);
         mLvMyVideo.setAdapter(mAdapter);
         init();
+
+        Video video = RealmUtils.getRealmUtils(getContext()).getVideoProfile(getContext());
+        if (video != null) {
+            mVideoPath = video.getPath();
+            mImgBackgroundVideo.setVisibility(View.GONE);
+        } else {
+            mVideoPath = "";
+            mImgVolume.setVisibility(View.GONE);
+        }
+
+        mIsVolume = true;
+
         return v;
     }
 
@@ -92,6 +116,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         mTvCreateDub.setOnClickListener(this);
         mImgVolume.setOnClickListener(this);
         mLlCreateDub.setOnClickListener(this);
+        mTextureView.setSurfaceTextureListener(this);
     }
 
     @Override
@@ -158,8 +183,14 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
                 ((MainActivity) getContext()).showSounds();
                 break;
             case R.id.imgVolume:
+                if (mIsVolume) {
+                    mMediaPlayer.setVolume(0.0f, 0.0f);
+                    mImgVolume.setImageResource(R.mipmap.ic_action_volume_muted);
+                } else {
+                    mMediaPlayer.setVolume(1.0f, 1.0f);
+                    mImgVolume.setImageResource(R.mipmap.ic_action_volume_on);
+                }
                 mIsVolume = !mIsVolume;
-                mImgVolume.setImageResource(mIsVolume ? R.mipmap.ic_action_volume_on : R.mipmap.ic_action_volume_muted);
                 break;
         }
     }
@@ -179,7 +210,47 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
                 startActivity(i);
                 break;
             case R.id.imgoption:
+                Log.d("Position", pos + "");
                 break;
         }
+    }
+
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
+        Log.d("Tien", "Available");
+
+        if (mVideoPath.equals("")) return;
+
+        Surface surface = new Surface(surfaceTexture);
+        try {
+            mMediaPlayer.setDataSource(mVideoPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mMediaPlayer.setSurface(surface);
+        mMediaPlayer.setLooping(true);
+        mMediaPlayer.prepareAsync();
+
+        mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mediaPlayer) {
+                mediaPlayer.start();
+            }
+        });
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        return false;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
     }
 }

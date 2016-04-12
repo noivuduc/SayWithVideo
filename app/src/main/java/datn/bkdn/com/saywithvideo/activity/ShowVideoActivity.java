@@ -18,11 +18,8 @@ import datn.bkdn.com.saywithvideo.R;
 
 public class ShowVideoActivity extends AppCompatActivity implements View.OnClickListener, TextureView.SurfaceTextureListener {
 
-    private RelativeLayout mRlBack;
     private static final String TAG = "Tien";
     private String mVideoPath;
-    private TextView mtvShare;
-    private TextureView mTextureView;
     private MediaPlayer mMediaPlayer;
 
     @Override
@@ -35,9 +32,9 @@ public class ShowVideoActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void init() {
-        mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
-        mTextureView = (TextureView) findViewById(R.id.playback_video);
-        mtvShare = (TextView) findViewById(R.id.tvShare);
+        RelativeLayout mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
+        TextureView mTextureView = (TextureView) findViewById(R.id.playback_video);
+        TextView mtvShare = (TextView) findViewById(R.id.tvShare);
 
         mRlBack.setOnClickListener(this);
         mtvShare.setOnClickListener(this);
@@ -80,11 +77,7 @@ public class ShowVideoActivity extends AppCompatActivity implements View.OnClick
                 }
             });
 
-        } catch (IllegalArgumentException e) {
-            Log.d(TAG, e.getMessage());
         } catch (SecurityException e) {
-            Log.d(TAG, e.getMessage());
-        } catch (IllegalStateException e) {
             Log.d(TAG, e.getMessage());
         }
     }
