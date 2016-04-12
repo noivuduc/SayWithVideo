@@ -7,6 +7,7 @@ public class Video extends RealmObject {
     private String name;
     private String time;
     private String path;
+    private boolean isProfile;
 
     public Video(String id, String name, String time, String path) {
         this.id = id;
@@ -48,5 +49,13 @@ public class Video extends RealmObject {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public boolean isProfile() {
+        return isProfile;
+    }
+
+    public void setIsProfile(boolean isProfile) {
+        this.isProfile = isProfile;
     }
 }

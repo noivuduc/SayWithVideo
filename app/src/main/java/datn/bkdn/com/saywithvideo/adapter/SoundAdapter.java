@@ -29,9 +29,7 @@ import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
 
-/**
- * Created by Admin on 4/7/2016.
- */
+
 public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHolder,Audio>{
     private Context mContext;
     public SoundAdapter(Query query, Class<Audio> itemClass, Context context) {

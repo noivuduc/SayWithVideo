@@ -12,7 +12,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp">
 
-        <VideoView
+        <TextureView
             android:id="@+id/video"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
@@ -30,7 +30,7 @@
             android:id="@+id/imgBackgroundVideo"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@mipmap/ic_launcher" />
+            android:src="@mipmap/img_no_video" />
 
     </RelativeLayout>
 
