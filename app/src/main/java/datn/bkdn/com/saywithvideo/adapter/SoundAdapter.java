@@ -59,7 +59,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
             public void onClick(View v) {
                 if (mItemClicked != null) {
                     mItemClicked.onClick(model, v,position);
-                    itemChanged(model,model,getKeys().get(position),position);
+                   itemChanged(model,model,getKeys().get(position),position);
                 }
             }
         });
@@ -126,11 +126,29 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         {
             new AsyncAddSound().execute(sound);
         }
+        else
+        {
+            new AsyncTask<Void, Void,Void>(){
+
+                @Override
+                protected Void doInBackground(Void... params) {
+                    RealmUtils.getRealmUtils(mContext).updateSound(mContext,key,item);
+                    return null;
+                }
+            }.execute();
+        }
     }
 
     @Override
-    protected void itemChanged(Audio oldItem, Audio newItem, String key, int position) {
+    protected void itemChanged(Audio oldItem, final Audio newItem, final String key, int position) {
+        new AsyncTask<Void, Void,Void>(){
 
+            @Override
+            protected Void doInBackground(Void... params) {
+                RealmUtils.getRealmUtils(mContext).updateSound(mContext,key,newItem);
+                return null;
+            }
+        }.execute();
     }
 
     @Override
@@ -194,7 +212,9 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
     }
 
     private Sound convertAudio(Audio audio){
-        return new Sound(audio.getId(),audio.getName(),audio.getAuthor(),audio.isFavorite());
+        return new Sound(audio.getId(),audio.getName(),audio.getAuthor(),
+                audio.isFavorite(),audio.getPlays(),audio.getDate_create(),
+                audio.getUser_id());
     }
 }
 

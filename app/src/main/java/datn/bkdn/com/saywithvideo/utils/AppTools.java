@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import datn.bkdn.com.saywithvideo.database.ContentAudio;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.firebase.FireBaseContent;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
@@ -25,45 +24,34 @@ public class AppTools {
         return format.format(date);
     }
 
-    public static ContentAudio getContentAudio(final String audioId, final Activity context) {
-        ContentAudio contentAudio;
-        contentAudio= RealmUtils.getRealmUtils(context).getContentAudio(context, audioId);
-        if(contentAudio==null) {
+    public static String getContentAudio(final String audioId, final Activity context) {
             if (datn.bkdn.com.saywithvideo.network.Tools.isOnline(context)) {
                 String link = FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_CONTENT_URL + "/" + audioId + ".json";
                 String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
                 FireBaseContent c = new Gson().fromJson(json, FireBaseContent.class);
                 String content = c.getContent();
-                String path_audio = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + audioId + ".m4a";
-                final ContentAudio audio = new ContentAudio();
-                audio.setId(audioId);
-                audio.setContent(path_audio);
+                final String path_audio = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + audioId + ".m4a";
                 try {
                     Base64.decodeToFile(content, path_audio);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                new AsyncTask<ContentAudio, Void, ContentAudio>() {
+                new AsyncTask<Void,Void,Void>(){
+
                     @Override
-                    protected ContentAudio doInBackground(ContentAudio... params) {
-                        RealmUtils.getRealmUtils(context).addSoundContent(context, audio);
+                    protected Void doInBackground(Void... params) {
+                        RealmUtils.getRealmUtils(context).setSoundPath(context,audioId,path_audio);
                         return null;
                     }
-
-                    @Override
-                    protected void onPostExecute(ContentAudio audio) {
-                        super.onPostExecute(audio);
-                    }
-                }.execute(audio);
-                contentAudio = RealmUtils.getRealmUtils(context).getContentAudio(context, audioId);
-
+                }.execute();
+                return path_audio;
             }else
             {
                 Snackbar.make(context.getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
                 return null;
             }
-        }
-        return contentAudio;
+
+
     }
 
     public static FirebaseUser getInfoUser(String id) {

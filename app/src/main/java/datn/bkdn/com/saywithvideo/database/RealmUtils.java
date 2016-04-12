@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
+import datn.bkdn.com.saywithvideo.model.Audio;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -46,9 +47,6 @@ public class RealmUtils {
 //        Realm.setDefaultConfiguration(config1);
 
     }
-
-
-
     public void deleteSound(final Context context, final String id) {
         realm = RealmManager.getRealm(context);
         realm.executeTransaction(new Realm.Transaction() {
@@ -68,6 +66,14 @@ public class RealmUtils {
             }
         });
 
+    }
+
+    public void setSoundPath(Context context,String id, String path){
+        realm = RealmManager.getRealm(context);
+        realm.beginTransaction();
+        Sound sound = realm.where(Sound.class).equalTo("id",id).findFirst();
+        sound.setLinkOnDisk(path);
+        realm.commitTransaction();
     }
 
     public void deleteFavoriteAudio(Context context, final String id) {
@@ -128,6 +134,16 @@ public class RealmUtils {
                 sound.setIsPlaying(!sound.isPlaying());
             }
         });
+    }
+
+    public void updateSound(Context context,String id, Audio sound){
+        realm = RealmManager.getRealm(context);
+        realm.beginTransaction();
+        Sound s = realm.where(Sound.class).equalTo("id",id).findFirst();
+        s.setIsFavorite(sound.isFavorite());
+        s.setAuthor(sound.getAuthor());
+        s.setPlays(sound.getPlays());
+        realm.commitTransaction();
     }
 
     public void addAudioUser(Context context, final RealmAudioUser audio) {

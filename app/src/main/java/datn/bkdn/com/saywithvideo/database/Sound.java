@@ -44,6 +44,16 @@ public class Sound extends RealmObject {
         this.isFavorite = isFavorite;
     }
 
+    public Sound(String id, String name, String author, boolean isFavorite, int plays, String dateOfCreate, String idUser) {
+        this.id = id;
+        this.name = name;
+        this.author = author;
+        this.isFavorite = isFavorite;
+        this.plays = plays;
+        this.dateOfCreate = dateOfCreate;
+        this.idUser = idUser;
+    }
+
     public Sound(String id, String name, String author, String linkDown, String linkOnDisk, String dateOfCreate) {
         this.id = id;
         this.name = name;

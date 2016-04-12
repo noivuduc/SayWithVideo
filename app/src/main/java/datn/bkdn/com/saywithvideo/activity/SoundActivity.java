@@ -83,7 +83,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                     case R.id.imgPlay:
                         final String audioId = sound.getId();
                         String path;
-                        ContentAudio contentAudio = AppTools.getContentAudio(audioId, SoundActivity.this);
+                        ContentAudio contentAudio = new ContentAudio();
                         if (contentAudio != null) {
                             sound.setPlays(sound.getPlays() + 1);
                             new AsyncUpdatePlay().execute(audioId, sound.getPlays() + "");
@@ -107,7 +107,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                         }
                         break;
                     case R.id.llSoundInfor:
-                        ContentAudio content = AppTools.getContentAudio(sound.getId(), SoundActivity.this);
+                        ContentAudio content = new ContentAudio();
                         if (content != null) {
                             String filepath = content.getContent();
                             Intent intent = new Intent(SoundActivity.this, CaptureVideoActivity.class);

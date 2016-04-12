@@ -13,20 +13,38 @@ public class Audio {
     private int plays;
     private String user_id;
     private String id;
+    private String link_on_Disk;
     private boolean isPlaying;
     private boolean isFavorite;
 
     public Audio() {
     }
 
-    public Audio(String id, String name, String author, boolean isPlaying, boolean isFavorite, int plays, String dateOfCreate) {
-        this.id = id;
+    public Audio(String date_create, String name, String author, int plays, String user_id, String id, String link_on_Disk, boolean isFavorite) {
+        this.date_create = date_create;
         this.name = name;
         this.author = author;
-        this.date_create = dateOfCreate;
-        this.isPlaying = isPlaying;
-        this.isFavorite = isFavorite;
         this.plays = plays;
+        this.user_id = user_id;
+        this.id = id;
+        this.link_on_Disk = link_on_Disk;
+        this.isFavorite = isFavorite;
+    }
+
+    public String getLink_on_Disk() {
+        return link_on_Disk;
+    }
+
+    public void setLink_on_Disk(String link_on_Disk) {
+        this.link_on_Disk = link_on_Disk;
+    }
+
+    public void setPlaying(boolean playing) {
+        isPlaying = playing;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 
     public String getId() {

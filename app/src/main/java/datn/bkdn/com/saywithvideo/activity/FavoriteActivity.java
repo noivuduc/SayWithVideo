@@ -118,7 +118,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                     case R.id.imgPlay:
                         final String audioId = sound.getId();
                         String path = "";
-                        ContentAudio contentAudio = AppTools.getContentAudio(audioId, FavoriteActivity.this);
+                        ContentAudio contentAudio =new ContentAudio();
                         if (contentAudio != null) {
                             new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
                             path = contentAudio.getContent();
