@@ -342,14 +342,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             File file = new File(mVideoOutPut);
             file.delete();
             Toast.makeText(getBaseContext(), "Mux video success", Toast.LENGTH_SHORT).show();
-            new AsyncTask<Void , Void, Void>(){
-
-                @Override
-                protected Void doInBackground(Void... params) {
-                    RealmUtils.getRealmUtils(CaptureVideoActivity.this).addVideo(CaptureVideoActivity.this, mFileName, outputPath);
-                    return null;
-                }
-            }.execute();
             RealmUtils.getRealmUtils(CaptureVideoActivity.this).addVideo(CaptureVideoActivity.this, mFileName, outputPath);
             sendBroadcast(new Intent("AddVideo"));
             Intent intent = new Intent(CaptureVideoActivity.this, ShowVideoActivity.class);

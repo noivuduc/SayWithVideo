@@ -258,7 +258,7 @@ public class RealmUtils {
         }
     }
 
-    public boolean addVideo(Context context, String name, String path) {
+    public boolean addVideo(final Context context, final String name, final String path) {
         realm = RealmManager.getRealm(context);
         String id = UUID.randomUUID().toString();
         Date date = new Date();
@@ -267,6 +267,7 @@ public class RealmUtils {
         realm.beginTransaction();
         realm.copyToRealm(video);
         realm.commitTransaction();
+
         return true;
     }
 
