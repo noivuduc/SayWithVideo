@@ -24,7 +24,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_margin="10dp"
-            android:src="@mipmap/ic_action_volume_muted" />
+            android:src="@mipmap/ic_action_volume_on" />
 
         <ImageView
             android:id="@+id/imgBackgroundVideo"

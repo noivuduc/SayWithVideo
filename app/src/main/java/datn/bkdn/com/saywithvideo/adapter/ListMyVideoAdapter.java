@@ -4,10 +4,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import datn.bkdn.com.saywithvideo.R;
@@ -18,18 +20,24 @@ import io.realm.RealmResults;
 public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
 
     public OnItemClicked mItemClicked;
+    public OnMenuItemClicked mMenuItemClicked;
+    private Context mContext;
 
     public ListMyVideoAdapter(Context context, RealmResults<Video> videos) {
         super(context, videos, true);
+        mContext = context;
     }
 
     public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
         this.mItemClicked = playButtonClicked;
     }
 
+    public void setMenuItemClicked(OnMenuItemClicked mMenuItemClicked) {
+        this.mMenuItemClicked = mMenuItemClicked;
+    }
+
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-
         ViewHolder viewHolder;
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.item_list_video_profile, parent, false);
@@ -57,7 +65,16 @@ public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
             @Override
             public void onClick(View v) {
                 if (mItemClicked != null) {
-                    mItemClicked.onClick(position, v);
+                    PopupMenu popupMenu = new PopupMenu(mContext, v);
+                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            mMenuItemClicked.onItemClick(position, item);
+                            return true;
+                        }
+                    });
+                    popupMenu.inflate(R.menu.popup_list_video);
+                    popupMenu.show();
                 }
             }
         });
@@ -65,8 +82,8 @@ public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
         viewHolder.llInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mItemClicked!=null){
-                    mItemClicked.onClick(position,v);
+                if (mItemClicked != null) {
+                    mItemClicked.onClick(position, v);
                 }
             }
         });
@@ -80,6 +97,10 @@ public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
 
     public interface OnItemClicked {
         void onClick(int pos, View v);
+    }
+
+    public interface OnMenuItemClicked {
+        void onItemClick(int pos, MenuItem menuItem);
     }
 
     private class ViewHolder {

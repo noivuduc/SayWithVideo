@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
+import java.io.File;
 import java.io.IOException;
 
 import datn.bkdn.com.saywithvideo.R;
@@ -39,7 +41,8 @@ import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 
-public class UserProfileFragment extends Fragment implements View.OnClickListener, ListMyVideoAdapter.OnItemClicked, TextureView.SurfaceTextureListener {
+public class UserProfileFragment extends Fragment implements View.OnClickListener, ListMyVideoAdapter.OnItemClicked,
+        TextureView.SurfaceTextureListener, ListMyVideoAdapter.OnMenuItemClicked {
 
     private boolean mIsVolume;
     private ImageView mImgVolume;
@@ -55,6 +58,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     private TextureView mTextureView;
     private MediaPlayer mMediaPlayer;
     private String mVideoPath;
+    private Video mDefaultVideo;
 
     public static UserProfileFragment newInstance() {
 
@@ -91,12 +95,13 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         }
         ListMyVideoAdapter mAdapter = new ListMyVideoAdapter(getContext(), mVideos);
         mAdapter.setPlayButtonClicked(this);
+        mAdapter.setMenuItemClicked(this);
         mLvMyVideo.setAdapter(mAdapter);
         init();
 
-        Video video = RealmUtils.getRealmUtils(getContext()).getVideoProfile(getContext());
-        if (video != null) {
-            mVideoPath = video.getPath();
+        mDefaultVideo = RealmUtils.getRealmUtils(getContext()).getVideoProfile(getContext());
+        if (mDefaultVideo != null) {
+            mVideoPath = mDefaultVideo.getPath();
             mImgBackgroundVideo.setVisibility(View.GONE);
         } else {
             mVideoPath = "";
@@ -252,5 +257,39 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
 
+    }
+
+    @Override
+    public void onItemClick(final int pos, MenuItem menuItem) {
+        final String newid = mVideos.get(pos).getId();
+        switch (menuItem.getItemId()) {
+            case R.id.setProfile:
+                if (mDefaultVideo != null) {
+                    String id = mDefaultVideo.getId();
+                    if (!id.equals(newid)) {
+                        Log.d("tien", "co");
+                        RealmUtils.getRealmUtils(getContext()).setVideoProfile(getContext(), id);
+
+                    }
+                }
+                Log.d("tien", "co 2");
+                RealmUtils.getRealmUtils(getContext()).setVideoProfile(getContext(), newid);
+                mMediaPlayer.reset();
+                try {
+                    mMediaPlayer.setDataSource(mVideos.get(pos).getPath());
+                    mMediaPlayer.prepare();
+                    mMediaPlayer.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case R.id.delete:
+                String path = mVideos.get(pos).getPath();
+                RealmUtils.getRealmUtils(getContext()).deleteVideo(getContext(), newid);
+                File file = new File(path);
+                file.delete();
+                mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
+                break;
+        }
     }
 }

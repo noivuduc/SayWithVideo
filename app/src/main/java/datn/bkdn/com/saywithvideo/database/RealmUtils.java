@@ -147,7 +147,7 @@ public class RealmUtils {
         s.setIsFavorite(sound.isFavorite());
 //        s.setAuthor(sound.getAuthor());
         s.setPlays(sound.getPlays());
-        Log.d("updateSound",s.getAuthor()+"|||" +sound.getAuthor());
+        Log.d("updateSound", s.getAuthor() + "|||" + sound.getAuthor());
         realm.commitTransaction();
     }
 
@@ -273,11 +273,32 @@ public class RealmUtils {
 
     public RealmResults<Video> getVideo(Context context) {
         realm = RealmManager.getRealm(context);
-        return realm.where(Video.class).findAllAsync();
+        return realm.where(Video.class).findAll();
     }
 
     public Video getVideoProfile(Context context) {
         RealmResults<Video> videos = realm.where(Video.class).equalTo("isProfile", true).findAll();
         return videos.size() > 0 ? videos.get(0) : null;
+    }
+
+    public void setVideoProfile(Context context, final String id) {
+        realm = RealmManager.getRealm(context);
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Video video = realm.where(Video.class).equalTo("id", id).findFirst();
+                video.setIsProfile(!video.isProfile());
+            }
+        });
+    }
+
+    public void deleteVideo(final Context context, final String id) {
+        realm = RealmManager.getRealm(context);
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.where(Video.class).equalTo("id", id).findAll().removeLast();
+            }
+        });
     }
 }
