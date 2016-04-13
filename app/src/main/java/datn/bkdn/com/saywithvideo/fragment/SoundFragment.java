@@ -120,7 +120,7 @@ public class SoundFragment extends Fragment {
         mAdapter = new SoundAdapter(mFirebase, Audio.class, mSounds, mAdapterItems, mAdapterKeys, getContext());
         mAdapter.setPlayButtonClicked(new SoundAdapter.OnItemClicked() {
             @Override
-            public void onClick(Audio sound, View v, int pos) {
+            public void onClick(final Audio sound, View v, int pos) {
                 final String audioId = sound.getId();
                 switch (v.getId()) {
                     case R.id.imgPlay:
@@ -209,14 +209,26 @@ public class SoundFragment extends Fragment {
                     case R.id.llSoundInfor:
                         if ((sound.getLink_on_Disk()) != null) {
                             mFilePath = sound.getLink_on_Disk();
+                            finishActivity();
                         } else {
-                            getPath(audioId);
-                            mFilePath = AppTools.getContentAudio(audioId, getActivity());
+                            new AsyncTask<Void,Void,String>(){
+
+                                @Override
+                                protected String doInBackground(Void... params) {
+                                    String f = AppTools.getContentAudio(audioId, getActivity());
+                                    return f;
+                                }
+
+                                @Override
+                                protected void onPostExecute(String aVoid) {
+                                    super.onPostExecute(aVoid);
+                                    mFilePath = aVoid;
+                                    sound.setLink_on_Disk(mFilePath);
+                                    finishActivity();
+                                }
+                            }.execute();
                         }
 
-                        Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
-                        intent.putExtra("FilePath", mFilePath);
-                        startActivity(intent);
                         break;
                     case R.id.rlOption:
                         createPopupMenu(v);
@@ -225,6 +237,12 @@ public class SoundFragment extends Fragment {
             }
         });
         mLvSound.setAdapter(mAdapter);
+    }
+
+    private void finishActivity(){
+        Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
+        intent.putExtra("FilePath", mFilePath);
+        startActivity(intent);
     }
 
     private void getPath(final String audioId) {

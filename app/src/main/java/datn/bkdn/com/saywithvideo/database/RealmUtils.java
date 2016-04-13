@@ -1,7 +1,6 @@
 package datn.bkdn.com.saywithvideo.database;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -146,6 +145,7 @@ public class RealmUtils {
         Sound s = realm.where(Sound.class).equalTo("id", id).findFirst();
         s.setIsFavorite(sound.isFavorite());
         s.setAuthor(sound.getAuthor());
+        s.setLinkOnDisk(sound.getLink_on_Disk());
         s.setPlays(sound.getPlays());
         realm.commitTransaction();
     }

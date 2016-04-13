@@ -29,7 +29,6 @@ import java.util.ArrayList;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter2;
-import datn.bkdn.com.saywithvideo.database.ContentAudio;
 import datn.bkdn.com.saywithvideo.database.RealmAudioUser;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
@@ -86,7 +85,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         mAdapter.setPlayButtonClicked(new ListMySoundAdapter2.OnItemClicked() {
 
             @Override
-            public void onClick(int pos, View v, Audio sound) {
+            public void onClick(int pos, View v, final Audio sound) {
                 final String audioId = sound.getId();
                 switch (v.getId()) {
                     case R.id.imgPlay:
@@ -120,14 +119,34 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                         mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
-                        ContentAudio content = new ContentAudio();
-                        if (content != null) {
-                            String filepath = content.getContent();
+                        if ((sound.getLink_on_Disk()) != null) {
+                            mFilePath = sound.getLink_on_Disk();
                             Intent intent = new Intent(SoundActivity.this, CaptureVideoActivity.class);
-                            intent.putExtra("FilePath", filepath);
+                            intent.putExtra("FilePath", mFilePath);
                             intent.putExtra("FileName", sound.getName());
                             startActivity(intent);
+                        } else {
+                            new AsyncTask<Void,Void,String>(){
+
+                                @Override
+                                protected String doInBackground(Void... params) {
+                                    String f = AppTools.getContentAudio(audioId, SoundActivity.this);
+                                    return f;
+                                }
+
+                                @Override
+                                protected void onPostExecute(String aVoid) {
+                                    super.onPostExecute(aVoid);
+                                    mFilePath = aVoid;
+                                    sound.setLink_on_Disk(mFilePath);
+                                    Intent intent = new Intent(SoundActivity.this, CaptureVideoActivity.class);
+                                    intent.putExtra("FilePath", mFilePath);
+                                    intent.putExtra("FileName", sound.getName());
+                                    startActivity(intent);
+                                }
+                            }.execute();
                         }
+
                         break;
                     case R.id.rlOption:
                         createSoundMenu(v, sound);

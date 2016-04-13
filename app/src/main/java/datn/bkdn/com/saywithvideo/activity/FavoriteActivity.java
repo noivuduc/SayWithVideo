@@ -113,38 +113,38 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         mAdapter.setPlayButtonClicked(new ListSoundAdapter.OnItemClicked() {
             @Override
             public void onClick(int pos, View v) {
-                Sound sound = mSounds.get(pos);
+                final Sound sound = mSounds.get(pos);
                 switch (v.getId()) {
                     case R.id.imgPlay:
                         final String audioId = sound.getId();
 
 
-                            if (mCurrentPos != -1 && pos != mCurrentPos) {
-                                Sound sound1 = mSounds.get(mCurrentPos);
-                                if (sound1.isPlaying()) {
-                                    //sound1.setIsPlaying(!sound1.isPlaying());
-                                    String id = mSounds.get(mCurrentPos).getId();
-                                    new AsyncUpdatePlaying().execute(id);
-                                    mPlayer.stop();
-                                }
-                            }
-                            mCurrentPos = pos;
-                            if (sound.isPlaying()) {
+                        if (mCurrentPos != -1 && pos != mCurrentPos) {
+                            Sound sound1 = mSounds.get(mCurrentPos);
+                            if (sound1.isPlaying()) {
+                                //sound1.setIsPlaying(!sound1.isPlaying());
+                                String id = mSounds.get(mCurrentPos).getId();
+                                new AsyncUpdatePlaying().execute(id);
                                 mPlayer.stop();
-                                mPlayer.reset();
-                            } else {
-                                if(sound.getLinkOnDisk()==null){
-                                    getPath(audioId);
-                                    sound.setLinkOnDisk(mFilePath);
-                                } else {
-                                    mFilePath = sound.getLinkOnDisk();
-                                    playMp3(mFilePath);
-                                }
-                                new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
-//                                playMp3(mFilePath);
                             }
-                            new AsyncUpdatePlaying().execute(sound.getId());
-                           // sound.setIsPlaying(!sound.isPlaying());
+                        }
+                        mCurrentPos = pos;
+                        if (sound.isPlaying()) {
+                            mPlayer.stop();
+                            mPlayer.reset();
+                        } else {
+                            if (sound.getLinkOnDisk() == null) {
+                                getPath(audioId);
+                                sound.setLinkOnDisk(mFilePath);
+                            } else {
+                                mFilePath = sound.getLinkOnDisk();
+                                playMp3(mFilePath);
+                            }
+                            new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
+//                                playMp3(mFilePath);
+                        }
+                        new AsyncUpdatePlaying().execute(sound.getId());
+                        // sound.setIsPlaying(!sound.isPlaying());
 
                         mAdapter.notifyDataSetChanged();
                         break;
@@ -175,9 +175,32 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                         mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
-                        Intent intent = new Intent(FavoriteActivity.this, CaptureVideoActivity.class);
-                        intent.putExtra("FilePath", sound.getLinkOnDisk());
-                        startActivity(intent);
+                        if ((sound.getLinkOnDisk()) != null) {
+                            mFilePath = sound.getLinkOnDisk();
+
+                            Intent intent = new Intent(FavoriteActivity.this, CaptureVideoActivity.class);
+                            intent.putExtra("FilePath", mFilePath);
+                            startActivity(intent);
+                        } else {
+                            new AsyncTask<Void, Void, String>() {
+
+                                @Override
+                                protected String doInBackground(Void... params) {
+                                    String f = AppTools.getContentAudio(sound.getId(), FavoriteActivity.this);
+                                    return f;
+                                }
+
+                                @Override
+                                protected void onPostExecute(String aVoid) {
+                                    super.onPostExecute(aVoid);
+                                    mFilePath = aVoid;
+                                    sound.setLinkOnDisk(mFilePath);
+                                    Intent intent = new Intent(FavoriteActivity.this, CaptureVideoActivity.class);
+                                    intent.putExtra("FilePath", mFilePath);
+                                    startActivity(intent);
+                                }
+                            }.execute();
+                        }
                         //:TODO
                         break;
                     case R.id.rlOption:
@@ -205,6 +228,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
             }
         }.execute();
     }
+
     private void createPopupMenu(View v) {
         PopupMenu menu = new PopupMenu(this, v);
         menu.getMenuInflater().inflate(R.menu.popup_menu, menu.getMenu());
