@@ -1,6 +1,9 @@
 package datn.bkdn.com.saywithvideo.fragment;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -59,6 +62,9 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     private MediaPlayer mMediaPlayer;
     private String mVideoPath;
     private Video mDefaultVideo;
+    private BroadcastReceiver mBroadcastReceiver;
+    private Surface mSurface;
+    private ImageView mImgBackgroundVideo;
 
     public static UserProfileFragment newInstance() {
 
@@ -84,7 +90,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         mNumSound = (TextView) v.findViewById(R.id.tvNumberSound);
         mTextureView = (TextureView) v.findViewById(R.id.video);
         mImgVolume = (ImageView) v.findViewById(R.id.imgVolume);
-        ImageView mImgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
+        mImgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
         ListView mLvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
         mMediaPlayer = new MediaPlayer();
 
@@ -109,6 +115,15 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         }
 
         mIsVolume = true;
+
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d("Tien", "co");
+                mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
+            }
+        };
+        getActivity().registerReceiver(mBroadcastReceiver, new IntentFilter("AddVideo"));
 
         return v;
     }
@@ -165,7 +180,17 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
             }
         });
 
+        Log.d("Tien", mVideoPath);
 
+        if (!mVideoPath.equals("")) {
+            try {
+                mMediaPlayer.reset();
+                mMediaPlayer.setDataSource(mVideoPath);
+                mMediaPlayer.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -272,6 +297,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
 
                     }
                 }
+                mImgBackgroundVideo.setVisibility(View.GONE);
                 Log.d("tien", "co 2");
                 RealmUtils.getRealmUtils(getContext()).setVideoProfile(getContext(), newid);
                 mMediaPlayer.reset();
@@ -291,5 +317,29 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
                 mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
                 break;
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
+            mMediaPlayer.release();
+            mMediaPlayer = null;
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        getActivity().unregisterReceiver(mBroadcastReceiver);
     }
 }
