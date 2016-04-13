@@ -342,6 +342,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             File file = new File(mVideoOutPut);
             file.delete();
             Toast.makeText(getBaseContext(), "Mux video success", Toast.LENGTH_SHORT).show();
+<<<<<<< HEAD
             new AsyncTask<Void , Void, Void>(){
 
                 @Override
@@ -350,6 +351,10 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                     return null;
                 }
             }.execute();
+=======
+            RealmUtils.getRealmUtils(CaptureVideoActivity.this).addVideo(CaptureVideoActivity.this, mFileName, outputPath);
+            sendBroadcast(new Intent("AddVideo"));
+>>>>>>> ef66c7a288217f944d99fdab91f597dfa635d7a0
             Intent intent = new Intent(CaptureVideoActivity.this, ShowVideoActivity.class);
             intent.putExtra("VideoPath", outputPath);
             startActivity(intent);

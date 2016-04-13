@@ -1,6 +1,9 @@
 package datn.bkdn.com.saywithvideo.fragment;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -8,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -22,6 +26,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
+import java.io.File;
 import java.io.IOException;
 
 import datn.bkdn.com.saywithvideo.R;
@@ -39,7 +44,8 @@ import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 
-public class UserProfileFragment extends Fragment implements View.OnClickListener, ListMyVideoAdapter.OnItemClicked, TextureView.SurfaceTextureListener {
+public class UserProfileFragment extends Fragment implements View.OnClickListener, ListMyVideoAdapter.OnItemClicked,
+        TextureView.SurfaceTextureListener, ListMyVideoAdapter.OnMenuItemClicked {
 
     private boolean mIsVolume;
     private ImageView mImgVolume;
@@ -55,6 +61,10 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     private TextureView mTextureView;
     private MediaPlayer mMediaPlayer;
     private String mVideoPath;
+    private Video mDefaultVideo;
+    private BroadcastReceiver mBroadcastReceiver;
+    private Surface mSurface;
+    private ImageView mImgBackgroundVideo;
 
     public static UserProfileFragment newInstance() {
 
@@ -80,7 +90,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         mNumSound = (TextView) v.findViewById(R.id.tvNumberSound);
         mTextureView = (TextureView) v.findViewById(R.id.video);
         mImgVolume = (ImageView) v.findViewById(R.id.imgVolume);
-        ImageView mImgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
+        mImgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
         ListView mLvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
         mMediaPlayer = new MediaPlayer();
 
@@ -91,12 +101,13 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         }
         ListMyVideoAdapter mAdapter = new ListMyVideoAdapter(getContext(), mVideos);
         mAdapter.setPlayButtonClicked(this);
+        mAdapter.setMenuItemClicked(this);
         mLvMyVideo.setAdapter(mAdapter);
         init();
 
-        Video video = RealmUtils.getRealmUtils(getContext()).getVideoProfile(getContext());
-        if (video != null) {
-            mVideoPath = video.getPath();
+        mDefaultVideo = RealmUtils.getRealmUtils(getContext()).getVideoProfile(getContext());
+        if (mDefaultVideo != null) {
+            mVideoPath = mDefaultVideo.getPath();
             mImgBackgroundVideo.setVisibility(View.GONE);
         } else {
             mVideoPath = "";
@@ -104,6 +115,15 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         }
 
         mIsVolume = true;
+
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d("Tien", "co");
+                mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
+            }
+        };
+        getActivity().registerReceiver(mBroadcastReceiver, new IntentFilter("AddVideo"));
 
         return v;
     }
@@ -160,7 +180,17 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
             }
         });
 
+        Log.d("Tien", mVideoPath);
 
+        if (!mVideoPath.equals("")) {
+            try {
+                mMediaPlayer.reset();
+                mMediaPlayer.setDataSource(mVideoPath);
+                mMediaPlayer.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -252,5 +282,64 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
 
+    }
+
+    @Override
+    public void onItemClick(final int pos, MenuItem menuItem) {
+        final String newid = mVideos.get(pos).getId();
+        switch (menuItem.getItemId()) {
+            case R.id.setProfile:
+                if (mDefaultVideo != null) {
+                    String id = mDefaultVideo.getId();
+                    if (!id.equals(newid)) {
+                        Log.d("tien", "co");
+                        RealmUtils.getRealmUtils(getContext()).setVideoProfile(getContext(), id);
+
+                    }
+                }
+                mImgBackgroundVideo.setVisibility(View.GONE);
+                Log.d("tien", "co 2");
+                RealmUtils.getRealmUtils(getContext()).setVideoProfile(getContext(), newid);
+                mMediaPlayer.reset();
+                try {
+                    mMediaPlayer.setDataSource(mVideos.get(pos).getPath());
+                    mMediaPlayer.prepare();
+                    mMediaPlayer.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case R.id.delete:
+                String path = mVideos.get(pos).getPath();
+                RealmUtils.getRealmUtils(getContext()).deleteVideo(getContext(), newid);
+                File file = new File(path);
+                file.delete();
+                mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
+                break;
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
+            mMediaPlayer.release();
+            mMediaPlayer = null;
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        getActivity().unregisterReceiver(mBroadcastReceiver);
     }
 }
