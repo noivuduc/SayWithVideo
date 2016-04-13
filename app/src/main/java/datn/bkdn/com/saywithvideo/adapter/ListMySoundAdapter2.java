@@ -1,7 +1,8 @@
 package datn.bkdn.com.saywithvideo.adapter;
 
+import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 
 import com.firebase.client.Query;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 
 import datn.bkdn.com.saywithvideo.R;
@@ -23,7 +25,7 @@ import static java.util.Collections.sort;
  * Created by Admin on 4/10/2016.
  */
 public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdapter2.AudioViewholder,Audio>{
-
+    private Context mContext;
     public interface OnItemClicked {
         void onClick(int pos, View v, Audio audio);
     }
@@ -36,16 +38,19 @@ public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdap
         super(query, itemClass);
     }
 
+    public ListMySoundAdapter2(Context context, Query query, Class<Audio> itemClass, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys) {
+        super(query, itemClass, items, keys);
+        this.mContext = context;
+    }
+
     @Override
     public AudioViewholder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Log.d("MySoundAdapter","onCreateViewHolder");
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list_mysound,parent,false);
         return new AudioViewholder(view);
     }
 
     @Override
     public void onBindViewHolder(AudioViewholder viewHolder, final int position) {
-        Log.d("MySoundAdapter","onBindViewHolder");
         final Audio sound = getItem(position);
         viewHolder.imgPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,16 +85,17 @@ public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdap
     @Override
     protected void itemAdded(Audio item, String key, int position) {
        item.setId(key);
+
     }
 
     @Override
     protected void itemChanged(Audio oldItem, Audio newItem, String key, int position) {
-
+        getItems().set(position,oldItem);
+        notifyDataSetChanged();
     }
 
     @Override
-    protected void itemRemoved(Audio item, String key, int position) {
-
+    protected void itemRemoved(final Audio item, final String key, int position) {
     }
 
     @Override

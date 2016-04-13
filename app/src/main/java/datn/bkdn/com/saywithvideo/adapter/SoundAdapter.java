@@ -28,23 +28,27 @@ import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmResults;
 
 /**
  * Created by Admin on 4/7/2016.
  */
 
-public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHolder,Audio>{
+public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHolder, Audio> implements RealmChangeListener{
 
     private Context mContext;
-
+    private RealmResults<Sound> mSounds;
     public SoundAdapter(Query query, Class<Audio> itemClass, Context context) {
         super(query, itemClass);
         this.mContext = context;
     }
 
-    public SoundAdapter(Query query, Class<Audio> itemClass, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
+    public SoundAdapter(Query query, Class<Audio> itemClass,RealmResults<Sound> sounds, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
         super(query, itemClass, items, keys);
+        this.mSounds = sounds;
         this.mContext = mContext;
+        mSounds.addChangeListener(this);
     }
 
     @Override
@@ -98,7 +102,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
     }
 
     @Override
-    protected void itemAdded(final Audio item, final String key, int position) {
+    protected void itemAdded(final Audio item, final String key, final int position) {
         String author = Utils.getUserName(item.getUser_id());
         item.setAuthor(author);
         item.setId(key);
@@ -119,6 +123,23 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
                         if (!RealmUtils.getRealmUtils(mContext).checkExistSound(mContext, key)) {
                             new AsyncAddSound().execute(sound);
                         }
+//                        else {
+//                            new AsyncTask<Void, Void, Void>() {
+//
+//                                @Override
+//                                protected Void doInBackground(Void... params) {
+//                                    RealmUtils.getRealmUtils(mContext).updateSound(mContext, key, item);
+//                                    getItems().set(position,item);
+//                                    return null;
+//                                }
+//
+//                                @Override
+//                                protected void onPostExecute(Void aVoid) {
+//                                    super.onPostExecute(aVoid);
+//                                    notifyDataSetChanged();
+//                                }
+//                            }.execute();
+//                        }
                     }
 
                     @Override
@@ -129,21 +150,11 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
                 return null;
             }
         }.execute();
-// else {
-//            new AsyncTask<Void, Void, Void>() {
-//
-//                @Override
-//                protected Void doInBackground(Void... params) {
-//                    RealmUtils.getRealmUtils(mContext).updateSound(mContext, key, item);
-//                    return null;
-//                }
-//            }.execute();
-//        }
     }
 
     @Override
     protected void itemChanged(final Audio oldItem, final Audio newItem, final String key, int position) {
-        getItems().set(position,oldItem);
+        getItems().set(position, oldItem);
         notifyDataSetChanged();
         if (datn.bkdn.com.saywithvideo.network.Tools.isOnline(mContext)) {
             new AsyncTask<Void, Void, Void>() {
@@ -163,7 +174,9 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
             @Override
             protected Void doInBackground(Void... params) {
                 Realm realm = RealmManager.getRealm(mContext);
+                realm.beginTransaction();
                 realm.where(Sound.class).equalTo("id", key).findAll().clear();
+                realm.commitTransaction();
                 return null;
             }
         }.execute();
@@ -174,6 +187,22 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
 
     }
 
+    @Override
+    public void onChange() {
+        getItems().clear();
+        getKeys().clear();
+        for (Sound s : mSounds) {
+            Audio audio = convertAudio(s);
+            getItems().add(audio);
+            getKeys().add(audio.getId());
+        }
+        notifyDataSetChanged();
+    }
+    private Audio convertAudio(Sound sound) {
+        Audio audio = new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
+                sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
+        return audio;
+    }
     public interface OnItemClicked {
         void onClick(Audio audio, View v, int pos);
     }

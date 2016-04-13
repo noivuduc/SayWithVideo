@@ -36,6 +36,7 @@ import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
 import io.realm.RealmAsyncTask;
+import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
 public class SoundFragment extends Fragment {
@@ -66,8 +67,6 @@ public class SoundFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.from(getContext()).inflate(R.layout.fragment_sound, container, false);
         mLvSound = (RecyclerView) v.findViewById(R.id.lvSound);
-        mLvSound.setHasFixedSize(true);
-        mLvSound.setLayoutManager(new LinearLayoutManager(getContext()));
         init();
         return v;
     }
@@ -94,9 +93,13 @@ public class SoundFragment extends Fragment {
 
         realm = RealmManager.getRealm(getContext());
         mSounds = realm.where(Sound.class).findAll();
-
+        mSounds.addChangeListener(new RealmChangeListener() {
+            @Override
+            public void onChange() {
+                Log.d("onChange", "onChange");
+            }
+        });
         for (Sound s : mSounds) {
-            Log.d("SoundFragment.initData",s.isFavorite()+"");
             Audio audio = convertAudio(s);
             mAdapterItems.add(audio);
             mAdapterKeys.add(audio.getId());
@@ -109,31 +112,22 @@ public class SoundFragment extends Fragment {
     }
 
     private void init() {
+        mLvSound.setHasFixedSize(true);
+        mLvSound.setLayoutManager(new LinearLayoutManager(getContext()));
         initData();
         Firebase.setAndroidContext(getContext());
         mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
-        mAdapter = new SoundAdapter(mFirebase, Audio.class, mAdapterItems, mAdapterKeys, getContext());
+        mAdapter = new SoundAdapter(mFirebase, Audio.class, mSounds, mAdapterItems, mAdapterKeys, getContext());
         mAdapter.setPlayButtonClicked(new SoundAdapter.OnItemClicked() {
             @Override
             public void onClick(Audio sound, View v, int pos) {
                 final String audioId = sound.getId();
                 switch (v.getId()) {
                     case R.id.imgPlay:
-                        if(!Tools.isOnline(getContext())){
-                            Snackbar.make( getActivity().getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                        if (!Tools.isOnline(getContext())) {
+                            Snackbar.make(getActivity().getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
                             break;
                         }
-                        if (sound.getLink_on_Disk() == null)
-                        {
-                            getPath(audioId);
-                            sound.setLink_on_Disk(mFilePath);
-                        }
-                        else
-                        {
-                            mFilePath = sound.getLink_on_Disk();
-
-                        }
-                        new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
                         if (mCurrentPos != -1 && pos != mCurrentPos) {
                             Audio sound1 = mAdapter.getItems().get(mCurrentPos);
                             if (sound1.isPlaying()) {
@@ -147,11 +141,15 @@ public class SoundFragment extends Fragment {
                             mPlayer.stop();
                             mPlayer.reset();
                         } else {
-                            try {
+                            if (sound.getLink_on_Disk() == null) {
+                                getPath(audioId);
+                                sound.setLink_on_Disk(mFilePath);
+                            } else {
+                                mFilePath = sound.getLink_on_Disk();
                                 playMp3(mFilePath);
-                            }catch (Exception e){
 
                             }
+                            new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
                         }
                         sound.setIsPlaying(!sound.isPlaying());
                         mAdapter.notifyDataSetChanged();
@@ -160,11 +158,11 @@ public class SoundFragment extends Fragment {
                         try {
                             final String id = sound.getId();
                             sound.setIsFavorite(!sound.isFavorite());
-                            new AsyncTask<Void, Void, FirebaseUser>(){
+                            new AsyncTask<Void, Void, FirebaseUser>() {
 
                                 @Override
                                 protected FirebaseUser doInBackground(Void... params) {
-                                  FirebaseUser  f = AppTools.getInfoUser(Utils.getCurrentUserID(getContext()));
+                                    FirebaseUser f = AppTools.getInfoUser(Utils.getCurrentUserID(getContext()));
                                     return f;
                                 }
 
@@ -209,7 +207,7 @@ public class SoundFragment extends Fragment {
                         mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
-                        if ((sound.getLink_on_Disk())!= null) {
+                        if ((sound.getLink_on_Disk()) != null) {
                             mFilePath = sound.getLink_on_Disk();
                         } else {
                             getPath(audioId);
@@ -229,17 +227,19 @@ public class SoundFragment extends Fragment {
         mLvSound.setAdapter(mAdapter);
     }
 
-    private void getPath(final String audioId){
-        new AsyncTask<Void,String,String>(){
+    private void getPath(final String audioId) {
+        new AsyncTask<Void, String, String>() {
             @Override
             protected String doInBackground(Void... params) {
-                String  path = AppTools.getContentAudio(audioId, getActivity());
+                String path = AppTools.getContentAudio(audioId, getActivity());
                 return path;
             }
+
             @Override
             protected void onPostExecute(String aVoid) {
                 super.onPostExecute(aVoid);
                 mFilePath = aVoid;
+                playMp3(mFilePath);
             }
         }.execute();
     }

@@ -18,7 +18,6 @@ import java.io.IOException;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.ListSoundAdapter;
-import datn.bkdn.com.saywithvideo.database.ContentAudio;
 import datn.bkdn.com.saywithvideo.database.FavoriteAudio;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
@@ -40,6 +39,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     private MediaPlayer mPlayer;
     private ListView mLvSound;
     private Realm realm;
+    private String mFilePath;
     private Firebase mFirebaseFavorite;
     private ImageView mImgSort;
     private int mCurrentPos = -1;
@@ -117,15 +117,12 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                 switch (v.getId()) {
                     case R.id.imgPlay:
                         final String audioId = sound.getId();
-                        String path = "";
-                        ContentAudio contentAudio =new ContentAudio();
-                        if (contentAudio != null) {
-                            new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
-                            path = contentAudio.getContent();
+
+
                             if (mCurrentPos != -1 && pos != mCurrentPos) {
                                 Sound sound1 = mSounds.get(mCurrentPos);
                                 if (sound1.isPlaying()) {
-                                    sound1.setIsPlaying(!sound1.isPlaying());
+                                    //sound1.setIsPlaying(!sound1.isPlaying());
                                     String id = mSounds.get(mCurrentPos).getId();
                                     new AsyncUpdatePlaying().execute(id);
                                     mPlayer.stop();
@@ -136,11 +133,19 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                                 mPlayer.stop();
                                 mPlayer.reset();
                             } else {
-                                playMp3(path);
+                                if(sound.getLinkOnDisk()==null){
+                                    getPath(audioId);
+                                    sound.setLinkOnDisk(mFilePath);
+                                } else {
+                                    mFilePath = sound.getLinkOnDisk();
+                                    playMp3(mFilePath);
+                                }
+                                new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
+//                                playMp3(mFilePath);
                             }
                             new AsyncUpdatePlaying().execute(sound.getId());
-                            sound.setIsPlaying(!sound.isPlaying());
-                        }
+                           // sound.setIsPlaying(!sound.isPlaying());
+
                         mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
@@ -184,6 +189,22 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         mLvSound.setAdapter(mAdapter);
     }
 
+    private void getPath(final String audioId) {
+        new AsyncTask<Void, String, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String path = AppTools.getContentAudio(audioId, FavoriteActivity.this);
+                return path;
+            }
+
+            @Override
+            protected void onPostExecute(String aVoid) {
+                super.onPostExecute(aVoid);
+                mFilePath = aVoid;
+                playMp3(mFilePath);
+            }
+        }.execute();
+    }
     private void createPopupMenu(View v) {
         PopupMenu menu = new PopupMenu(this, v);
         menu.getMenuInflater().inflate(R.menu.popup_menu, menu.getMenu());

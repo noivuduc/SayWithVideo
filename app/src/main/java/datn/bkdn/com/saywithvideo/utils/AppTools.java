@@ -2,7 +2,6 @@ package datn.bkdn.com.saywithvideo.utils;
 
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.os.Environment;
 
 import com.firebase.client.utilities.Base64;
 import com.google.gson.Gson;
@@ -29,7 +28,9 @@ public class AppTools {
                 String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
                 FireBaseContent c = new Gson().fromJson(json, FireBaseContent.class);
                 String content = c.getContent();
-                final String path_audio = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + audioId + ".m4a";
+                String folderPath = Constant.DIRECTORY_PATH + Constant.AUDIO;
+                Tools.createFolder(folderPath);
+                final String path_audio = folderPath + "/" + audioId + ".m4a";
                 try {
                     Base64.decodeToFile(content, path_audio);
                 } catch (IOException e) {

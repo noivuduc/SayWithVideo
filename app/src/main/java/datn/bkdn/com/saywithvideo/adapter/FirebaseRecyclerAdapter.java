@@ -99,7 +99,9 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
                 }
                 notifyItemInserted(insertedPosition);
                 itemAdded(item, key, insertedPosition);
-            }
+            } else {
+                itemAdded(item, key, 0);
+                }
         }
 
         @Override
@@ -111,7 +113,6 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
                 T oldItem = mItems.get(index);
                 T newItem = dataSnapshot.getValue(FirebaseRecyclerAdapter.this.mItemClass);
                 mItems.set(index, newItem);
-                Log.d("aaa","aaa");
                 notifyItemChanged(index);
                 itemChanged(oldItem, newItem, key, index);
             }

@@ -32,7 +32,6 @@ import java.util.UUID;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.custom.MarkerView;
 import datn.bkdn.com.saywithvideo.custom.VisualizerView;
-import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseAudio;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
@@ -278,7 +277,6 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         final String id = Utils.getCurrentUserID(EditAudioActivity.this);
         Sound sound = new Sound(idSound, name, Utils.getCurrentUserName(EditAudioActivity.this), mOutputPath, mOutputPath, ft.format(date));
         sound.setIdUser(id);
-        RealmUtils.getRealmUtils(EditAudioActivity.this).addNewSound(EditAudioActivity.this, sound);
 
         //  send to server
         FirebaseAudio mAudio = new FirebaseAudio(name, id, ft.format(date), 0);
