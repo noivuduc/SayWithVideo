@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="My Profile">
+        <menu>
+            <item
+                android:id="@+id/nav_sounds"
+                android:icon="@mipmap/ic_nav_sound"
+                android:title="Sounds" />
+
+            <item
+                android:id="@+id/nav_favourites"
+                android:icon="@mipmap/ic_nav_favourite"
+                android:title="Favourites" />
+        </menu>
+    </item>
+
+    <item android:title="Change Info">
+        <menu>
+            <item
+                android:id="@+id/nav_fullname"
+                android:icon="@mipmap/ic_nav_name"
+                android:title="Full Name" />
+            <item
+                android:id="@+id/nav_email"
+                android:icon="@mipmap/ic_nav_email"
+                android:title="Email" />
+
+            <item
+                android:id="@+id/nav_password"
+                android:icon="@mipmap/ic_nav_password"
+                android:title="Password" />
+        </menu>
+    </item>
+
+    <item android:title="Action">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@mipmap/ic_nav_logout"
+                android:title="Logout" />
+        </menu>
+    </item>
+
+</menu>

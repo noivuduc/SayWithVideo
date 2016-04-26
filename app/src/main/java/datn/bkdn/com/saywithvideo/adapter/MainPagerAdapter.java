@@ -8,10 +8,8 @@ import datn.bkdn.com.saywithvideo.fragment.SoundFragment;
 import datn.bkdn.com.saywithvideo.fragment.UserProfileFragment;
 
 public class MainPagerAdapter extends FragmentPagerAdapter {
-    public static final int TAB_SOUND = 0;
-    public static final int TAB_DUB = 1;
     public static final int NUM_TAB = 2;
-    public static final String[] TAB_NAME = {"Sounds", "My Dubs"};
+    public static final String[] TAB_NAME = {"Sounds", "My Videos"};
 
     public MainPagerAdapter(FragmentManager fm) {
         super(fm);

@@ -25,6 +25,7 @@
             android:layout_toLeftOf="@+id/imgClearPassword"
             android:layout_toRightOf="@+id/tv2"
             android:inputType="textPassword"
+            android:focusable="true"
             android:singleLine="true" />
 
         <ImageView

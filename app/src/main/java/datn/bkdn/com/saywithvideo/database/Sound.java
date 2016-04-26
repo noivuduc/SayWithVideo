@@ -3,9 +3,6 @@ package datn.bkdn.com.saywithvideo.database;
 import io.realm.RealmList;
 import io.realm.RealmObject;
 
-/**
- * Created by Admin on 2/18/2016.
- */
 public class Sound extends RealmObject {
 
     private String id;
