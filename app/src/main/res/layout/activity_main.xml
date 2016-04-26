@@ -1,52 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
 
-    <datn.bkdn.com.saywithvideo.utils.PagerSlidingTabStrip
-        android:id="@+id/tab"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        app:pstsActivateTextColor="#f2d05e"
-        app:pstsDeactivateTextColor="#FFCCCCCC"
-        app:pstsDividerColor="@android:color/transparent"
-        app:pstsIndicatorColor="#f2d05e"
-        app:pstsIndicatorHeight="4dp"
-        app:pstsShouldExpand="true"
-        app:pstsTabBackground="@android:color/secondary_text_light_nodisable"
-        app:pstsTabSwitch="true"
-        app:pstsTextAllCaps="false"
-        app:pstsUnderlineHeight="0dp" />
-
-    <LinearLayout
-        android:id="@+id/ll"
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_below="@+id/tab"
-        android:background="@mipmap/shadow"
-        android:orientation="horizontal" />
-
-    <android.support.v4.view.ViewPager
-        android:id="@+id/pager"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/tab" />
+        android:fitsSystemWindows="true">
 
-    <android.support.design.widget.CoordinatorLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="-15dp"
-        android:layout_marginRight="15dp">
+        <RelativeLayout
+            android:id="@+id/rl"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="#fff"
+            android:paddingLeft="10dp">
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
+            <ImageView
+                android:id="@+id/imgMenu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/ic_menu_toolbar" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@+id/imgMenu"
+                android:text="@string/app_name"
+                android:textColor="#f2d05e"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/root"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@mipmap/ic_setting"
-            android:visibility="gone" />
-    </android.support.design.widget.CoordinatorLayout>
-</RelativeLayout>
+            android:layout_below="@+id/rl"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#fff">
+
+                <datn.bkdn.com.saywithvideo.utils.PagerSlidingTabStrip
+                    android:id="@+id/tab"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    app:pstsActivateTextColor="#f2d05e"
+                    app:pstsDeactivateTextColor="#FFCCCCCC"
+                    app:pstsDividerColor="@android:color/transparent"
+                    app:pstsIndicatorColor="#f2d05e"
+                    app:pstsIndicatorHeight="4dp"
+                    app:pstsShouldExpand="true"
+                    app:pstsTabBackground="?attr/colorPrimary"
+                    app:pstsTabSwitch="true"
+                    app:pstsTextAllCaps="false"
+                    app:pstsUnderlineHeight="0dp" />
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/tab" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/activity_main_drawer" />
+
+</android.support.v4.widget.DrawerLayout>
+
 

@@ -49,6 +49,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             Camera.Size mBestSize = i.get(0);
             List<int[]> fps = mParameters.getSupportedPreviewFpsRange();
             int[] best = fps.get(0);
+            Log.d("size", mBestSize.width + " " + mBestSize.height);
             mParameters.setPreviewSize(mBestSize.width, mBestSize.height);
             mParameters.setPreviewFpsRange(best[0], best[1]);
             List<String> focusModes = mParameters.getSupportedFocusModes();

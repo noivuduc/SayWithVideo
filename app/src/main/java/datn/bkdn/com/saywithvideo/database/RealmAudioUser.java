@@ -2,9 +2,6 @@ package datn.bkdn.com.saywithvideo.database;
 
 import io.realm.RealmObject;
 
-/**
- * Created by Admin on 3/23/2016.
- */
 public class RealmAudioUser extends RealmObject {
     private String name;
     private int plays;

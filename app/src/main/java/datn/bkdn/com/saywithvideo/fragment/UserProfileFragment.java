@@ -4,67 +4,36 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.SurfaceTexture;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.Surface;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
-
 import java.io.File;
-import java.io.IOException;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.activity.FavoriteActivity;
 import datn.bkdn.com.saywithvideo.activity.MainActivity;
-import datn.bkdn.com.saywithvideo.activity.SettingActivity;
 import datn.bkdn.com.saywithvideo.activity.ShareActivity;
 import datn.bkdn.com.saywithvideo.activity.ShowVideoActivity;
-import datn.bkdn.com.saywithvideo.activity.SoundActivity;
-import datn.bkdn.com.saywithvideo.activity.SoundBoardActivity;
 import datn.bkdn.com.saywithvideo.adapter.ListMyVideoAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Video;
-import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
-import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 
 public class UserProfileFragment extends Fragment implements View.OnClickListener, ListMyVideoAdapter.OnItemClicked,
-        TextureView.SurfaceTextureListener, ListMyVideoAdapter.OnMenuItemClicked {
+        ListMyVideoAdapter.OnMenuItemClicked {
 
-    private boolean mIsVolume;
-    private ImageView mImgVolume;
-    private LinearLayout mLnSound;
-    private LinearLayout mLnSoundboards;
-    private LinearLayout mLnFavorites;
     private LinearLayout mLlCreateDub;
     private TextView mTvCreateDub;
-    private TextView mTvUserName;
-    private TextView mNumFavorite;
-    private TextView mNumSound;
     private RealmResults<Video> mVideos;
-    private TextureView mTextureView;
-    private MediaPlayer mMediaPlayer;
-    private String mVideoPath;
-    private Video mDefaultVideo;
     private BroadcastReceiver mBroadcastReceiver;
-    private Surface mSurface;
-    private ImageView mImgBackgroundVideo;
 
     public static UserProfileFragment newInstance() {
 
@@ -80,47 +49,26 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_user_profile, container, false);
 
-        mLnSound = (LinearLayout) v.findViewById(R.id.lnSounds);
-        mLnSoundboards = (LinearLayout) v.findViewById(R.id.lnSoundboards);
-        mLnFavorites = (LinearLayout) v.findViewById(R.id.lnFavorites);
         mLlCreateDub = (LinearLayout) v.findViewById(R.id.llCreateDub);
         mTvCreateDub = (TextView) v.findViewById(R.id.tvCreateDub);
-        mTvUserName = (TextView) v.findViewById(R.id.tvNameUser);
-        mNumFavorite = (TextView) v.findViewById(R.id.tvNumberSoundFavorite);
-        mNumSound = (TextView) v.findViewById(R.id.tvNumberSound);
-        mTextureView = (TextureView) v.findViewById(R.id.video);
-        mImgVolume = (ImageView) v.findViewById(R.id.imgVolume);
-        mImgBackgroundVideo = (ImageView) v.findViewById(R.id.imgBackgroundVideo);
         ListView mLvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
-        mMediaPlayer = new MediaPlayer();
 
         mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
         Log.d("size", "" + mVideos.size());
         if (mVideos.size() != 0) {
             mLlCreateDub.setVisibility(View.INVISIBLE);
         }
-        ListMyVideoAdapter mAdapter = new ListMyVideoAdapter(getContext(), mVideos);
+        final ListMyVideoAdapter mAdapter = new ListMyVideoAdapter(getContext(), mVideos);
         mAdapter.setPlayButtonClicked(this);
         mAdapter.setMenuItemClicked(this);
         mLvMyVideo.setAdapter(mAdapter);
         init();
 
-        mDefaultVideo = RealmUtils.getRealmUtils(getContext()).getVideoProfile(getContext());
-        if (mDefaultVideo != null) {
-            mVideoPath = mDefaultVideo.getPath();
-            mImgBackgroundVideo.setVisibility(View.GONE);
-        } else {
-            mVideoPath = "";
-            mImgVolume.setVisibility(View.GONE);
-        }
-
-        mIsVolume = true;
-
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Log.d("Tien", "co");
                 mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
+                if (mAdapter != null) mAdapter.notifyDataSetChanged();
             }
         };
         getActivity().registerReceiver(mBroadcastReceiver, new IntentFilter("AddVideo"));
@@ -129,98 +77,15 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     }
 
     private void init() {
-        mLnSound.setOnClickListener(this);
-        mLnSoundboards.setOnClickListener(this);
-        mLnFavorites.setOnClickListener(this);
-        mTvUserName.setOnClickListener(this);
         mTvCreateDub.setOnClickListener(this);
-        mImgVolume.setOnClickListener(this);
         mLlCreateDub.setOnClickListener(this);
-        mTextureView.setSurfaceTextureListener(this);
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        String id = Utils.getCurrentUserID(getContext());
-        Firebase baseUser = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + id + "/");
-        baseUser.child("no_favorite").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String content = dataSnapshot.getValue() == null ? "0" : dataSnapshot.getValue().toString();
-                mNumFavorite.setText(content);
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
-        baseUser.child("no_sound").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String content = dataSnapshot.getValue() == null ? "0" : dataSnapshot.getValue().toString();
-                mNumSound.setText(content);
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
-        baseUser.child("name").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mTvUserName.setText(dataSnapshot.getValue().toString());
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
-
-        Log.d("Tien", mVideoPath);
-
-        if (!mVideoPath.equals("")) {
-            try {
-                mMediaPlayer.reset();
-                mMediaPlayer.setDataSource(mVideoPath);
-                mMediaPlayer.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.lnSounds:
-                startActivity(new Intent(getContext(), SoundActivity.class));
-                break;
-            case R.id.lnSoundboards:
-                startActivity(new Intent(getContext(), SoundBoardActivity.class));
-                break;
-            case R.id.lnFavorites:
-                startActivity(new Intent(getContext(), FavoriteActivity.class));
-                break;
-            case R.id.tvNameUser:
-                startActivity(new Intent(getContext(), SettingActivity.class));
-                break;
             case R.id.tvCreateDub:
                 ((MainActivity) getContext()).showSounds();
-                break;
-            case R.id.imgVolume:
-                if (mIsVolume) {
-                    mMediaPlayer.setVolume(0.0f, 0.0f);
-                    mImgVolume.setImageResource(R.mipmap.ic_action_volume_muted);
-                } else {
-                    mMediaPlayer.setVolume(1.0f, 1.0f);
-                    mImgVolume.setImageResource(R.mipmap.ic_action_volume_on);
-                }
-                mIsVolume = !mIsVolume;
                 break;
         }
     }
@@ -245,70 +110,11 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
-        Log.d("Tien", "Available");
-
-        if (mVideoPath.equals("")) return;
-
-        Surface surface = new Surface(surfaceTexture);
-        try {
-            mMediaPlayer.setDataSource(mVideoPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        mMediaPlayer.setSurface(surface);
-        mMediaPlayer.setLooping(true);
-        mMediaPlayer.prepareAsync();
-
-        mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mediaPlayer) {
-                mediaPlayer.start();
-            }
-        });
-    }
-
-    @Override
-    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-
-    }
-
-    @Override
-    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        return false;
-    }
-
-    @Override
-    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
-    }
 
     @Override
     public void onItemClick(final int pos, MenuItem menuItem) {
         final String newid = mVideos.get(pos).getId();
         switch (menuItem.getItemId()) {
-            case R.id.setProfile:
-                if (mDefaultVideo != null) {
-                    String id = mDefaultVideo.getId();
-                    if (!id.equals(newid)) {
-                        Log.d("tien", "co");
-                        RealmUtils.getRealmUtils(getContext()).setVideoProfile(getContext(), id);
-
-                    }
-                }
-                mImgBackgroundVideo.setVisibility(View.GONE);
-                Log.d("tien", "co 2");
-                RealmUtils.getRealmUtils(getContext()).setVideoProfile(getContext(), newid);
-                mMediaPlayer.reset();
-                try {
-                    mMediaPlayer.setDataSource(mVideos.get(pos).getPath());
-                    mMediaPlayer.prepare();
-                    mMediaPlayer.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                break;
             case R.id.delete:
                 String path = mVideos.get(pos).getPath();
                 RealmUtils.getRealmUtils(getContext()).deleteVideo(getContext(), newid);
@@ -316,24 +122,6 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
                 file.delete();
                 mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
                 break;
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
-            mMediaPlayer.stop();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
-            mMediaPlayer.stop();
-            mMediaPlayer.release();
-            mMediaPlayer = null;
         }
     }
 

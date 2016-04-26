@@ -24,13 +24,7 @@
             android:name=".activity.SoundActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.SoundBoardActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.FavoriteActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.SettingActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.CaptureVideoActivity"
@@ -40,9 +34,6 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.RecordNewSoundActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.test"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.EditAudioActivity"
