@@ -1,7 +1,6 @@
 package datn.bkdn.com.saywithvideo.utils;
 
 import android.app.Activity;
-import android.os.AsyncTask;
 
 import com.firebase.client.utilities.Base64;
 import com.google.gson.Gson;
@@ -10,7 +9,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.firebase.FireBaseContent;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
@@ -33,18 +31,13 @@ public class AppTools {
                 final String path_audio = folderPath + "/" + audioId + ".m4a";
                 try {
                     Base64.decodeToFile(content, path_audio);
+                    return path_audio;
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
-                new AsyncTask<Void,Void,Void>(){
 
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        RealmUtils.getRealmUtils(context).setSoundPath(context,audioId,path_audio);
-                        return null;
-                    }
-                }.execute();
-                return path_audio;
+                }
+
+        return null;
     }
 
     public static FirebaseUser getInfoUser(String id) {

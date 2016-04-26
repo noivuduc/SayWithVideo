@@ -1,5 +1,6 @@
 package datn.bkdn.com.saywithvideo.fragment;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
@@ -35,7 +36,6 @@ import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
-import io.realm.RealmAsyncTask;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
@@ -51,7 +51,7 @@ public class SoundFragment extends Fragment {
     private ArrayList<Audio> mAdapterItems;
     private ArrayList<String> mAdapterKeys;
     private SoundAdapter mAdapter;
-    private RealmAsyncTask asyncTransaction;
+    private ProgressDialog mProgressDialog;
 
     public static SoundFragment newInstance() {
 
@@ -120,64 +120,96 @@ public class SoundFragment extends Fragment {
         mAdapter = new SoundAdapter(mFirebase, Audio.class, mSounds, mAdapterItems, mAdapterKeys, getContext());
         mAdapter.setPlayButtonClicked(new SoundAdapter.OnItemClicked() {
             @Override
-            public void onClick(final Audio sound, View v, int pos) {
+            public void onClick(final Audio sound, View v, final int pos) {
                 final String audioId = sound.getId();
                 switch (v.getId()) {
                     case R.id.imgPlay:
-                        if (!Tools.isOnline(getContext())) {
-                            Snackbar.make(getActivity().getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
-                            break;
-                        }
                         if (mCurrentPos != -1 && pos != mCurrentPos) {
                             Audio sound1 = mAdapter.getItems().get(mCurrentPos);
                             if (sound1.isPlaying()) {
                                 sound1.setIsPlaying(!sound1.isPlaying());
+                                if (sound1.isLoadAudio()) {
+                                    sound1.setLoadAudio(false);
+                                }
                                 mAdapter.notifyDataSetChanged();
-                                mPlayer.stop();
+                                if (mPlayer != null) {
+                                    mPlayer.stop();
+                                }
                             }
                         }
                         mCurrentPos = pos;
                         if (sound.isPlaying()) {
+                            sound.setIsPlaying(false);
                             mPlayer.stop();
                             mPlayer.reset();
+                            mAdapter.notifyDataSetChanged();
                         } else {
                             if (sound.getLink_on_Disk() == null) {
-                                getPath(audioId);
-                                sound.setLink_on_Disk(mFilePath);
+                                if (!Tools.isOnline(getContext())) {
+                                    Snackbar.make(getActivity().getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                                    break;
+                                }
+                                /**
+                                 * download sound
+                                 */
+                                new AsyncTask<Void, String, String>() {
+                                    @Override
+                                    protected void onPreExecute() {
+                                        super.onPreExecute();
+                                        sound.setLoadAudio(true);
+                                        mAdapter.notifyDataSetChanged();
+                                    }
+
+                                    @Override
+                                    protected String doInBackground(Void... params) {
+                                        String path = AppTools.getContentAudio(audioId, getActivity());
+                                        return path;
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(String aVoid) {
+                                        super.onPostExecute(aVoid);
+                                        if (mCurrentPos == pos) {
+                                            sound.setLoadAudio(false);
+                                            sound.setIsPlaying(!sound.isPlaying());
+                                            playMp3(mFilePath);
+                                            new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
+                                        }
+                                        mFilePath = aVoid;
+                                        sound.setLink_on_Disk(mFilePath);
+                                        mAdapter.notifyDataSetChanged();
+
+                                    }
+                                }.execute();
+
                             } else {
                                 mFilePath = sound.getLink_on_Disk();
+                                sound.setIsPlaying(!sound.isPlaying());
+                                mAdapter.notifyDataSetChanged();
                                 playMp3(mFilePath);
-
                             }
-                            new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
+                            new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
+
                         }
-                        sound.setIsPlaying(!sound.isPlaying());
-                        mAdapter.notifyDataSetChanged();
+
+                        //  mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
                         try {
                             final String id = sound.getId();
                             sound.setIsFavorite(!sound.isFavorite());
-                            new AsyncTask<Void, Void, FirebaseUser>() {
-
-                                @Override
-                                protected FirebaseUser doInBackground(Void... params) {
-                                    FirebaseUser f = AppTools.getInfoUser(Utils.getCurrentUserID(getContext()));
-                                    return f;
-                                }
-
-                                @Override
-                                protected void onPostExecute(FirebaseUser firebaseUser) {
-                                    super.onPostExecute(firebaseUser);
-                                    mFirebaseUser = firebaseUser;
-                                }
-                            }.execute();
-
                             final Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(getContext()) + "/favorite");
                             new AsyncTask<Void, Void, Void>() {
+                                @Override
+                                protected void onPreExecute() {
+                                    super.onPreExecute();
+                                    sound.setLoadFavorite(true);
+                                    mAdapter.notifyDataSetChanged();
+                                }
 
                                 @Override
                                 protected Void doInBackground(Void... params) {
+                                    mFirebaseUser = AppTools.getInfoUser(Utils.getCurrentUserID(getContext()));
                                     favoriteFirebase.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -198,6 +230,13 @@ public class SoundFragment extends Fragment {
                                     });
                                     return null;
                                 }
+
+                                @Override
+                                protected void onPostExecute(Void aVoid) {
+                                    super.onPostExecute(aVoid);
+                                    sound.setLoadFavorite(false);
+                                    mAdapter.notifyDataSetChanged();
+                                }
                             }.execute();
 
                         } catch (Exception e) {
@@ -207,11 +246,34 @@ public class SoundFragment extends Fragment {
                         mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
+                        if (!Tools.isOnline(getContext())) {
+                            Snackbar.make(getActivity().getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                            break;
+                        }
+                        if (mCurrentPos != -1 && pos != mCurrentPos) {
+                            Audio sound1 = mAdapter.getItems().get(mCurrentPos);
+                            if (sound1.isPlaying()) {
+                                sound1.setIsPlaying(!sound1.isPlaying());
+                                mAdapter.notifyDataSetChanged();
+                                if (mPlayer != null) {
+                                    mPlayer.stop();
+                                }
+                            }
+                        }
+
                         if ((sound.getLink_on_Disk()) != null) {
                             mFilePath = sound.getLink_on_Disk();
                             finishActivity();
                         } else {
-                            new AsyncTask<Void,Void,String>(){
+                            new AsyncTask<Void, Void, String>() {
+                                @Override
+                                protected void onPreExecute() {
+                                    super.onPreExecute();
+                                    if(mProgressDialog==null){
+                                        mProgressDialog = new ProgressDialog(getContext());
+                                    }
+                                    mProgressDialog.show();
+                                }
 
                                 @Override
                                 protected String doInBackground(Void... params) {
@@ -222,8 +284,10 @@ public class SoundFragment extends Fragment {
                                 @Override
                                 protected void onPostExecute(String aVoid) {
                                     super.onPostExecute(aVoid);
+                                    mProgressDialog.dismiss();
                                     mFilePath = aVoid;
                                     sound.setLink_on_Disk(mFilePath);
+                                    new AsyncUpdatePath().execute(sound.getId(),sound.getLink_on_Disk());
                                     finishActivity();
                                 }
                             }.execute();
@@ -239,27 +303,24 @@ public class SoundFragment extends Fragment {
         mLvSound.setAdapter(mAdapter);
     }
 
-    private void finishActivity(){
+    public class AsyncUpdatePath extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            Realm realm = RealmManager.getRealm(getContext());
+            realm.beginTransaction();
+            Sound sound = realm.where(Sound.class).equalTo("id", params[0]).findFirst();
+            sound.setLinkOnDisk(params[1]);
+            realm.commitTransaction();
+            realm.close();
+            return null;
+        }
+    }
+
+    private void finishActivity() {
         Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
         intent.putExtra("FilePath", mFilePath);
         startActivity(intent);
-    }
-
-    private void getPath(final String audioId) {
-        new AsyncTask<Void, String, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                String path = AppTools.getContentAudio(audioId, getActivity());
-                return path;
-            }
-
-            @Override
-            protected void onPostExecute(String aVoid) {
-                super.onPostExecute(aVoid);
-                mFilePath = aVoid;
-                playMp3(mFilePath);
-            }
-        }.execute();
     }
 
     @Override

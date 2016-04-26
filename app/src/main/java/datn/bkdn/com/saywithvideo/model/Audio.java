@@ -11,6 +11,8 @@ public class Audio {
     private String name;
     private String author;
     private int plays;
+    private boolean isLoadFavorite;
+    private boolean isLoadAudio;
     private String user_id;
     private String id;
     private String link_on_Disk;
@@ -29,6 +31,22 @@ public class Audio {
         this.id = id;
         this.link_on_Disk = link_on_Disk;
         this.isFavorite = isFavorite;
+    }
+
+    public boolean isLoadAudio() {
+        return isLoadAudio;
+    }
+
+    public void setLoadAudio(boolean loadAudio) {
+        isLoadAudio = loadAudio;
+    }
+
+    public boolean isLoadFavorite() {
+        return isLoadFavorite;
+    }
+
+    public void setLoadFavorite(boolean loadFavorite) {
+        isLoadFavorite = loadFavorite;
     }
 
     public String getLink_on_Disk() {

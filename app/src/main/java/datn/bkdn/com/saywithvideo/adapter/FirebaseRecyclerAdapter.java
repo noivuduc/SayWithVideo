@@ -107,15 +107,16 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
             String key = dataSnapshot.getKey();
-
-            if (mKeys.contains(key)) {
-                int index = mKeys.indexOf(key);
-                T oldItem = mItems.get(index);
-                T newItem = dataSnapshot.getValue(FirebaseRecyclerAdapter.this.mItemClass);
-                mItems.set(index, newItem);
-                notifyItemChanged(index);
-                itemChanged(oldItem, newItem, key, index);
-            }
+            //don't need for my App, sorry author :)
+//
+//            if (mKeys.contains(key)) {
+//                int index = mKeys.indexOf(key);
+//                T oldItem = mItems.get(index);
+//                T newItem = dataSnapshot.getValue(FirebaseRecyclerAdapter.this.mItemClass);
+//                mItems.set(index, newItem);
+//                notifyItemChanged(index);
+//                itemChanged(oldItem, newItem, key, index);
+//            }
         }
 
         @Override

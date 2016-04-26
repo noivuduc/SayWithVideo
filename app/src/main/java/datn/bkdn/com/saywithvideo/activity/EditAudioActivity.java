@@ -46,7 +46,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         MediaPlayer.OnCompletionListener, View.OnClickListener {
 
     private static final int MIN_SECOND = 1;
-    private static final int MAX_SECOND = 10;
+    private static final int MAX_SECOND = 20;
     private MarkerView mMarkerLeft;
     private MarkerView mMarkerRight;
     private VisualizerView mVisualizerView;
@@ -234,7 +234,7 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
                 float start = Float.parseFloat(mTvStart.getText().toString());
                 float end = Float.parseFloat(mTvEnd.getText().toString());
                 if (end - start > MAX_SECOND) {
-                    Toast.makeText(getBaseContext(), "The length of audio over 10 seconds", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "The length of audio over"+MAX_SECOND + "seconds", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     createDialog();
@@ -340,6 +340,16 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
             file.delete();
         }
         super.onBackPressed();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mMediaPlayer!=null){
+            if(mMediaPlayer.isPlaying()){
+                mMediaPlayer.stop();
+            }
+        }
     }
 
     private class EditAudio extends AsyncTask<Void, Void, Void> {

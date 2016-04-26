@@ -21,7 +21,6 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
-import com.soikonomakis.rxfirebase.RxFirebase;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,19 +32,16 @@ import datn.bkdn.com.saywithvideo.database.RealmAudioUser;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Sound;
-import datn.bkdn.com.saywithvideo.firebase.FirebaseAudio;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
-import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
 import io.realm.RealmAsyncTask;
 import io.realm.RealmResults;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+
 
 public class SoundActivity extends AppCompatActivity implements View.OnClickListener,
         PopupMenu.OnMenuItemClickListener {
@@ -459,42 +455,6 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
-    private void loadData() {
-        mFirebase.child(FirebaseConstant.AUDIO_URL).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                RealmUtils.getRealmUtils(SoundActivity.this).deleteAllAudioUser(SoundActivity.this);
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    FirebaseAudio firebaseAudio = data.getValue(FirebaseAudio.class);
-                    final String name = firebaseAudio.getName();
-                    final String dateCreate = firebaseAudio.getDate_create();
-                    final String user_id = firebaseAudio.getUser_id();
-                    final String audio_id = data.getKey();
-                    final int plays = firebaseAudio.getPlays();
-                    Firebase base = new Firebase(Constant.FIREBASE_ROOT + "users/" + user_id + "/name/");
-                    RxFirebase.getInstance().
-                            observeValueEvent(base).
-                            subscribeOn(Schedulers.newThread()).
-                            subscribe(new Action1<DataSnapshot>() {
-                                @Override
-                                public void call(DataSnapshot dataSnapshot) {
-                                    RealmAudioUser sound = new RealmAudioUser(name, plays, audio_id, dateCreate);
-                                    sound.setPlays(plays);
-                                    mAdapter.notifyDataSetChanged();
-                                    new AsyncAddSound().execute(sound);
-                                }
-                            });
-//
-
-                }
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
-    }
 
     class AsyncAddSound extends AsyncTask<RealmAudioUser, Void, Void> {
 

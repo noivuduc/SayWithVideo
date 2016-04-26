@@ -1,7 +1,6 @@
 package datn.bkdn.com.saywithvideo.utils;
 
 import android.app.Activity;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -31,7 +30,6 @@ public class Tools {
     }
 
     public static void createFolder(String path) {
-        Log.d("Tien", path);
         File file = new File(path);
         if (file.isDirectory()) {
             return;
