@@ -1,6 +1,7 @@
 package datn.bkdn.com.saywithvideo.adapter;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -17,23 +19,31 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import datn.bkdn.com.saywithvideo.R;
+import datn.bkdn.com.saywithvideo.database.RealmManager;
+import datn.bkdn.com.saywithvideo.database.RealmUtils;
+import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.model.Audio;
+import datn.bkdn.com.saywithvideo.utils.Utils;
+import io.realm.Realm;
 
 import static java.util.Collections.sort;
 
 /**
  * Created by Admin on 4/10/2016.
  */
-public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdapter2.AudioViewholder,Audio>{
+public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdapter2.AudioViewholder, Audio> {
     private Context mContext;
+
     public interface OnItemClicked {
         void onClick(int pos, View v, Audio audio);
     }
+
     public OnItemClicked mItemClicked;
 
     public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
         this.mItemClicked = playButtonClicked;
     }
+
     public ListMySoundAdapter2(Query query, Class<Audio> itemClass) {
         super(query, itemClass);
     }
@@ -45,7 +55,7 @@ public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdap
 
     @Override
     public AudioViewholder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list_mysound,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list_mysound, parent, false);
         return new AudioViewholder(view);
     }
 
@@ -64,7 +74,7 @@ public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdap
             @Override
             public void onClick(View v) {
                 if (mItemClicked != null) {
-                    mItemClicked.onClick(position, v,sound);
+                    mItemClicked.onClick(position, v, sound);
                 }
             }
         });
@@ -72,10 +82,18 @@ public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdap
             @Override
             public void onClick(View v) {
                 if (mItemClicked != null) {
-                    mItemClicked.onClick(position, v,sound);
+                    mItemClicked.onClick(position, v, sound);
                 }
             }
         });
+
+        if (sound.isLoadAudio()) {
+            viewHolder.progressPlay.setVisibility(View.VISIBLE);
+            viewHolder.imgPlayPause.setVisibility(View.INVISIBLE);
+        } else {
+            viewHolder.progressPlay.setVisibility(View.INVISIBLE);
+            viewHolder.imgPlayPause.setVisibility(View.VISIBLE);
+        }
         viewHolder.imgPlayPause.setImageResource(sound.isPlaying() ? R.mipmap.ic_pause : R.mipmap.ic_play);
         viewHolder.tvSoundName.setText(sound.getName());
         viewHolder.tvPlays.setText(sound.getPlays() + " plays");
@@ -84,12 +102,39 @@ public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdap
 
     @Override
     protected void itemAdded(Audio item, String key, int position) {
-       item.setId(key);
+        String author = Utils.getUserName(item.getUser_id());
+        item.setId(key);
+        item.setAuthor(author);
+        final Sound sound = convertAudio(item);
+        if (!RealmUtils.getRealmUtils(mContext).checkExistSound(mContext, key)) {
+            new AsyncAddSound().execute(sound);
+        } else {
+            new AsyncTask<Void, Void, Void>() {
 
+                @Override
+                protected Void doInBackground(Void... params) {
+                    Realm realm = RealmManager.getRealm(mContext);
+                    realm.beginTransaction();
+                    Sound s = realm.where(Sound.class).equalTo("id", sound.getId()).findFirst();
+                    s.setAuthor(sound.getAuthor());
+                    s.setPlays(sound.getPlays());
+                    realm.commitTransaction();
+                    realm.close();
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    super.onPostExecute(aVoid);
+                }
+            }.execute();
+        }
     }
+
 
     @Override
     protected void itemChanged(Audio oldItem, Audio newItem, String key, int position) {
+        oldItem.setPlays(newItem.getPlays());
         getItems().set(position,oldItem);
         notifyDataSetChanged();
     }
@@ -103,13 +148,15 @@ public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdap
 
     }
 
-    public static class AudioViewholder extends RecyclerView.ViewHolder{
+    public static class AudioViewholder extends RecyclerView.ViewHolder {
         private TextView tvSoundName;
         private TextView tvPlays;
         private TextView tvDateOfCreate;
         private ImageView imgPlayPause;
         private LinearLayout linearLayout;
+        private ProgressBar progressPlay;
         private RelativeLayout rlOption;
+
         public AudioViewholder(View itemView) {
             super(itemView);
             tvSoundName = (TextView) itemView.findViewById(R.id.tvSoundName);
@@ -118,10 +165,29 @@ public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdap
             imgPlayPause = (ImageView) itemView.findViewById(R.id.imgPlay);
             linearLayout = (LinearLayout) itemView.findViewById(R.id.llSoundInfor);
             rlOption = (RelativeLayout) itemView.findViewById(R.id.rlOption);
+            progressPlay = (ProgressBar) itemView.findViewById(R.id.progressPlay);
         }
     }
 
-    public void sortByName(){
+    class AsyncAddSound extends AsyncTask<Sound, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Sound... sound) {
+            Realm realm = RealmManager.getRealm(mContext);
+            realm.beginTransaction();
+            realm.copyToRealm(sound[0]);
+            realm.commitTransaction();
+            realm.close();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    public void sortByName() {
         sort(getItems(), new Comparator<Audio>() {
             @Override
             public int compare(Audio lhs, Audio rhs) {
@@ -130,16 +196,18 @@ public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdap
         });
         notifyDataSetChanged();
     }
-    public void sortByPlays(){
+
+    public void sortByPlays() {
         sort(getItems(), new Comparator<Audio>() {
             @Override
             public int compare(Audio lhs, Audio rhs) {
-                return lhs.getPlays()+"".compareTo(rhs.getPlays()+"");
+                return rhs.getPlays() + "".compareTo(lhs.getPlays() + "");
             }
         });
         notifyDataSetChanged();
     }
-    public void sortByDateUpload(){
+
+    public void sortByDateUpload() {
         sort(getItems(), new Comparator<Audio>() {
             @Override
             public int compare(Audio lhs, Audio rhs) {
@@ -147,5 +215,11 @@ public class ListMySoundAdapter2 extends FirebaseRecyclerAdapter<ListMySoundAdap
             }
         });
         notifyDataSetChanged();
+    }
+
+    private Sound convertAudio(Audio audio) {
+        return new Sound(audio.getId(), audio.getName(), audio.getAuthor(),
+                audio.isFavorite(), audio.getPlays(), audio.getDate_create(),
+                audio.getUser_id());
     }
 }

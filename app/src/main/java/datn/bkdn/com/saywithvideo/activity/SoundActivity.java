@@ -1,5 +1,6 @@
 package datn.bkdn.com.saywithvideo.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
@@ -28,9 +29,7 @@ import java.util.ArrayList;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter2;
-import datn.bkdn.com.saywithvideo.database.RealmAudioUser;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
-import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
@@ -39,7 +38,6 @@ import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
-import io.realm.RealmAsyncTask;
 import io.realm.RealmResults;
 
 
@@ -51,17 +49,16 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private TextView tvAddSound;
     private EditText tvSearch;
     private MediaPlayer mPlayer;
-    private FirebaseUser mFirebaseUser;
     private String mFilePath;
     private RecyclerView mRecycle;
     private ImageView imgSort;
     private Realm realm;
-    private RealmAsyncTask asyncTransaction;
     private RealmResults<Sound> mSounds;
     private ArrayList<Audio> mAdapterItems;
     private ArrayList<String> mAdapterKeys;
     private int mCurrentPos = -1;
     private Firebase mFirebase;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,48 +78,107 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         mAdapter.setPlayButtonClicked(new ListMySoundAdapter2.OnItemClicked() {
 
             @Override
-            public void onClick(int pos, View v, final Audio sound) {
+            public void onClick(final int pos, View v, final Audio sound) {
                 final String audioId = sound.getId();
                 switch (v.getId()) {
                     case R.id.imgPlay:
-                        if (!Tools.isOnline(SoundActivity.this)) {
-                            Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
-                            break;
+                        if (mCurrentPos != -1 && pos != mCurrentPos) {
+                            Audio sound1 = mAdapter.getItems().get(mCurrentPos);
+                            if (sound1.isPlaying()) {
+                                sound1.setIsPlaying(!sound1.isPlaying());
+                                if (sound1.isLoadAudio()) {
+                                    sound1.setLoadAudio(false);
+                                }
+                                mAdapter.notifyDataSetChanged();
+                                if (mPlayer != null) {
+                                    mPlayer.stop();
+                                }
+                            }
                         }
+                        mCurrentPos = pos;
+                        if (sound.isPlaying()) {
+                            sound.setIsPlaying(false);
+                            mPlayer.stop();
+                            mPlayer.reset();
+                            mAdapter.notifyDataSetChanged();
+                        } else {
+                            if (sound.getLink_on_Disk() == null) {
+                                if (!Tools.isOnline(SoundActivity.this)) {
+                                    Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                                    break;
+                                }
+                                /**
+                                 * download sound
+                                 */
+                                new AsyncTask<Void, String, String>() {
+                                    @Override
+                                    protected void onPreExecute() {
+                                        super.onPreExecute();
+                                        sound.setLoadAudio(true);
+                                        mAdapter.notifyDataSetChanged();
+                                    }
+
+                                    @Override
+                                    protected String doInBackground(Void... params) {
+                                        String path = AppTools.getContentAudio(audioId, SoundActivity.this);
+                                        return path;
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(String aVoid) {
+                                        super.onPostExecute(aVoid);
+                                        mFilePath = aVoid;
+                                        sound.setLink_on_Disk(mFilePath);
+                                        new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
+                                        if (mCurrentPos == pos) {
+                                            sound.setLoadAudio(false);
+                                            sound.setIsPlaying(!sound.isPlaying());
+                                            playMp3(mFilePath);
+                                        }
+                                        mAdapter.notifyDataSetChanged();
+
+                                    }
+                                }.execute();
+
+                            } else {
+                                mFilePath = sound.getLink_on_Disk();
+                                sound.setIsPlaying(!sound.isPlaying());
+                                mAdapter.notifyDataSetChanged();
+                                playMp3(mFilePath);
+                            }
+                            new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
+
+                        }
+                        break;
+                    case R.id.llSoundInfor:
                         if (mCurrentPos != -1 && pos != mCurrentPos) {
                             Audio sound1 = mAdapter.getItems().get(mCurrentPos);
                             if (sound1.isPlaying()) {
                                 sound1.setIsPlaying(!sound1.isPlaying());
                                 mAdapter.notifyDataSetChanged();
-                                mPlayer.stop();
+                                if (mPlayer != null) {
+                                    mPlayer.stop();
+                                }
                             }
                         }
-                        mCurrentPos = pos;
-                        if (sound.isPlaying()) {
-                            mPlayer.stop();
-                            mPlayer.reset();
-                        } else {
-                            if (sound.getLink_on_Disk() == null) {
-                                getPath(audioId);
-                                sound.setLink_on_Disk(mFilePath);
-                            } else {
-                                mFilePath = sound.getLink_on_Disk();
-                                playMp3(mFilePath);
-                            }
-                            new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
-                        }
-                        sound.setIsPlaying(!sound.isPlaying());
-                        mAdapter.notifyDataSetChanged();
-                        break;
-                    case R.id.llSoundInfor:
+
                         if ((sound.getLink_on_Disk()) != null) {
                             mFilePath = sound.getLink_on_Disk();
-                            Intent intent = new Intent(SoundActivity.this, CaptureVideoActivity.class);
-                            intent.putExtra("FilePath", mFilePath);
-                            intent.putExtra("FileName", sound.getName());
-                            startActivity(intent);
+                            finishActivity();
                         } else {
-                            new AsyncTask<Void,Void,String>(){
+                            if (!Tools.isOnline(SoundActivity.this)) {
+                                Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                                break;
+                            }
+                            new AsyncTask<Void, Void, String>() {
+                                @Override
+                                protected void onPreExecute() {
+                                    super.onPreExecute();
+                                    if(mProgressDialog==null){
+                                        mProgressDialog = new ProgressDialog(SoundActivity.this);
+                                    }
+                                    mProgressDialog.show();
+                                }
 
                                 @Override
                                 protected String doInBackground(Void... params) {
@@ -133,12 +189,11 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                                 @Override
                                 protected void onPostExecute(String aVoid) {
                                     super.onPostExecute(aVoid);
+                                    mProgressDialog.dismiss();
                                     mFilePath = aVoid;
                                     sound.setLink_on_Disk(mFilePath);
-                                    Intent intent = new Intent(SoundActivity.this, CaptureVideoActivity.class);
-                                    intent.putExtra("FilePath", mFilePath);
-                                    intent.putExtra("FileName", sound.getName());
-                                    startActivity(intent);
+                                    new AsyncUpdatePath().execute(sound.getId(),sound.getLink_on_Disk());
+                                    finishActivity();
                                 }
                             }.execute();
                         }
@@ -151,22 +206,29 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             }
         });
     }
+    public class AsyncUpdatePath extends AsyncTask<String, Void, Void> {
 
-    private void getPath(final String audioId) {
-        new AsyncTask<Void, String, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                String path = AppTools.getContentAudio(audioId, SoundActivity.this);
-                return path;
-            }
+        @Override
+        protected Void doInBackground(String... params) {
+            Realm realm = RealmManager.getRealm(SoundActivity.this);
+            realm.beginTransaction();
+            Sound sound = realm.where(Sound.class).equalTo("id", params[0]).findFirst();
+            sound.setLinkOnDisk(params[1]);
+            realm.commitTransaction();
+            realm.close();
+            return null;
+        }
+    }
+    class AsyncUpdatePlay extends AsyncTask<String, Void, Void> {
 
-            @Override
-            protected void onPostExecute(String aVoid) {
-                super.onPostExecute(aVoid);
-                mFilePath = aVoid;
-                playMp3(mFilePath);
-            }
-        }.execute();
+        @Override
+        protected Void doInBackground(String... params) {
+            String audioId = params[0];
+            String plays = params[1];
+            Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
+            firebase.child(audioId).child("plays").setValue(plays);
+            return null;
+        }
     }
 
     public void playMp3(String path) {
@@ -358,7 +420,10 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void finishActivity() {
-        this.finish();
+        Intent intent = new Intent(SoundActivity.this, CaptureVideoActivity.class);
+        intent.putExtra("FilePath", mFilePath);
+        startActivity(intent);
+       // this.finish();
     }
 
     @Override
@@ -452,38 +517,5 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
         }
         return true;
-    }
-
-
-
-    class AsyncAddSound extends AsyncTask<RealmAudioUser, Void, Void> {
-
-        @Override
-        protected Void doInBackground(RealmAudioUser... sound) {
-            RealmUtils.getRealmUtils(SoundActivity.this).addAudioUser(SoundActivity.this, sound[0]);
-            return null;
-        }
-    }
-
-    class AsyncUpdatePlaying extends AsyncTask<String, Void, Void> {
-        @Override
-        protected Void doInBackground(String... params) {
-            String id = params[0];
-            RealmUtils.getRealmUtils(SoundActivity.this).updatePlaying(SoundActivity.this, id);
-            return null;
-        }
-    }
-
-    public class AsyncUpdatePlay extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected Void doInBackground(String... params) {
-            String audioId = params[0];
-            String plays = params[1];
-            RealmUtils.getRealmUtils(SoundActivity.this).updatePlays(SoundActivity.this, audioId);
-            Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
-            firebase.child(audioId).child("plays").setValue(plays);
-            return null;
-        }
     }
 }

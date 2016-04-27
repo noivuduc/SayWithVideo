@@ -109,15 +109,16 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
             String key = dataSnapshot.getKey();
             //don't need for my App, sorry author :)
 //
-//            if (mKeys.contains(key)) {
-//                int index = mKeys.indexOf(key);
-//                T oldItem = mItems.get(index);
-//                T newItem = dataSnapshot.getValue(FirebaseRecyclerAdapter.this.mItemClass);
-//                mItems.set(index, newItem);
-//                notifyItemChanged(index);
-//                itemChanged(oldItem, newItem, key, index);
-//            }
+            if (mKeys.contains(key)) {
+                int index = mKeys.indexOf(key);
+                T oldItem = mItems.get(index);
+                T newItem = dataSnapshot.getValue(FirebaseRecyclerAdapter.this.mItemClass);
+              //  mItems.set(index, newItem);
+                notifyItemChanged(index);
+                itemChanged(oldItem, newItem, key, index);
+            }
         }
+
 
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {

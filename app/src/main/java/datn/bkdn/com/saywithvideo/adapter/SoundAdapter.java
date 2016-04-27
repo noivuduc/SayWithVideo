@@ -69,7 +69,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
             public void onClick(View v) {
                 if (mItemClicked != null) {
                     mItemClicked.onClick(model, v, position);
-                    itemChanged(model, model, getKeys().get(position), position);
+                    //   itemChanged(model, model, getKeys().get(position), position);
                 }
             }
         });
@@ -113,7 +113,6 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
             viewHolder.progressPlay.setVisibility(View.INVISIBLE);
             viewHolder.imgPlayPause.setVisibility(View.VISIBLE);
         }
-        Log.d("adapter.SSS " + model.getName(), model.isPlaying() + "");
         viewHolder.imgFavorite.setImageResource(model.isFavorite() ? R.mipmap.favorite_selected : R.mipmap.favorite_unselected);
         viewHolder.imgPlayPause.setImageResource(model.isPlaying() ? R.mipmap.ic_pause : R.mipmap.ic_play);
         viewHolder.tvSoundName.setText(model.getName());
@@ -125,7 +124,6 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         String author = Utils.getUserName(item.getUser_id());
         item.setAuthor(author);
         item.setId(key);
-        // item.setLink_on_Disk(getItem(position).getLink_on_Disk());
         final Sound sound = convertAudio(item);
         final Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(mContext) + "/favorite/");
         new AsyncTask<Void, Void, Void>() {
@@ -136,37 +134,23 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.hasChild(key)) {
-                            item.setIsFavorite(true);
-                            sound.setIsFavorite(true);
+                            getItem(position).setIsFavorite(true);
                             notifyDataSetChanged();
+                            sound.setIsFavorite(true);
                         }
                         if (!RealmUtils.getRealmUtils(mContext).checkExistSound(mContext, key)) {
                             new AsyncAddSound().execute(sound);
                         } else {
-                            new AsyncTask<Void, Void, Void>() {
-
-                                @Override
-                                protected Void doInBackground(Void... params) {
-                                    Realm realm = RealmManager.getRealm(mContext);
-                                    realm.beginTransaction();
-                                    Sound s = realm.where(Sound.class).equalTo("id", sound.getId()).findFirst();
-                                    s.setIsFavorite(sound.isFavorite());
-                                    s.setAuthor(sound.getAuthor());
-//                                    s.setLinkOnDisk(sound.getLinkOnDisk());
-                                    s.setPlays(sound.getPlays());
-                                    realm.commitTransaction();
-//                                    Audio audio = convertAudio(s);
-//                                    getItems().set(position, audio);
-//                                    getKeys().set(position, key);
-                                    realm.close();
-                                    return null;
-                                }
-
-                                @Override
-                                protected void onPostExecute(Void aVoid) {
-                                    super.onPostExecute(aVoid);
-                                }
-                            }.execute();
+                            //update Realm object
+                            Realm realm = RealmManager.getRealm(mContext);
+                            realm.beginTransaction();
+                            Sound s = realm.where(Sound.class).equalTo("id", sound.getId()).findFirst();
+                            s.setIsFavorite(sound.isFavorite());
+                            s.setAuthor(sound.getAuthor());
+                            s.setPlays(sound.getPlays());
+                            realm.commitTransaction();
+                            item.setLink_on_Disk(s.getLinkOnDisk());
+                            realm.close();
                         }
                         notifyDataSetChanged();
                     }
@@ -181,29 +165,22 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         }.execute();
     }
 
+
     @Override
     protected void itemChanged(final Audio oldItem, final Audio newItem, final String key, final int position) {
         if (datn.bkdn.com.saywithvideo.network.Tools.isOnline(mContext)) {
-//            new AsyncTask<Void, Void, Void>() {
-//                @Override
-//                protected Void doInBackground(Void... params) {
-//                    Realm realm = RealmManager.getRealm(mContext);
-//                    realm.beginTransaction();
-//                    Sound s = realm.where(Sound.class).equalTo("id", key).findFirst();
-//                    s.setIsFavorite(newItem.isFavorite());
-//                    s.setAuthor(newItem.getAuthor());
-//                    s.setLinkOnDisk(newItem.getLink_on_Disk());
-//                    s.setPlays(newItem.getPlays());
-//                    realm.commitTransaction();
-//                    Audio audio = convertAudio(s);
-//                    getItems().set(position, audio);
-//                    getKeys().set(position, key);
-//                    realm.close();
-//                   // notifyDataSetChanged();
-//                    RealmUtils.getRealmUtils(mContext).updateSound(mContext, key, oldItem);
-//                    return null;
-//                }
-//            }.execute();
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    Realm realm = RealmManager.getRealm(mContext);
+                    realm.beginTransaction();
+                    Sound s = realm.where(Sound.class).equalTo("id", key).findFirst();
+                    s.setPlays(newItem.getPlays());
+                    realm.commitTransaction();
+                    realm.close();
+                    return null;
+                }
+            }.execute();
         }
     }
 
@@ -293,7 +270,6 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
             realm.beginTransaction();
             realm.copyToRealm(sound[0]);
             realm.commitTransaction();
-            //RealmUtils.getRealmUtils(mContext).addNewSound(mContext, sound[0]);
             realm.close();
             return null;
         }

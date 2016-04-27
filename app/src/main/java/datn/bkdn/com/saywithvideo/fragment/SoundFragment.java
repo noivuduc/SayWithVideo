@@ -23,11 +23,14 @@ import com.firebase.client.ValueEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity;
 import datn.bkdn.com.saywithvideo.adapter.SoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
+import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
@@ -169,14 +172,14 @@ public class SoundFragment extends Fragment {
                                     @Override
                                     protected void onPostExecute(String aVoid) {
                                         super.onPostExecute(aVoid);
+                                        mFilePath = aVoid;
+                                        sound.setLink_on_Disk(mFilePath);
+                                        new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                         if (mCurrentPos == pos) {
                                             sound.setLoadAudio(false);
                                             sound.setIsPlaying(!sound.isPlaying());
                                             playMp3(mFilePath);
-                                            new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
                                         }
-                                        mFilePath = aVoid;
-                                        sound.setLink_on_Disk(mFilePath);
                                         mAdapter.notifyDataSetChanged();
 
                                     }
@@ -188,7 +191,7 @@ public class SoundFragment extends Fragment {
                                 mAdapter.notifyDataSetChanged();
                                 playMp3(mFilePath);
                             }
-                            new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
+                            new AsyncUpdatePlay().execute(audioId, sound.getPlays() + 1 + "");
 
                         }
 
@@ -209,6 +212,7 @@ public class SoundFragment extends Fragment {
 
                                 @Override
                                 protected Void doInBackground(Void... params) {
+                                    RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(),audioId);
                                     mFirebaseUser = AppTools.getInfoUser(Utils.getCurrentUserID(getContext()));
                                     favoriteFirebase.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
@@ -218,7 +222,9 @@ public class SoundFragment extends Fragment {
                                                 favoriteFirebase.child(id).removeValue();
                                                 ff.child("no_favorite").setValue(mFirebaseUser.getNo_favorite() - 1);
                                             } else {
-                                                favoriteFirebase.child(id).setValue("true");
+                                                Map<String,String> values = new HashMap<String, String>();
+                                                values.put("name",sound.getName());
+                                                favoriteFirebase.child(id).setValue(values);
                                                 ff.child("no_favorite").setValue(mFirebaseUser.getNo_favorite() + 1);
                                             }
                                         }
@@ -235,6 +241,7 @@ public class SoundFragment extends Fragment {
                                 protected void onPostExecute(Void aVoid) {
                                     super.onPostExecute(aVoid);
                                     sound.setLoadFavorite(false);
+//                                    RealmUtils.
                                     mAdapter.notifyDataSetChanged();
                                 }
                             }.execute();
@@ -246,10 +253,6 @@ public class SoundFragment extends Fragment {
                         mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.llSoundInfor:
-                        if (!Tools.isOnline(getContext())) {
-                            Snackbar.make(getActivity().getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
-                            break;
-                        }
                         if (mCurrentPos != -1 && pos != mCurrentPos) {
                             Audio sound1 = mAdapter.getItems().get(mCurrentPos);
                             if (sound1.isPlaying()) {
@@ -265,6 +268,10 @@ public class SoundFragment extends Fragment {
                             mFilePath = sound.getLink_on_Disk();
                             finishActivity();
                         } else {
+                            if (!Tools.isOnline(getContext())) {
+                                Snackbar.make(getActivity().getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                                break;
+                            }
                             new AsyncTask<Void, Void, String>() {
                                 @Override
                                 protected void onPreExecute() {
