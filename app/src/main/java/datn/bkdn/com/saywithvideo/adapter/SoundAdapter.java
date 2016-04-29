@@ -14,11 +14,10 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -26,7 +25,7 @@ import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Sound;
-import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.lib.FirebaseRecyclerAdapter;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
@@ -38,20 +37,56 @@ import io.realm.RealmResults;
  */
 
 public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHolder, Audio> implements RealmChangeListener {
-
+    private ArrayList<String> mFavorites;
     private Context mContext;
     private RealmResults<Sound> mSounds;
+
+    private ChildEventListener mListenner = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            if (mFavorites == null) {
+                mFavorites = new ArrayList<>();
+            }
+            String key = dataSnapshot.getKey();
+            if (!mFavorites.contains(key)) {
+                mFavorites.add(key);
+            }
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+            mFavorites.remove(dataSnapshot.getKey());
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(FirebaseError firebaseError) {
+
+        }
+    };
 
     public SoundAdapter(Query query, Class<Audio> itemClass, Context context) {
         super(query, itemClass);
         this.mContext = context;
     }
 
-    public SoundAdapter(Query query, Class<Audio> itemClass, RealmResults<Sound> sounds, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
+    public SoundAdapter(Query query, @Nullable Query favorite, Class<Audio> itemClass, RealmResults<Sound> sounds, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
         super(query, itemClass, items, keys);
         this.mSounds = sounds;
         this.mContext = mContext;
         mSounds.addChangeListener(this);
+        if (favorite != null) {
+            favorite.addChildEventListener(mListenner);
+        }
     }
 
     @Override
@@ -69,7 +104,6 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
             public void onClick(View v) {
                 if (mItemClicked != null) {
                     mItemClicked.onClick(model, v, position);
-                    //   itemChanged(model, model, getKeys().get(position), position);
                 }
             }
         });
@@ -119,50 +153,80 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         viewHolder.tvSoundAuthor.setText("upload by " + model.getAuthor());
     }
 
+    /**
+     * @param item     item exist
+     * @param key      key of item
+     * @param position
+     */
     @Override
-    protected void itemAdded(final Audio item, final String key, final int position) {
-        String author = Utils.getUserName(item.getUser_id());
-        item.setAuthor(author);
-        item.setId(key);
-        final Sound sound = convertAudio(item);
-        final Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(mContext) + "/favorite/");
-        new AsyncTask<Void, Void, Void>() {
+    protected void itemExist(final Audio item, final String key, final int position) {
+        new AsyncTask<Void, Void, String>(){
 
             @Override
+            protected String doInBackground(Void... params) {
+                String author = Utils.getUserName(item.getUser_id());
+                return author;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                getItem(position).setAuthor(s);
+            }
+        }.execute();
+        if(mFavorites!=null) {
+            if (mFavorites.contains(key)) {
+                getItem(position).setIsFavorite(true);
+                notifyItemChanged(position);
+            } else {
+                getItem(position).setIsFavorite(false);
+            }
+        }
+        new AsyncTask<Void, Void, Void>() {
+            @Override
             protected Void doInBackground(Void... params) {
-                firebase.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.hasChild(key)) {
-                            getItem(position).setIsFavorite(true);
-                            notifyDataSetChanged();
-                            sound.setIsFavorite(true);
-                        }
-                        if (!RealmUtils.getRealmUtils(mContext).checkExistSound(mContext, key)) {
-                            new AsyncAddSound().execute(sound);
-                        } else {
-                            //update Realm object
-                            Realm realm = RealmManager.getRealm(mContext);
-                            realm.beginTransaction();
-                            Sound s = realm.where(Sound.class).equalTo("id", sound.getId()).findFirst();
-                            s.setIsFavorite(sound.isFavorite());
-                            s.setAuthor(sound.getAuthor());
-                            s.setPlays(sound.getPlays());
-                            realm.commitTransaction();
-                            item.setLink_on_Disk(s.getLinkOnDisk());
-                            realm.close();
-                        }
-                        notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-
-                    }
-                });
+                Realm realm = RealmManager.getRealm(mContext);
+                realm.beginTransaction();
+                Sound s = realm.where(Sound.class).equalTo("id", key).findFirst();
+                s.setIsFavorite(getItem(position).isFavorite());
+                s.setAuthor("");
+                s.setPlays(item.getPlays());
+                realm.commitTransaction();
+                realm.close();
                 return null;
             }
         }.execute();
+    }
+
+    @Override
+    protected void itemAdded(final Audio item, final String key, final int position) {
+        new AsyncTask<Void, Void, String>(){
+
+            @Override
+            protected String doInBackground(Void... params) {
+                String author = Utils.getUserName(item.getUser_id());
+                return author;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                item.setAuthor(s);
+            }
+        }.execute();
+        item.setId(key);
+        final Sound sound = convertAudio(item);
+        if(mFavorites!=null) {
+            if (mFavorites.contains(key)) {
+                getItem(position).setIsFavorite(true);
+                notifyItemChanged(position);
+            } else {
+                getItem(position).setIsFavorite(false);
+            }
+        }
+        if (!RealmUtils.getRealmUtils(mContext).checkExistSound(mContext, key)) {
+            new AsyncAddSound().execute(sound);
+        }
     }
 
 
@@ -239,7 +303,6 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         private TextView tvSoundName;
         private ImageView imgPlayPause;
         private ImageView imgFavorite;
-        private ImageView imgMenu;
         private ProgressBar progressBar;
         private ProgressBar progressPlay;
         private LinearLayout linearLayout;
@@ -253,13 +316,14 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
             tvSoundAuthor = (TextView) mView.findViewById(R.id.tvSoundAuthor);
             imgPlayPause = (ImageView) mView.findViewById(R.id.imgPlay);
             imgFavorite = (ImageView) mView.findViewById(R.id.imgFavorite);
-            imgMenu = (ImageView) mView.findViewById(R.id.imgOption);
             progressBar = (ProgressBar) mView.findViewById(R.id.progressFavorite);
             progressPlay = (ProgressBar) mView.findViewById(R.id.progressPlay);
             linearLayout = (LinearLayout) mView.findViewById(R.id.llSoundInfor);
             rlOption = (RelativeLayout) mView.findViewById(R.id.rlOption);
             rlFavorite = (RelativeLayout) mView.findViewById(R.id.rlFavorite);
         }
+
+
     }
 
     class AsyncAddSound extends AsyncTask<Sound, Void, Void> {

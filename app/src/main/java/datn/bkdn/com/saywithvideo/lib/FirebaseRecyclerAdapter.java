@@ -1,4 +1,4 @@
-package datn.bkdn.com.saywithvideo.adapter;
+package datn.bkdn.com.saywithvideo.lib;
 
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -100,7 +100,9 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
                 notifyItemInserted(insertedPosition);
                 itemAdded(item, key, insertedPosition);
             } else {
-                itemAdded(item, key, 0);
+                int currentPosition = mKeys.indexOf(key);
+                itemExist(item, key, currentPosition);
+
                 }
         }
 
@@ -246,6 +248,13 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
     }
 
     /**
+     * Called after an item has already exist
+     * @param item item exist
+     * @param key key of item
+     * @param postion position of item
+     */
+    protected abstract void itemExist(T item, String key, int postion);
+    /**
      * ABSTRACT METHODS THAT MUST BE IMPLEMENTED BY THE EXTENDING ADAPTER.
      */
 
@@ -256,6 +265,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
      * @param key      Key of the added item
      * @param position Position of the added item in the adapter
      */
+
     protected abstract void itemAdded(T item, String key, int position);
 
     /**

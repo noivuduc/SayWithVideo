@@ -1,7 +1,10 @@
 package datn.bkdn.com.saywithvideo.fragment;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,6 +31,7 @@ import java.util.Map;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity;
+import datn.bkdn.com.saywithvideo.activity.FavoriteActivity;
 import datn.bkdn.com.saywithvideo.adapter.SoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
@@ -78,6 +82,7 @@ public class SoundFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        getActivity().registerReceiver(mReceiver,new IntentFilter(FavoriteActivity.BROADCAST_FAVORITE));
     }
 
     private Audio convertAudio(Sound sound) {
@@ -112,6 +117,7 @@ public class SoundFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+        getActivity().unregisterReceiver(mReceiver);
     }
 
     private void init() {
@@ -120,7 +126,8 @@ public class SoundFragment extends Fragment {
         initData();
         Firebase.setAndroidContext(getContext());
         mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
-        mAdapter = new SoundAdapter(mFirebase, Audio.class, mSounds, mAdapterItems, mAdapterKeys, getContext());
+        final Firebase fFavorite = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(getContext()) + "/favorite/");
+        mAdapter = new SoundAdapter(mFirebase,fFavorite, Audio.class, mSounds, mAdapterItems, mAdapterKeys, getContext());
         mAdapter.setPlayButtonClicked(new SoundAdapter.OnItemClicked() {
             @Override
             public void onClick(final Audio sound, View v, final int pos) {
@@ -206,8 +213,8 @@ public class SoundFragment extends Fragment {
                                 @Override
                                 protected void onPreExecute() {
                                     super.onPreExecute();
-                                    sound.setLoadFavorite(true);
-                                    mAdapter.notifyDataSetChanged();
+//                                    sound.setLoadFavorite(true);
+//                                    mAdapter.notifyDataSetChanged();
                                 }
 
                                 @Override
@@ -224,6 +231,9 @@ public class SoundFragment extends Fragment {
                                             } else {
                                                 Map<String,String> values = new HashMap<String, String>();
                                                 values.put("name",sound.getName());
+                                                values.put("date_create",sound.getDate_create());
+                                                values.put("user_id",sound.getUser_id());
+                                                values.put("plays",sound.getPlays()+"");
                                                 favoriteFirebase.child(id).setValue(values);
                                                 ff.child("no_favorite").setValue(mFirebaseUser.getNo_favorite() + 1);
                                             }
@@ -240,9 +250,9 @@ public class SoundFragment extends Fragment {
                                 @Override
                                 protected void onPostExecute(Void aVoid) {
                                     super.onPostExecute(aVoid);
-                                    sound.setLoadFavorite(false);
-//                                    RealmUtils.
-                                    mAdapter.notifyDataSetChanged();
+//                                    sound.setLoadFavorite(false);
+////                                    RealmUtils.
+//                                    mAdapter.notifyDataSetChanged();
                                 }
                             }.execute();
 
@@ -340,6 +350,7 @@ public class SoundFragment extends Fragment {
         }
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
@@ -386,5 +397,18 @@ public class SoundFragment extends Fragment {
         }
     }
 
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("aaass","aaaa");
+            if(intent.getAction()== FavoriteActivity.BROADCAST_FAVORITE){
+                int pos = intent.getIntExtra("POS",-1);
+                if(pos != -1) {
+                    mAdapter.getItem(pos).setFavorite(false);
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        }
+    };
 
 }

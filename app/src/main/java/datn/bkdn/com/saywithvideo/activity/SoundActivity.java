@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter2;
+import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
 import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
@@ -43,7 +43,7 @@ import io.realm.RealmResults;
 
 public class SoundActivity extends AppCompatActivity implements View.OnClickListener,
         PopupMenu.OnMenuItemClickListener {
-    private ListMySoundAdapter2 mAdapter;
+    private ListMySoundAdapter mAdapter;
     private RelativeLayout rlBack;
     private RelativeLayout rlSort;
     private TextView tvAddSound;
@@ -73,9 +73,9 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private void initAdapter() {
         Query query = mFirebase.orderByChild("user_id").equalTo(Utils.getCurrentUserID(this));
         getData();
-        mAdapter = new ListMySoundAdapter2(this, query, Audio.class, mAdapterItems, mAdapterKeys);
+        mAdapter = new ListMySoundAdapter(this, query, Audio.class, mAdapterItems, mAdapterKeys);
         mRecycle.setAdapter(mAdapter);
-        mAdapter.setPlayButtonClicked(new ListMySoundAdapter2.OnItemClicked() {
+        mAdapter.setPlayButtonClicked(new ListMySoundAdapter.OnItemClicked() {
 
             @Override
             public void onClick(final int pos, View v, final Audio sound) {
@@ -470,7 +470,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        finishActivity();
+        this.finish();
     }
 
     @Override
@@ -482,7 +482,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.rlBack:
-                finishActivity();
+                this.finish();
                 break;
             case R.id.rlSort:
                 createSortMenu(imgSort);
