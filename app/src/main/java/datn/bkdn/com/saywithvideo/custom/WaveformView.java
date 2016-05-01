@@ -169,6 +169,12 @@ public class WaveformView extends View {
         return (int) ((msecs * 1.0 * mSampleRate * z) / (1000.0 * mSamplesPerFrame) + 0.5);
     }
 
+    public int secondsToPixels(double seconds) {
+        double z = mZoomFactorByZoomLevel[mZoomLevel];
+        return (int)(z * seconds * mSampleRate / mSamplesPerFrame + 0.5);
+    }
+
+
     public int pixelsToMillisecs(int pixels) {
         double z = mZoomFactorByZoomLevel[mZoomLevel];
         return (int) (pixels * (1000.0 * mSamplesPerFrame) / (mSampleRate * z) + 0.5);

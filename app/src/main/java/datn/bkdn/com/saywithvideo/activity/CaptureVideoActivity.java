@@ -13,7 +13,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -83,22 +82,31 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mRlCaptureVideo = (RelativeLayout) findViewById(R.id.rlCaptureVideo);
         mRlSwitchCamera = (RelativeLayout) findViewById(R.id.rlSwitchCamera);
         mWaveformView = (WaveformView) findViewById(R.id.waveform);
+        FrameLayout mFlPreview = (FrameLayout) findViewById(R.id.cameraPreview);
 
-        mRlBack.setOnClickListener(this);
+        if (mRlBack != null) mRlBack.setOnClickListener(this);
         mRlCaptureVideo.setOnClickListener(this);
         mRlSwitchCamera.setOnClickListener(this);
         mWaveformView.setListener(this);
 
-        mFileName = getIntent().getStringExtra("FileName");
-        mFilePath = getIntent().getStringExtra("FilePath");
-        mMaxPos = 0;
-        mDensity = getResources().getDisplayMetrics().density;
         mHandler = new Handler();
         mCamera = getCameraInstance();
         mPreview = new CameraPreview(this, mCamera);
-        FrameLayout mFlPreview = (FrameLayout) findViewById(R.id.cameraPreview);
-        mFlPreview.addView(mPreview);
-        loadFile();
+        if (mFlPreview != null) mFlPreview.addView(mPreview);
+
+        initData();
+    }
+
+    private void initData() {
+        mFileName = getIntent().getStringExtra("FileName");
+        mFilePath = getIntent().getStringExtra("FilePath");
+        mMaxPos = 0;
+        mStartPos = 0;
+        mDensity = getResources().getDisplayMetrics().density;
+        if (mSoundFile == null) loadFile();
+        else {
+            finishOpeningSoundFile();
+        }
     }
 
     private void loadFile() {
@@ -139,6 +147,15 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                     mMediaPlayer.setDataSource(mFilePath);
                     mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                     mMediaPlayer.prepare();
+                    mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            handlePause();
+                            releaseMediaRecorder();
+                            mWaveformView.setPlayback(-1);
+                            new MuxVideo().execute();
+                        }
+                    });
                 } catch (IOException e) {
                     mMediaPlayer = null;
                 }
@@ -207,14 +224,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             } else {
                 mPlayEndMsec = mWaveformView.pixelsToMillisecs(mEndPos);
             }
-            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    handlePause();
-                    releaseMediaRecorder();
-                    new MuxVideo().execute();
-                }
-            });
             mIsPlaying = true;
 
             mMediaPlayer.seekTo(mPlayStartMsec);
@@ -235,6 +244,13 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
 
     protected synchronized void handleRelease() {
         releasePlayer();
+        releaseMediaRecorder();
+        try {
+            File file = new File(mVideoOutPut);
+            file.deleteOnExit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         mWaveformView.setPlayback(-1);
         mIsPlaying = false;
     }
@@ -309,6 +325,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             mMediaRecorder.setOrientationHint(90);
         }
 
+        Tools.createFolder(Constant.VIDEO_DIRECTORY_PATH);
         mVideoOutPut = Constant.VIDEO_DIRECTORY_PATH + "VIDEO_" + AppTools.getDate() + ".mp4";
         mMediaRecorder.setOutputFile(mVideoOutPut);
         try {
@@ -337,12 +354,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     }
 
     public void onResume() {
-        super.onResume();
-
-        mStartPos = 0;
-        mOffset = 0;
-        mOffsetGoal = 0;
-
         if (!hasCamera(this)) {
             Toast toast = Toast.makeText(this, "Sorry, your phone does not have a camera!", Toast.LENGTH_LONG);
             toast.show();
@@ -358,6 +369,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             }
             mPreview.refreshCamera(mCamera);
         }
+        super.onResume();
     }
 
     public void chooseCamera() {
@@ -439,8 +451,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                     Toast.makeText(CaptureVideoActivity.this, "Fail in prepareMediaRecorder()!\n - Ended -", Toast.LENGTH_LONG).show();
                     finish();
                 }
-
-                Log.d("mStartPos", mStartPos + "");
                 onPlay(mStartPos);
                 mMediaRecorder.start();
                 break;
@@ -539,18 +549,5 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     public void onBackPressed() {
         handleRelease();
         super.onBackPressed();
-    }
-
-    @Override
-    protected void onPause() {
-        handleRelease();
-        if (mMediaRecorder != null) {
-            mMediaRecorder.stop();
-            mMediaRecorder = null;
-        }
-        releaseCamera();
-        mRlSwitchCamera.setEnabled(true);
-        mRlCaptureVideo.setEnabled(true);
-        super.onPause();
     }
 }

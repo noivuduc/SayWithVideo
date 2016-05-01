@@ -3,13 +3,14 @@ package datn.bkdn.com.saywithvideo.activity;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.audiofx.Visualizer;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -27,11 +28,12 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.UUID;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.custom.MarkerView;
-import datn.bkdn.com.saywithvideo.custom.VisualizerView;
+import datn.bkdn.com.saywithvideo.custom.WaveformView;
 import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseAudio;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
@@ -42,117 +44,244 @@ import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Tools;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
-public class EditAudioActivity extends Activity implements MarkerView.CustomListener,
-        MediaPlayer.OnCompletionListener, View.OnClickListener {
+public class EditAudioActivity extends Activity implements MarkerView.MarkerListener,
+        WaveformView.WaveformListener, View.OnClickListener {
 
-    private static final int MIN_SECOND = 1;
+    //    private static final int MIN_SECOND = 1;
     private static final int MAX_SECOND = 20;
-    private MarkerView mMarkerLeft;
-    private MarkerView mMarkerRight;
-    private VisualizerView mVisualizerView;
     private ImageView mImgPlay;
-    private String mFilePath;
-    private MediaPlayer mMediaPlayer;
-    private int mWidth;
+    private String mFilename;
     private String mOutputPath;
     private Firebase mFirebase;
     private String mType;
     private TextView mTvStart;
     private TextView mTvEnd;
     private ProgressDialog mProgressDialog;
-    private int mStartPosition;
-    private int mEndPosition;
-    private int mDuration;
-    private CountDownTimer mCountDownTimer;
     private String fileName;
+    private WaveformView mWaveformView;
+    private MarkerView mStartMarker;
+    private MarkerView mEndMarker;
+    private int mWidth;
+    private int mMaxPos;
+    private int mStartPos;
+    private int mEndPos;
+    private boolean mStartVisible;
+    private boolean mEndVisible;
+    private int mLastDisplayedStartPos;
+    private int mLastDisplayedEndPos;
+    private int mOffset;
+    private int mOffsetGoal;
+    private int mFlingVelocity;
+    private int mPlayStartMsec;
+    private int mPlayEndMsec;
+    private Handler mHandler;
+    private boolean mIsPlaying;
+    private MediaPlayer mPlayer;
+    private boolean mTouchDragging;
+    private float mTouchStart;
+    private int mTouchInitialOffset;
+    private int mTouchInitialStartPos;
+    private int mTouchInitialEndPos;
+    private long mWaveformTouchStartMsec;
+    private float mDensity;
+    private int mMarkerLeftInset;
+    private int mMarkerRightInset;
+    private int mMarkerTopOffset;
+    private int mMarkerBottomOffset;
+    private TextView mInfo;
+    private String mCaption = "";
+    private SoundFile mSoundFile;
+    private File mFile;
+    private boolean mKeyDown;
+    private long mLoadingLastUpdateTime;
+    private boolean mLoadingKeepGoing;
 
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.activity_edit_audio);
+
         Firebase.setAndroidContext(this);
         mFirebase = new Firebase(FirebaseConstant.BASE_URL);
 
-        mFilePath = getIntent().getStringExtra("FileName");
+        mFilename = getIntent().getStringExtra("FileName");
         mType = getIntent().getStringExtra("Type");
-
-        if (mFilePath == null) {
+        if (mFilename == null) {
             Toast.makeText(getBaseContext(), "Audio file error", Toast.LENGTH_SHORT).show();
             finish();
         }
 
-        init();
-        setupData();
-        setupVisualizerFxAndUI();
+        mHandler = new Handler();
+        loadGui();
+        mHandler.postDelayed(mTimerRunnable, 100);
+        loadFromFile();
     }
 
-    private void init() {
-        mMarkerLeft = (MarkerView) findViewById(R.id.markerLeft);
-        mMarkerRight = (MarkerView) findViewById(R.id.markerRight);
+    private void loadGui() {
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        mDensity = metrics.density;
+
+        mMarkerLeftInset = (int) (46 * mDensity);
+        mMarkerRightInset = (int) (48 * mDensity);
+        mMarkerTopOffset = (int) (10 * mDensity);
+        mMarkerBottomOffset = (int) (10 * mDensity);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
         RelativeLayout mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
-        mVisualizerView = (VisualizerView) findViewById(R.id.visualizerView);
         TextView mTvNext = (TextView) findViewById(R.id.tvNext);
         mImgPlay = (ImageView) findViewById(R.id.imgPlay);
         mTvStart = (TextView) findViewById(R.id.tvStart);
         mTvEnd = (TextView) findViewById(R.id.tvEnd);
+        mWaveformView = (WaveformView) findViewById(R.id.waveform);
+        mInfo = (TextView) findViewById(R.id.tvInfor);
 
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Please wait...");
-        mProgressDialog.setIndeterminate(true);
-        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-
-        mMarkerLeft.setListener(this);
-        mMarkerRight.setListener(this);
         mRlBack.setOnClickListener(this);
         mTvNext.setOnClickListener(this);
         mImgPlay.setOnClickListener(this);
+        mWaveformView.setListener(this);
+        mInfo.setText(mCaption);
 
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        mMaxPos = 0;
+        mLastDisplayedStartPos = -1;
+        mLastDisplayedEndPos = -1;
+
+        mStartMarker = (MarkerView) findViewById(R.id.startmarker);
+        mStartMarker.setListener(this);
+        mStartMarker.setAlpha(1f);
+        mStartMarker.setFocusable(true);
+        mStartMarker.setFocusableInTouchMode(true);
+        mStartVisible = true;
+
+        mEndMarker = (MarkerView) findViewById(R.id.endmarker);
+        mEndMarker.setListener(this);
+        mEndMarker.setAlpha(1f);
+        mEndMarker.setFocusable(true);
+        mEndMarker.setFocusableInTouchMode(true);
+        mEndVisible = true;
+        enableDisableButtons();
+
+        updateDisplay();
     }
 
-    private void setupData() {
-        mMediaPlayer = new MediaPlayer();
-        try {
-            mMediaPlayer.setDataSource(mFilePath);
-            mMediaPlayer.prepare();
-            mMediaPlayer.setOnCompletionListener(this);
-            mDuration = mMediaPlayer.getDuration();
-            String duration = mDuration / 1000 + "." + mDuration / 100 % 10;
-            mTvEnd.setText(duration);
-        } catch (IOException e) {
-            e.printStackTrace();
-            mMediaPlayer = null;
+
+    @Override
+    public void markerTouchStart(MarkerView marker, float x) {
+        Log.d("marker", "markerTouchStart");
+        mTouchDragging = true;
+        mTouchStart = x;
+        mTouchInitialStartPos = mStartPos;
+        mTouchInitialEndPos = mEndPos;
+    }
+
+    @Override
+    public void markerTouchMove(MarkerView marker, float x) {
+        Log.d("marker", "markerTouchMove");
+        float delta = x - mTouchStart;
+
+        if (marker == mStartMarker) {
+            mStartPos = trap((int) (mTouchInitialStartPos + delta));
+            mEndPos = trap((int) (mTouchInitialEndPos + delta));
+        } else {
+            mEndPos = trap((int) (mTouchInitialEndPos + delta));
+            if (mEndPos < mStartPos)
+                mEndPos = mStartPos;
         }
 
-        mWidth = getResources().getDisplayMetrics().widthPixels;
-        mStartPosition = 0;
-        mEndPosition = mDuration;
+        updateDisplay();
     }
 
-    private void setupVisualizerFxAndUI() {
-        mVisualizerView.start();
-        Visualizer mVisualizer = new Visualizer(mMediaPlayer.getAudioSessionId());
-        mVisualizerView.setDuration(mMediaPlayer.getDuration());
-        mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
-        mVisualizer.setDataCaptureListener(
-                new Visualizer.OnDataCaptureListener() {
-                    public void onWaveFormDataCapture(Visualizer visualizer,
-                                                      byte[] bytes, int samplingRate) {
-                        int current;
-                        try {
-                            current = mMediaPlayer.getCurrentPosition();
-                            mVisualizerView.updateVisualizer(bytes, current);
-                        } catch (Exception e) {
-                            visualizer.setEnabled(false);
-                        }
+    @Override
+    public void markerTouchEnd(MarkerView marker) {
+        Log.d("marker", "markerTouchEnd");
+        mTouchDragging = false;
+        if (marker == mStartMarker) {
+            setOffsetGoalStart();
+        } else {
+            setOffsetGoalEnd();
+        }
+    }
 
-                    }
+    @Override
+    public void markerFocus(MarkerView marker) {
+        Log.d("marker", "markerFocus");
+        mKeyDown = false;
+        if (marker == mStartMarker) {
+            setOffsetGoalStartNoUpdate();
+        } else {
+            setOffsetGoalEndNoUpdate();
+        }
 
-                    public void onFftDataCapture(Visualizer visualizer,
-                                                 byte[] bytes, int samplingRate) {
-                    }
-                }, Visualizer.getMaxCaptureRate() / 2, true, false);
-        mVisualizer.setEnabled(true);
+        mHandler.postDelayed(new Runnable() {
+            public void run() {
+                updateDisplay();
+            }
+        }, 100);
+    }
+
+    @Override
+    public void markerLeft(MarkerView marker, int velocity) {
+        Log.d("marker", "markerLeft");
+        mKeyDown = true;
+
+        if (marker == mStartMarker) {
+            int saveStart = mStartPos;
+            mStartPos = trap(mStartPos - velocity);
+            mEndPos = trap(mEndPos - (saveStart - mStartPos));
+            setOffsetGoalStart();
+        }
+
+        if (marker == mEndMarker) {
+            if (mEndPos == mStartPos) {
+                mStartPos = trap(mStartPos - velocity);
+                mEndPos = mStartPos;
+            } else {
+                mEndPos = trap(mEndPos - velocity);
+            }
+
+            setOffsetGoalEnd();
+        }
+
+        updateDisplay();
+    }
+
+    @Override
+    public void markerRight(MarkerView marker, int velocity) {
+        Log.d("marker", "markerRight");
+        mKeyDown = true;
+
+        if (marker == mStartMarker) {
+            int saveStart = mStartPos;
+            mStartPos += velocity;
+            if (mStartPos > mMaxPos)
+                mStartPos = mMaxPos;
+            mEndPos += (mStartPos - saveStart);
+            if (mEndPos > mMaxPos)
+                mEndPos = mMaxPos;
+
+            setOffsetGoalStart();
+        }
+
+        if (marker == mEndMarker) {
+            mEndPos += velocity;
+            if (mEndPos > mMaxPos)
+                mEndPos = mMaxPos;
+
+            setOffsetGoalEnd();
+        }
+
+        updateDisplay();
+    }
+
+    @Override
+    public void markerEnter(MarkerView marker) {
+
+    }
+
+    @Override
+    public void markerKeyUp() {
+        mKeyDown = false;
+        updateDisplay();
     }
 
     @Override
@@ -161,68 +290,10 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
     }
 
     @Override
-    public void markerTouchStart(MarkerView customImageView) {
-    }
-
-    @Override
-    public void markerTouchEnd(MarkerView customImageView, float x) {
-
-    }
-
-    @Override
-    public void markerMove(MarkerView customImageView, float x) {
-
-        int temp = (int) x * mDuration / mVisualizerView.getWidth();
-        String stemp = temp / 1000 + "." + temp / 100 % 10;
-
-        switch (customImageView.getId()) {
-            case R.id.markerLeft:
-                if (Float.parseFloat(mTvEnd.getText().toString()) - Float.parseFloat(stemp) < MIN_SECOND) {
-                    return;
-                }
-                mStartPosition = temp;
-                mMarkerLeft.setX(x);
-                mTvStart.setText(stemp);
-                break;
-            case R.id.markerRight:
-                if ((int) x + mMarkerRight.getWidth() <= mWidth) {
-                    if (Float.parseFloat(stemp) - Float.parseFloat(mTvStart.getText().toString()) < MIN_SECOND) {
-                        return;
-                    }
-                    mEndPosition = temp;
-                    mMarkerRight.setX(x);
-                    mTvEnd.setText(stemp);
-                } else {
-                    String s = mDuration / 1000 + "." + mDuration / 100 % 10;
-                    mTvEnd.setText(s);
-                }
-                break;
-        }
-    }
-
-    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.imgPlay:
-                if (mMediaPlayer.isPlaying()) {
-                    complete();
-                } else {
-                    mVisualizerView.setStartPosition(mStartPosition);
-                    mMediaPlayer.seekTo(mStartPosition);
-                    mImgPlay.setImageResource(R.mipmap.ic_pause);
-                    mCountDownTimer = new CountDownTimer(mEndPosition - mStartPosition, 100) {
-                        @Override
-                        public void onTick(long millisUntilFinished) {
-                            mMediaPlayer.start();
-                        }
-
-                        @Override
-                        public void onFinish() {
-                            complete();
-                        }
-                    };
-                    mCountDownTimer.start();
-                }
+                onPlay(mStartPos);
                 break;
             case R.id.tvNext:
                 Tools.hideKeyboard(EditAudioActivity.this);
@@ -234,46 +305,22 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
                 float start = Float.parseFloat(mTvStart.getText().toString());
                 float end = Float.parseFloat(mTvEnd.getText().toString());
                 if (end - start > MAX_SECOND) {
-                    Toast.makeText(getBaseContext(), "The length of audio over"+MAX_SECOND + "seconds", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "The length of audio over" + MAX_SECOND + "seconds", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     createDialog();
                 }
                 break;
             case R.id.rlBack:
-                complete();
                 finish();
 
         }
     }
 
-    @Override
-    public void onCompletion(MediaPlayer mp) {
-        complete();
-    }
-
-    private void complete() {
-        if (mMediaPlayer.isPlaying()) {
-            mMediaPlayer.stop();
-            try {
-                mMediaPlayer.prepare();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (mCountDownTimer != null) {
-                mCountDownTimer.cancel();
-            }
-        }
-        mVisualizerView.reset();
-        mMediaPlayer.seekTo(mStartPosition);
-        mVisualizerView.setStartPosition(mStartPosition);
-        mImgPlay.setImageResource(R.mipmap.ic_play);
-    }
-
     private void createSound(String name) {
         String idSound = UUID.randomUUID().toString();
         Date date = new Date();
-        SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
         final String id = Utils.getCurrentUserID(EditAudioActivity.this);
         Sound sound = new Sound(idSound, name, Utils.getCurrentUserName(EditAudioActivity.this), mOutputPath, mOutputPath, ft.format(date));
         sound.setIdUser(id);
@@ -333,11 +380,16 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         dialog.show();
     }
 
+    private long getCurrentTime() {
+        return System.nanoTime() / 1000000;
+    }
+
+
     @Override
     public void onBackPressed() {
         if (mType.equals("Record")) {
-            File file = new File(mFilePath);
-            file.delete();
+            File file = new File(mFilename);
+            file.deleteOnExit();
         }
         super.onBackPressed();
     }
@@ -345,10 +397,422 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
     @Override
     protected void onStop() {
         super.onStop();
-        if(mMediaPlayer!=null){
-            if(mMediaPlayer.isPlaying()){
-                mMediaPlayer.stop();
+    }
+
+    @Override
+    public void waveformTouchStart(float x) {
+        mTouchDragging = true;
+        mTouchStart = x;
+        mTouchInitialOffset = mOffset;
+        mFlingVelocity = 0;
+        mWaveformTouchStartMsec = getCurrentTime();
+    }
+
+    @Override
+    public void waveformTouchMove(float x) {
+        mOffset = trap((int) (mTouchInitialOffset + (mTouchStart - x)));
+        updateDisplay();
+    }
+
+    @Override
+    public void waveformTouchEnd() {
+        mTouchDragging = false;
+        mOffsetGoal = mOffset;
+
+        long elapsedMsec = getCurrentTime() - mWaveformTouchStartMsec;
+        if (elapsedMsec < 300) {
+            if (mIsPlaying) {
+                int seekMsec = mWaveformView.pixelsToMillisecs(
+                        (int) (mTouchStart + mOffset));
+                if (seekMsec >= mPlayStartMsec &&
+                        seekMsec < mPlayEndMsec) {
+                    mPlayer.seekTo(seekMsec);
+                } else {
+                    handlePause();
+                }
+            } else {
+                onPlay((int) (mTouchStart + mOffset));
             }
+        }
+    }
+
+    @Override
+    public void waveformFling(float vx) {
+        mTouchDragging = false;
+        mOffsetGoal = mOffset;
+        mFlingVelocity = (int) (-vx);
+        updateDisplay();
+    }
+
+    @Override
+    public void waveformDraw() {
+        mWidth = mWaveformView.getMeasuredWidth();
+        if (mOffsetGoal != mOffset && !mKeyDown)
+            updateDisplay();
+        else if (mIsPlaying) {
+            updateDisplay();
+        } else if (mFlingVelocity != 0) {
+            updateDisplay();
+        }
+    }
+
+    private void loadFromFile() {
+        mFile = new File(mFilename);
+
+        mLoadingLastUpdateTime = getCurrentTime();
+        mLoadingKeepGoing = true;
+        mProgressDialog = new ProgressDialog(EditAudioActivity.this);
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        mProgressDialog.setTitle(R.string.progress_dialog_loading);
+        mProgressDialog.setCancelable(true);
+        mProgressDialog.setOnCancelListener(
+                new DialogInterface.OnCancelListener() {
+                    public void onCancel(DialogInterface dialog) {
+                        mLoadingKeepGoing = false;
+                    }
+                });
+        mProgressDialog.show();
+
+        final SoundFile.ProgressListener listener =
+                new SoundFile.ProgressListener() {
+                    public boolean reportProgress(double fractionComplete) {
+                        long now = getCurrentTime();
+                        if (now - mLoadingLastUpdateTime > 100) {
+                            mProgressDialog.setProgress(
+                                    (int) (mProgressDialog.getMax() * fractionComplete));
+                            mLoadingLastUpdateTime = now;
+                        }
+                        return mLoadingKeepGoing;
+                    }
+                };
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mPlayer = new MediaPlayer();
+                    mPlayer.setDataSource(mFilename);
+                    mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mPlayer.prepare();
+                } catch (IOException e) {
+                    mPlayer = null;
+                }
+            }
+        }).start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mSoundFile = SoundFile.create(mFile.getAbsolutePath(), listener);
+                } catch (final Exception e) {
+                    mProgressDialog.dismiss();
+                    return;
+                }
+                if (mLoadingKeepGoing) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            finishOpeningSoundFile();
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    private void finishOpeningSoundFile() {
+        mWaveformView.setSoundFile(mSoundFile);
+        mWaveformView.recomputeHeights(mDensity);
+
+        mMaxPos = mWaveformView.maxPos();
+        mLastDisplayedStartPos = -1;
+        mLastDisplayedEndPos = -1;
+
+        mTouchDragging = false;
+
+        mOffset = 0;
+        mOffsetGoal = 0;
+        mFlingVelocity = 0;
+        resetPositions();
+        if (mEndPos > mMaxPos)
+            mEndPos = mMaxPos;
+
+        mCaption =
+                mSoundFile.getFiletype() + ", " +
+                        mSoundFile.getSampleRate() + " Hz, " +
+                        mSoundFile.getAvgBitrateKbps() + " kbps, " +
+                        formatTime(mMaxPos) + " " +
+                        getResources().getString(R.string.time_seconds);
+        mInfo.setText(mCaption);
+
+        mProgressDialog.dismiss();
+        updateDisplay();
+    }
+
+    private synchronized void updateDisplay() {
+        if (mIsPlaying) {
+            int now = mPlayer.getCurrentPosition();
+            int frames = mWaveformView.millisecsToPixels(now);
+            mWaveformView.setPlayback(frames);
+            setOffsetGoalNoUpdate(frames - mWidth / 2);
+            if (now >= mPlayEndMsec) {
+                handlePause();
+            }
+        }
+
+        if (!mTouchDragging) {
+            int offsetDelta;
+
+            if (mFlingVelocity != 0) {
+                offsetDelta = mFlingVelocity / 30;
+                if (mFlingVelocity > 80) {
+                    mFlingVelocity -= 80;
+                } else if (mFlingVelocity < -80) {
+                    mFlingVelocity += 80;
+                } else {
+                    mFlingVelocity = 0;
+                }
+
+                mOffset += offsetDelta;
+
+                if (mOffset + mWidth / 2 > mMaxPos) {
+                    mOffset = mMaxPos - mWidth / 2;
+                    mFlingVelocity = 0;
+                }
+                if (mOffset < 0) {
+                    mOffset = 0;
+                    mFlingVelocity = 0;
+                }
+                mOffsetGoal = mOffset;
+            } else {
+                offsetDelta = mOffsetGoal - mOffset;
+
+                if (offsetDelta > 10)
+                    offsetDelta = offsetDelta / 10;
+                else if (offsetDelta > 0)
+                    offsetDelta = 1;
+                else if (offsetDelta < -10)
+                    offsetDelta = offsetDelta / 10;
+                else if (offsetDelta < 0)
+                    offsetDelta = -1;
+                else
+                    offsetDelta = 0;
+
+                mOffset += offsetDelta;
+            }
+        }
+
+        mWaveformView.setParameters(mStartPos, mEndPos, mOffset);
+        mWaveformView.invalidate();
+
+        mStartMarker.setContentDescription(
+                getResources().getText(R.string.start_marker) + " " +
+                        formatTime(mStartPos));
+        mEndMarker.setContentDescription(
+                getResources().getText(R.string.end_marker) + " " +
+                        formatTime(mEndPos));
+
+        int startX = mStartPos - mOffset - mMarkerLeftInset;
+        if (startX + mStartMarker.getWidth() >= 0) {
+            if (!mStartVisible) {
+                // Delay this to avoid flicker
+                mHandler.postDelayed(new Runnable() {
+                    public void run() {
+                        mStartVisible = true;
+                        mStartMarker.setAlpha(1f);
+                    }
+                }, 0);
+            }
+        } else {
+            if (mStartVisible) {
+                mStartMarker.setAlpha(0f);
+                mStartVisible = false;
+            }
+            startX = 0;
+        }
+
+        int endX = mEndPos - mOffset - mEndMarker.getWidth() + mMarkerRightInset;
+        if (endX + mEndMarker.getWidth() >= 0) {
+            if (!mEndVisible) {
+                // Delay this to avoid flicker
+                mHandler.postDelayed(new Runnable() {
+                    public void run() {
+                        mEndVisible = true;
+                        mEndMarker.setAlpha(1f);
+                    }
+                }, 0);
+            }
+        } else {
+            if (mEndVisible) {
+                mEndMarker.setAlpha(0f);
+                mEndVisible = false;
+            }
+            endX = 0;
+        }
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(
+                startX,
+                mMarkerTopOffset,
+                -mStartMarker.getWidth(),
+                -mStartMarker.getHeight());
+        mStartMarker.setLayoutParams(params);
+
+        params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(
+                endX,
+                mWaveformView.getMeasuredHeight() - mEndMarker.getHeight() - mMarkerBottomOffset,
+                -mStartMarker.getWidth(),
+                -mStartMarker.getHeight());
+        mEndMarker.setLayoutParams(params);
+    }
+
+    private Runnable mTimerRunnable = new Runnable() {
+        public void run() {
+            if (mStartPos != mLastDisplayedStartPos) {
+                mTvStart.setText(formatTime(mStartPos));
+                mLastDisplayedStartPos = mStartPos;
+            }
+
+            if (mEndPos != mLastDisplayedEndPos) {
+                mTvEnd.setText(formatTime(mEndPos));
+                mLastDisplayedEndPos = mEndPos;
+            }
+
+            mHandler.postDelayed(mTimerRunnable, 100);
+        }
+    };
+
+    private void enableDisableButtons() {
+        if (mIsPlaying) {
+            mImgPlay.setImageResource(android.R.drawable.ic_media_pause);
+            mImgPlay.setContentDescription(getResources().getText(R.string.stop));
+        } else {
+            mImgPlay.setImageResource(android.R.drawable.ic_media_play);
+            mImgPlay.setContentDescription(getResources().getText(R.string.play));
+        }
+    }
+
+    private void resetPositions() {
+        mStartPos = mWaveformView.secondsToPixels(0.0);
+        mEndPos = mWaveformView.secondsToPixels(15.0);
+    }
+
+    private int trap(int pos) {
+        if (pos < 0)
+            return 0;
+        if (pos > mMaxPos)
+            return mMaxPos;
+        return pos;
+    }
+
+    private void setOffsetGoalStart() {
+        setOffsetGoal(mStartPos - mWidth / 2);
+    }
+
+    private void setOffsetGoalStartNoUpdate() {
+        Log.d("111", mStartPos + " " + mWidth);
+        setOffsetGoalNoUpdate(mStartPos - mWidth / 2);
+    }
+
+    private void setOffsetGoalEnd() {
+        setOffsetGoal(mEndPos - mWidth / 2);
+    }
+
+    private void setOffsetGoalEndNoUpdate() {
+        setOffsetGoalNoUpdate(mEndPos - mWidth / 2);
+    }
+
+    private void setOffsetGoal(int offset) {
+        setOffsetGoalNoUpdate(offset);
+        updateDisplay();
+    }
+
+    private void setOffsetGoalNoUpdate(int offset) {
+        if (mTouchDragging) {
+            return;
+        }
+
+        mOffsetGoal = offset;
+        if (mOffsetGoal + mWidth / 2 > mMaxPos)
+            mOffsetGoal = mMaxPos - mWidth / 2;
+        if (mOffsetGoal < 0)
+            mOffsetGoal = 0;
+    }
+
+    private String formatTime(int pixels) {
+        if (mWaveformView != null && mWaveformView.isInitialized()) {
+            return formatDecimal(mWaveformView.pixelsToSeconds(pixels));
+        } else {
+            return "";
+        }
+    }
+
+    private String formatDecimal(double x) {
+        int xWhole = (int) x;
+        int xFrac = (int) (100 * (x - xWhole) + 0.5);
+
+        if (xFrac >= 100) {
+            xWhole++; //Round up
+            xFrac -= 100; //Now we need the remainder after the round up
+            if (xFrac < 10) {
+                xFrac *= 10; //we need a fraction that is 2 digits long
+            }
+        }
+
+        if (xFrac < 10)
+            return xWhole + ".0" + xFrac;
+        else
+            return xWhole + "." + xFrac;
+    }
+
+    private synchronized void handlePause() {
+        if (mPlayer != null && mPlayer.isPlaying()) {
+            mPlayer.pause();
+        }
+        mWaveformView.setPlayback(-1);
+        mIsPlaying = false;
+        enableDisableButtons();
+    }
+
+    private synchronized void onPlay(int startPosition) {
+        if (mIsPlaying) {
+            handlePause();
+            return;
+        }
+
+        if (mPlayer == null) {
+            return;
+        }
+
+        try {
+            mPlayStartMsec = mWaveformView.pixelsToMillisecs(startPosition);
+            if (startPosition < mStartPos) {
+                mPlayEndMsec = mWaveformView.pixelsToMillisecs(mStartPos);
+            } else if (startPosition > mEndPos) {
+                mPlayEndMsec = mWaveformView.pixelsToMillisecs(mMaxPos);
+            } else {
+                mPlayEndMsec = mWaveformView.pixelsToMillisecs(mEndPos);
+            }
+            mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    handlePause();
+                }
+            });
+            mIsPlaying = true;
+
+            mPlayer.seekTo(mPlayStartMsec);
+            mPlayer.start();
+            updateDisplay();
+            enableDisableButtons();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -371,13 +835,11 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
             Tools.createFolder(folderPath);
             mOutputPath = folderPath + "AUDIO_" + AppTools.getDate() + ".m4a";
             try {
-                SoundFile soundFile = SoundFile.create(mFilePath, null);
+                SoundFile soundFile = SoundFile.create(mFilename, null);
                 if (soundFile != null) {
                     soundFile.WriteFile(new File(mOutputPath), start, end);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (SoundFile.InvalidInputException e) {
+            } catch (IOException | SoundFile.InvalidInputException e) {
                 e.printStackTrace();
             }
             return null;
@@ -388,8 +850,8 @@ public class EditAudioActivity extends Activity implements MarkerView.CustomList
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             if (mType.equals("Record")) {
-                File file = new File(mFilePath);
-                file.delete();
+                File file = new File(mFilename);
+                file.deleteOnExit();
             }
             createSound(fileName);
             finish();

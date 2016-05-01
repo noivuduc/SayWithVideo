@@ -38,7 +38,6 @@ public class ListImportSoundAdapter extends ArrayAdapter<ImportSound> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_list_import_sound, parent, false);
             viewHolder = new ViewHolder();
             viewHolder.tvName = (TextView) convertView.findViewById(R.id.tvName);
-            viewHolder.tvAuthor = (TextView) convertView.findViewById(R.id.tvAuthor);
             viewHolder.imgPlay = (ImageView) convertView.findViewById(R.id.imgPlay);
             viewHolder.rlPlay = (RelativeLayout) convertView.findViewById(R.id.rlPlay);
 
@@ -59,14 +58,12 @@ public class ListImportSoundAdapter extends ArrayAdapter<ImportSound> {
         ImportSound sound = getItem(position);
         viewHolder.imgPlay.setImageResource(sound.isPlaying() ? R.mipmap.ic_pause : R.mipmap.ic_play);
         viewHolder.tvName.setText(sound.getName());
-        viewHolder.tvAuthor.setText(sound.getAuthor());
 
         return convertView;
     }
 
     private class ViewHolder {
         private TextView tvName;
-        private TextView tvAuthor;
         private ImageView imgPlay;
         private RelativeLayout rlPlay;
     }

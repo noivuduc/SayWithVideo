@@ -5,7 +5,6 @@ package datn.bkdn.com.saywithvideo.model;
  */
 public class ImportSound {
     private String name;
-    private String author;
     private boolean isPlaying;
     private String path;
 
@@ -15,14 +14,6 @@ public class ImportSound {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
     }
 
     public boolean isPlaying() {

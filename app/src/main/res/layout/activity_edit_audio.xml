@@ -44,6 +44,7 @@
         android:layout_below="@+id/llTop">
 
         <TextView
+            android:id="@+id/tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -55,40 +56,54 @@
         <RelativeLayout
             android:id="@+id/rl"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_centerVertical="true">
+            android:layout_height="200dp"
+            android:layout_below="@+id/tv"
+            android:layout_marginTop="10dp">
 
-            <datn.bkdn.com.saywithvideo.custom.VisualizerView
-                android:id="@+id/visualizerView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp" />
+            <datn.bkdn.com.saywithvideo.custom.WaveformView
+                android:id="@+id/waveform"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" />
 
             <datn.bkdn.com.saywithvideo.custom.MarkerView
-                android:id="@+id/markerLeft"
-                android:layout_width="20dp"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@mipmap/ic_marker" />
+                android:id="@+id/startmarker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/start_marker"
+                android:nextFocusDown="@+id/endmarker"
+                android:src="@drawable/marker_left" />
 
             <datn.bkdn.com.saywithvideo.custom.MarkerView
-                android:id="@+id/markerRight"
-                android:layout_width="20dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
-                android:scaleType="centerCrop"
-                android:src="@mipmap/ic_marker" />
+                android:id="@+id/endmarker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/end_marker"
+                android:nextFocusDown="@+id/tvInfor"
+                android:nextFocusUp="@+id/startmarker"
+                android:src="@drawable/marker_right" />
+
         </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tvInfor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/rl"
+            android:layout_marginTop="10dp"
+            android:background="#c7c3c3"
+            android:gravity="center_horizontal"
+            android:padding="5dp"
+            android:text="123"
+            android:textColor="#fff" />
 
         <RelativeLayout
             android:id="@+id/rl2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/rl"
-            android:layout_marginTop="10dp"
-            android:gravity="center_horizontal">
+            android:layout_below="@+id/tvInfor"
+            android:background="#c7c3c3"
+            android:gravity="center_horizontal"
+            android:padding="5dp">
 
             <TextView
                 android:id="@+id/tv1"
@@ -96,7 +111,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:text="Start:"
-                android:textColor="#000"
+                android:textColor="#fff"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -118,7 +133,7 @@
                 android:layout_marginLeft="30dp"
                 android:layout_toRightOf="@+id/tvStart"
                 android:text="End:"
-                android:textColor="#000"
+                android:textColor="#fff"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -135,16 +150,21 @@
 
         </RelativeLayout>
 
-        <ImageButton
-            android:id="@+id/imgPlay"
-            style="@android:style/MediaButton"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/rl2"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
-            android:padding="10dp"
-            android:src="@mipmap/ic_play" />
+            android:background="#c7c3c3">
+
+            <ImageButton
+                android:id="@+id/imgPlay"
+                style="@android:style/MediaButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:padding="10dp"
+                android:src="@android:drawable/ic_media_play" />
+        </RelativeLayout>
     </RelativeLayout>
 
     <TextView
