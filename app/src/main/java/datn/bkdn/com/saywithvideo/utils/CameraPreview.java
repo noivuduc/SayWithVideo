@@ -77,4 +77,18 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceDestroyed(SurfaceHolder holder) {
         mCamera.release();
     }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int w = MeasureSpec.getSize(widthMeasureSpec);
+        int h = MeasureSpec.getSize(heightMeasureSpec);
+
+        if (w > h) {
+            w = h;
+        } else {
+            h = w;
+        }
+        setMeasuredDimension(w, h);
+        Log.d("preview", getWidth() + " " + getHeight() + " " + getMeasuredWidth() + " " + getMeasuredHeight());
+    }
 }

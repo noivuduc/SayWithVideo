@@ -25,8 +25,8 @@
         android:layout_alignParentTop="true"
         android:background="#fff">
 
-        <datn.bkdn.com.saywithvideo.custom.VisualizerView
-            android:id="@+id/visualizerView"
+        <datn.bkdn.com.saywithvideo.custom.WaveformView
+            android:id="@+id/waveform"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </RelativeLayout>

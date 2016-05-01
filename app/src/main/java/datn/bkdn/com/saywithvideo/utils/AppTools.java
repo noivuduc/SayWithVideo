@@ -28,7 +28,7 @@ public class AppTools {
                 String content = c.getContent();
                 String folderPath = Constant.DIRECTORY_PATH + Constant.AUDIO;
                 Tools.createFolder(folderPath);
-                final String path_audio = folderPath + "/" + audioId + ".m4a";
+                final String path_audio = folderPath + audioId + ".m4a";
                 try {
                     Base64.decodeToFile(content, path_audio);
                     return path_audio;

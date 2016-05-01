@@ -1,16 +1,19 @@
 package datn.bkdn.com.saywithvideo.activity;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.media.audiofx.Visualizer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -28,114 +31,266 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.custom.VisualizerView;
+import datn.bkdn.com.saywithvideo.custom.WaveformView;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
+import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.CameraPreview;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Tools;
 
-public class CaptureVideoActivity extends AppCompatActivity implements View.OnClickListener, MediaPlayer.OnCompletionListener {
+@SuppressWarnings("deprecation")
+public class CaptureVideoActivity extends AppCompatActivity implements View.OnClickListener,
+        WaveformView.WaveformListener {
 
     private Camera mCamera;
     private CameraPreview mPreview;
     private RelativeLayout mRlCaptureVideo;
     private RelativeLayout mRlSwitchCamera;
-    private Visualizer mVisualizer;
-    private VisualizerView mVisualizerView;
     private MediaPlayer mMediaPlayer;
     private MediaRecorder mMediaRecorder;
     private String mFilePath;
     private String mFileName;
     private boolean mCameraFront = false;
-    private boolean mRecording = false;
     private String mVideoOutPut;
-    private FrameLayout mFlPreview;
+    private WaveformView mWaveformView;
+    private Handler mHandler;
+    private SoundFile mSoundFile;
+    private File mFile;
+    private float mDensity;
+    private boolean mLoadingKeepGoing;
+    private ProgressDialog mProgressDialog;
+    private long mLoadingLastUpdateTime;
+    private int mMaxPos;
+    private int mOffset;
+    private int mOffsetGoal;
+    private int mStartPos;
+    private int mEndPos;
+    private int mPlayEndMsec;
+    private boolean mIsPlaying;
+    private int mWidth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_capture_video);
-
         init();
-        mFileName = getIntent().getStringExtra("FileName");
-        mFilePath = getIntent().getStringExtra("FilePath");
-
-        mMediaPlayer = new MediaPlayer();
-        try {
-            mMediaPlayer.setDataSource(mFilePath);
-            mMediaPlayer.prepare();
-            mMediaPlayer.setOnCompletionListener(this);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void init() {
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
         RelativeLayout mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         mRlCaptureVideo = (RelativeLayout) findViewById(R.id.rlCaptureVideo);
         mRlSwitchCamera = (RelativeLayout) findViewById(R.id.rlSwitchCamera);
-        mVisualizerView = (VisualizerView) findViewById(R.id.visualizerView);
+        mWaveformView = (WaveformView) findViewById(R.id.waveform);
 
         mRlBack.setOnClickListener(this);
         mRlCaptureVideo.setOnClickListener(this);
         mRlSwitchCamera.setOnClickListener(this);
+        mWaveformView.setListener(this);
 
+        mFileName = getIntent().getStringExtra("FileName");
+        mFilePath = getIntent().getStringExtra("FilePath");
+        mMaxPos = 0;
+        mDensity = getResources().getDisplayMetrics().density;
+        mHandler = new Handler();
         mCamera = getCameraInstance();
         mPreview = new CameraPreview(this, mCamera);
-        mFlPreview = (FrameLayout) findViewById(R.id.cameraPreview);
-        int w = getResources().getDisplayMetrics().widthPixels;
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(w, w);
-        mFlPreview.setLayoutParams(params);
+        FrameLayout mFlPreview = (FrameLayout) findViewById(R.id.cameraPreview);
         mFlPreview.addView(mPreview);
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        loadFile();
     }
 
-    private void setupVisualizerFxAndUI() {
-        mVisualizerView.start();
-        mVisualizer = new Visualizer(mMediaPlayer.getAudioSessionId());
-        mVisualizerView.setDuration(mMediaPlayer.getDuration());
-        mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
-        mVisualizer.setDataCaptureListener(
-                new Visualizer.OnDataCaptureListener() {
-                    public void onWaveFormDataCapture(Visualizer visualizer,
-                                                      byte[] bytes, int samplingRate) {
-                        int current;
-                        try {
-                            current = mMediaPlayer.getCurrentPosition();
-                            mVisualizerView.updateVisualizer(bytes, current);
-                        } catch (Exception e) {
-                            visualizer.setEnabled(false);
+    private void loadFile() {
+        mFile = new File(mFilePath);
+        mLoadingLastUpdateTime = System.currentTimeMillis();
+        mLoadingKeepGoing = true;
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        mProgressDialog.setTitle(R.string.progress_dialog_loading);
+        mProgressDialog.setCancelable(true);
+        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mLoadingKeepGoing = false;
+            }
+        });
+        mProgressDialog.show();
+
+        final SoundFile.ProgressListener listener = new SoundFile.ProgressListener() {
+            @Override
+            public boolean reportProgress(double fractionComplete) {
+                long now = System.currentTimeMillis();
+                if (now - mLoadingLastUpdateTime > 100) {
+                    mProgressDialog.setProgress(
+                            (int) (mProgressDialog.getMax() * fractionComplete));
+                    mLoadingLastUpdateTime = now;
+                }
+                return mLoadingKeepGoing;
+            }
+        };
+
+        //  mediaplayer
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mMediaPlayer = new MediaPlayer();
+                    mMediaPlayer.setDataSource(mFilePath);
+                    mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mMediaPlayer.prepare();
+                } catch (IOException e) {
+                    mMediaPlayer = null;
+                }
+            }
+        }).start();
+
+        //  soundfile
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mSoundFile = SoundFile.create(mFile.getAbsolutePath(), listener);
+                } catch (final Exception e) {
+                    mProgressDialog.dismiss();
+                    return;
+                }
+                if (mLoadingKeepGoing) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            finishOpeningSoundFile();
                         }
+                    });
+                }
+            }
+        }).start();
 
-                    }
-
-                    public void onFftDataCapture(Visualizer visualizer,
-                                                 byte[] bytes, int samplingRate) {
-                    }
-                }, Visualizer.getMaxCaptureRate() / 2, true, false);
     }
 
-    private void complete() {
-        mVisualizer.setEnabled(false);
-        mVisualizerView.reset();
+    private void finishOpeningSoundFile() {
+        mWaveformView.setSoundFile(mSoundFile);
+        mWaveformView.recomputeHeights(mDensity);
+
+        mMaxPos = mWaveformView.maxPos();
+        mOffset = 0;
+        mOffsetGoal = 0;
+
+        resetPositions();
+
+        mProgressDialog.dismiss();
+        updateDisplay();
+    }
+
+    protected void resetPositions() {
+        mStartPos = 0;
+        mEndPos = mMaxPos;
+    }
+
+    private synchronized void onPlay(int startPosition) {
+        if (mIsPlaying) {
+            handlePause();
+            return;
+        }
+
+        if (mMediaPlayer == null) {
+            return;
+        }
+
+        int mPlayStartMsec;
+        try {
+            mPlayStartMsec = mWaveformView.pixelsToMillisecs(startPosition);
+            if (startPosition < mStartPos) {
+                mPlayEndMsec = mWaveformView.pixelsToMillisecs(mStartPos);
+            } else if (startPosition > mEndPos) {
+                mPlayEndMsec = mWaveformView.pixelsToMillisecs(mMaxPos);
+            } else {
+                mPlayEndMsec = mWaveformView.pixelsToMillisecs(mEndPos);
+            }
+            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    handlePause();
+                    releaseMediaRecorder();
+                    new MuxVideo().execute();
+                }
+            });
+            mIsPlaying = true;
+
+            mMediaPlayer.seekTo(mPlayStartMsec);
+            mMediaPlayer.start();
+            updateDisplay();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    protected synchronized void handlePause() {
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            mMediaPlayer.pause();
+        }
+        mWaveformView.setPlayback(-1);
+    }
+
+    protected synchronized void handleRelease() {
+        releasePlayer();
+        mWaveformView.setPlayback(-1);
+        mIsPlaying = false;
+    }
+
+    protected void setOffsetGoalNoUpdate(int offset) {
+        mOffsetGoal = offset;
+        if (mOffsetGoal + mWidth / 2 > mMaxPos)
+            mOffsetGoal = mMaxPos - mWidth / 2;
+        if (mOffsetGoal < 0)
+            mOffsetGoal = 0;
+    }
+
+    protected synchronized void updateDisplay() {
+
+        if (mIsPlaying) {
+            int now = mMediaPlayer.getCurrentPosition();
+            int frames = mWaveformView.millisecsToPixels(now);
+            mWaveformView.setPlayback(frames);
+            setOffsetGoalNoUpdate(frames - mWidth / 2);
+            if (now >= mPlayEndMsec) {
+                handlePause();
+            }
+        }
+
+        int offsetDelta;
+        offsetDelta = mOffsetGoal - mOffset;
+
+        if (offsetDelta > 10)
+            offsetDelta = offsetDelta / 10;
+        else if (offsetDelta > 0)
+            offsetDelta = 1;
+        else if (offsetDelta < -10)
+            offsetDelta = offsetDelta / 10;
+        else if (offsetDelta < 0)
+            offsetDelta = -1;
+        else
+            offsetDelta = 0;
+
+        mOffset += offsetDelta;
+
+        mWaveformView.setParameters(mStartPos, mEndPos, mOffset);
+        mWaveformView.invalidate();
     }
 
     public Camera getCameraInstance() {
-        Camera camera = null;
+        Camera camera;
         try {
             camera = Camera.open(findFrontFacingCamera());
         } catch (Exception e) {
+            camera = null;
         }
         return camera;
     }
 
     private boolean hasCamera(Context context) {
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            return true;
-        } else {
-            return false;
-        }
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
 
     private boolean prepareMediaRecorder() {
@@ -167,7 +322,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
 
     private void releaseMediaRecorder() {
         if (mMediaRecorder != null) {
-            mMediaRecorder.reset();
+            mMediaRecorder.stop();
             mMediaRecorder.release();
             mMediaRecorder = null;
             mCamera.lock();
@@ -183,6 +338,11 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
 
     public void onResume() {
         super.onResume();
+
+        mStartPos = 0;
+        mOffset = 0;
+        mOffsetGoal = 0;
+
         if (!hasCamera(this)) {
             Toast toast = Toast.makeText(this, "Sorry, your phone does not have a camera!", Toast.LENGTH_LONG);
             toast.show();
@@ -249,6 +409,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     private void releasePlayer() {
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             mMediaPlayer.stop();
+            mMediaPlayer.release();
             mMediaPlayer = null;
         }
     }
@@ -258,54 +419,77 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         switch (v.getId()) {
             case R.id.rlBack:
                 releaseCamera();
-                releasePlayer();
+                handleRelease();
                 finish();
                 break;
             case R.id.rlSwitchCamera:
-                if (!mRecording) {
-                    int camerasNumber = Camera.getNumberOfCameras();
-                    if (camerasNumber > 1) {
-                        releaseCamera();
-                        chooseCamera();
-                    } else {
-                        Toast toast = Toast.makeText(this, "Sorry, your phone has only one camera!", Toast.LENGTH_LONG);
-                        toast.show();
-                    }
+                int camerasNumber = Camera.getNumberOfCameras();
+                if (camerasNumber > 1) {
+                    releaseCamera();
+                    chooseCamera();
+                } else {
+                    Toast toast = Toast.makeText(this, "Sorry, your phone has only one camera!", Toast.LENGTH_LONG);
+                    toast.show();
                 }
                 break;
             case R.id.rlCaptureVideo:
-                if (!mRecording) {
-                    mRecording = !mRecording;
-                    mRlCaptureVideo.setEnabled(false);
-                    setupVisualizerFxAndUI();
-                    if (!prepareMediaRecorder()) {
-                        Toast.makeText(CaptureVideoActivity.this, "Fail in prepareMediaRecorder()!\n - Ended -", Toast.LENGTH_LONG).show();
-                        finish();
-                    }
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            try {
-                                mVisualizer.setEnabled(true);
-                                mMediaRecorder.start();
-                                mMediaPlayer.start();
-                            } catch (final Exception ex) {
-                            }
-                        }
-                    });
+                mRlCaptureVideo.setEnabled(false);
+                mRlSwitchCamera.setEnabled(false);
+                if (!prepareMediaRecorder()) {
+                    Toast.makeText(CaptureVideoActivity.this, "Fail in prepareMediaRecorder()!\n - Ended -", Toast.LENGTH_LONG).show();
+                    finish();
                 }
+
+                Log.d("mStartPos", mStartPos + "");
+                onPlay(mStartPos);
+                mMediaRecorder.start();
                 break;
         }
     }
 
     @Override
-    public void onCompletion(MediaPlayer mp) {
-        complete();
-        mMediaRecorder.stop();
-        releaseMediaRecorder();
-        new MuxVideo().execute();
+    public void waveformTouchStart(float x) {
+
+    }
+
+    @Override
+    public void waveformTouchMove(float x) {
+
+    }
+
+    @Override
+    public void waveformTouchEnd() {
+
+    }
+
+    @Override
+    public void waveformFling(float x) {
+
+    }
+
+    @Override
+    public void waveformDraw() {
+        mWidth = mWaveformView.getMeasuredWidth();
+        if (mOffsetGoal != mOffset)
+            updateDisplay();
+        else if (mIsPlaying) {
+            updateDisplay();
+        }
     }
 
     private class MuxVideo extends AsyncTask<Void, Void, Void> {
+
+        private ProgressDialog mProgressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mProgressDialog = new ProgressDialog(CaptureVideoActivity.this);
+            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mProgressDialog.setTitle("Muxing...");
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+        }
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -323,7 +507,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                 }
 
                 Container container = new DefaultMp4Builder().build(outputVideo);
-                String folderPath = Constant.DIRECTORY_PATH + Constant.VIDEO;
+                String folderPath = Constant.VIDEO_DIRECTORY_PATH;
                 Tools.createFolder(folderPath);
                 outputPath = folderPath + "VIDEO_" + AppTools.getDate() + ".mp4";
                 FileChannel fileChannel = new FileOutputStream(new File(outputPath)).getChannel();
@@ -340,14 +524,33 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         @Override
         protected void onPostExecute(Void aVoid) {
             File file = new File(mVideoOutPut);
-            file.delete();
-            Toast.makeText(getBaseContext(), "Mux video success", Toast.LENGTH_SHORT).show();
+            file.deleteOnExit();
             RealmUtils.getRealmUtils(CaptureVideoActivity.this).addVideo(CaptureVideoActivity.this, mFileName, outputPath);
             sendBroadcast(new Intent("AddVideo"));
             Intent intent = new Intent(CaptureVideoActivity.this, ShowVideoActivity.class);
             intent.putExtra("VideoPath", outputPath);
             startActivity(intent);
             finish();
+            mProgressDialog.dismiss();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        handleRelease();
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onPause() {
+        handleRelease();
+        if (mMediaRecorder != null) {
+            mMediaRecorder.stop();
+            mMediaRecorder = null;
+        }
+        releaseCamera();
+        mRlSwitchCamera.setEnabled(true);
+        mRlCaptureVideo.setEnabled(true);
+        super.onPause();
     }
 }
