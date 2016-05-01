@@ -213,21 +213,16 @@ public class SoundFragment extends Fragment {
                                 @Override
                                 protected void onPreExecute() {
                                     super.onPreExecute();
-//                                    sound.setLoadFavorite(true);
-//                                    mAdapter.notifyDataSetChanged();
                                 }
 
                                 @Override
                                 protected Void doInBackground(Void... params) {
                                     RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(),audioId);
-                                    mFirebaseUser = AppTools.getInfoUser(Utils.getCurrentUserID(getContext()));
                                     favoriteFirebase.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
-                                            final Firebase ff = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(getContext()) + "/");
                                             if (dataSnapshot.hasChild(id)) {
                                                 favoriteFirebase.child(id).removeValue();
-                                                ff.child("no_favorite").setValue(mFirebaseUser.getNo_favorite() - 1);
                                             } else {
                                                 Map<String,String> values = new HashMap<String, String>();
                                                 values.put("name",sound.getName());
@@ -235,7 +230,6 @@ public class SoundFragment extends Fragment {
                                                 values.put("user_id",sound.getUser_id());
                                                 values.put("plays",sound.getPlays()+"");
                                                 favoriteFirebase.child(id).setValue(values);
-                                                ff.child("no_favorite").setValue(mFirebaseUser.getNo_favorite() + 1);
                                             }
                                         }
 
@@ -250,9 +244,6 @@ public class SoundFragment extends Fragment {
                                 @Override
                                 protected void onPostExecute(Void aVoid) {
                                     super.onPostExecute(aVoid);
-//                                    sound.setLoadFavorite(false);
-////                                    RealmUtils.
-//                                    mAdapter.notifyDataSetChanged();
                                 }
                             }.execute();
 

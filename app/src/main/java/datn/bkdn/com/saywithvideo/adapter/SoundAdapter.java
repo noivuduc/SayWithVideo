@@ -20,6 +20,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
@@ -40,7 +41,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
     private ArrayList<String> mFavorites;
     private Context mContext;
     private RealmResults<Sound> mSounds;
-
+    private HashMap<String,String> mUsername = new HashMap<>();
     private ChildEventListener mListenner = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -200,6 +201,11 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
 
     @Override
     protected void itemAdded(final Audio item, final String key, final int position) {
+        if(mUsername.containsKey(item.getUser_id()))
+        {
+            item.setAuthor(mUsername.get(item.getUser_id()));
+        } else
+
         new AsyncTask<Void, Void, String>(){
 
             @Override
@@ -212,6 +218,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
                 item.setAuthor(s);
+                mUsername.put(item.getUser_id(),s);
             }
         }.execute();
         item.setId(key);
