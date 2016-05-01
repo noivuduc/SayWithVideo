@@ -238,14 +238,11 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                                 @Override
                                 protected Void doInBackground(Void... params) {
                                     RealmUtils.getRealmUtils(FavoriteActivity.this).updateFavorite(FavoriteActivity.this, audioId);
-                                    mFirebaseUser = AppTools.getInfoUser(Utils.getCurrentUserID(FavoriteActivity.this));
                                     mFirebaseFavorite.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
-                                            final Firebase ff = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(FavoriteActivity.this) + "/");
                                             if (dataSnapshot.hasChild(id)) {
                                                 mFirebaseFavorite.child(id).removeValue();
-                                                ff.child("no_favorite").setValue(mFirebaseUser.getNo_favorite() - 1);
                                             }
                                         }
 
