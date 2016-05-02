@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.media.AudioManager;
+import android.media.CamcorderProfile;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
@@ -103,10 +104,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mMaxPos = 0;
         mStartPos = 0;
         mDensity = getResources().getDisplayMetrics().density;
-        if (mSoundFile == null) loadFile();
-        else {
-            finishOpeningSoundFile();
-        }
+        loadFile();
     }
 
     private void loadFile() {
@@ -144,18 +142,9 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             public void run() {
                 try {
                     mMediaPlayer = new MediaPlayer();
+                    mMediaPlayer.reset();
                     mMediaPlayer.setDataSource(mFilePath);
                     mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mMediaPlayer.prepare();
-                    mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mp) {
-                            handlePause();
-                            releaseMediaRecorder();
-                            mWaveformView.setPlayback(-1);
-                            new MuxVideo().execute();
-                        }
-                    });
                 } catch (IOException e) {
                     mMediaPlayer = null;
                 }
@@ -214,9 +203,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             return;
         }
 
-        int mPlayStartMsec;
         try {
-            mPlayStartMsec = mWaveformView.pixelsToMillisecs(startPosition);
             if (startPosition < mStartPos) {
                 mPlayEndMsec = mWaveformView.pixelsToMillisecs(mStartPos);
             } else if (startPosition > mEndPos) {
@@ -225,9 +212,24 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                 mPlayEndMsec = mWaveformView.pixelsToMillisecs(mEndPos);
             }
             mIsPlaying = true;
-
-            mMediaPlayer.seekTo(mPlayStartMsec);
-            mMediaPlayer.start();
+            mMediaPlayer.prepare();
+            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mMediaPlayer.start();
+                }
+            });
+            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mIsPlaying = false;
+                    mMediaPlayer.release();
+                    mMediaPlayer = null;
+                    releaseMediaRecorder();
+                    mWaveformView.setPlayback(-1);
+                    new MuxVideo().execute();
+                }
+            });
             updateDisplay();
         } catch (Exception e) {
             e.printStackTrace();
@@ -312,13 +314,15 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     private boolean prepareMediaRecorder() {
         mMediaRecorder = new MediaRecorder();
         mCamera.unlock();
+
         mMediaRecorder.setCamera(mCamera);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
-        mMediaRecorder.setVideoSize(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels);
-        mMediaRecorder.setVideoFrameRate(30);
-        mMediaRecorder.setVideoEncodingBitRate(3000000);
+        CamcorderProfile cpHigh = CamcorderProfile.get(CamcorderProfile.QUALITY_1080P);
+        mMediaRecorder.setVideoSize(cpHigh.videoFrameWidth, cpHigh.videoFrameHeight);
+        mMediaRecorder.setVideoFrameRate(cpHigh.videoFrameRate);
+        mMediaRecorder.setVideoEncodingBitRate(cpHigh.videoBitRate);
         if (mCameraFront) {
             mMediaRecorder.setOrientationHint(270);
         } else {

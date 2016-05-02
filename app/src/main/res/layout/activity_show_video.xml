@@ -9,7 +9,7 @@
         android:id="@+id/rl"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="#ff0">
+        android:background="#779df5">
 
         <RelativeLayout
             android:id="@+id/rlBack"
@@ -24,14 +24,23 @@
                 android:layout_centerVertical="true"
                 android:src="@mipmap/ic_action_arrow_back" />
         </RelativeLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/rlBack"
+            android:text="Show Video"
+            android:textColor="#fff"
+            android:textSize="17sp" />
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/rl"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp">
+        android:layout_centerHorizontal="true">
 
         <TextureView
             android:id="@+id/playback_video"
@@ -45,9 +54,9 @@
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/background_button_register"
-        android:textStyle="bold"
         android:gravity="center"
         android:text="Share it"
         android:textColor="#fff"
-        android:textSize="17sp" />
+        android:textSize="17sp"
+        android:textStyle="bold" />
 </RelativeLayout>

@@ -3,14 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000"
+    android:background="#60949292"
     tools:context="datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity">
 
     <RelativeLayout
         android:id="@+id/rlSureface"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#000">
+        android:layout_height="match_parent">
 
         <FrameLayout
             android:id="@+id/cameraPreview"
@@ -21,9 +20,9 @@
     <RelativeLayout
         android:id="@+id/rlImage"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="60dp"
         android:layout_alignParentTop="true"
-        android:background="#fff">
+        android:background="#60949292">
 
         <datn.bkdn.com.saywithvideo.custom.WaveformView
             android:id="@+id/waveform"
@@ -34,17 +33,18 @@
     <RelativeLayout
         android:id="@+id/rl"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="50dp">
+        android:background="#60949292">
 
         <RelativeLayout
             android:id="@+id/rlCaptureVideo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/selector_capture_video"
-            android:clickable="true">
+            android:layout_centerInParent="true"
+            android:background="@drawable/selector_sound_info"
+            android:clickable="true"
+            android:padding="10dp">
 
             <ImageView
                 android:layout_width="wrap_content"

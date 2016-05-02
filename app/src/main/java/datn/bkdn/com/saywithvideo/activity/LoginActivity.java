@@ -295,13 +295,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onResume() {
         super.onResume();
-        AppEventsLogger.activateApp(this);
+        AppEventsLogger.activateApp(getApplication());
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        AppEventsLogger.deactivateApp(this);
     }
 
     @Override

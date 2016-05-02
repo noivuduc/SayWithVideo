@@ -54,7 +54,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         ListView mLvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
 
         mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
-        Log.d("size", "" + mVideos.size());
+
         if (mVideos.size() != 0) {
             mLlCreateDub.setVisibility(View.INVISIBLE);
         }
@@ -68,7 +68,10 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
             @Override
             public void onReceive(Context context, Intent intent) {
                 mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
-                if (mAdapter != null) mAdapter.notifyDataSetChanged();
+                mAdapter.notifyDataSetChanged();
+                if (mVideos != null && mVideos.size() > 0) {
+                    mLlCreateDub.setVisibility(View.GONE);
+                }
             }
         };
         getActivity().registerReceiver(mBroadcastReceiver, new IntentFilter("AddVideo"));
@@ -119,8 +122,11 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
                 String path = mVideos.get(pos).getPath();
                 RealmUtils.getRealmUtils(getContext()).deleteVideo(getContext(), newid);
                 File file = new File(path);
-                file.delete();
+                file.deleteOnExit();
                 mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
+                if (mVideos == null || mVideos.size() == 0) {
+                    mLlCreateDub.setVisibility(View.VISIBLE);
+                }
                 break;
         }
     }

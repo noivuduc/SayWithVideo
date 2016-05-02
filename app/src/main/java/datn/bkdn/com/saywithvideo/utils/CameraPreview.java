@@ -9,9 +9,14 @@ import android.view.SurfaceView;
 import java.io.IOException;
 import java.util.List;
 
+@SuppressWarnings("deprecation")
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;
     private Camera mCamera;
+
+    public CameraPreview(Context context) {
+        super(context);
+    }
 
     public CameraPreview(Context context, Camera camera) {
         super(context);
@@ -23,7 +28,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceCreated(SurfaceHolder holder) {
         Log.d("surfaceCreated", "surfaceCreated");
         try {
-            if (mCamera == null) {
+            if (mCamera != null) {
                 mCamera.setPreviewDisplay(holder);
                 mCamera.startPreview();
             }
@@ -41,6 +46,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         try {
             mCamera.stopPreview();
         } catch (Exception e) {
+            e.printStackTrace();
         }
         setCamera(camera);
         try {
@@ -49,7 +55,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             Camera.Size mBestSize = i.get(0);
             List<int[]> fps = mParameters.getSupportedPreviewFpsRange();
             int[] best = fps.get(0);
-            Log.d("size", mBestSize.width + " " + mBestSize.height);
             mParameters.setPreviewSize(mBestSize.width, mBestSize.height);
             mParameters.setPreviewFpsRange(best[0], best[1]);
             List<String> focusModes = mParameters.getSupportedFocusModes();
@@ -76,19 +81,5 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         mCamera.release();
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int w = MeasureSpec.getSize(widthMeasureSpec);
-        int h = MeasureSpec.getSize(heightMeasureSpec);
-
-        if (w > h) {
-            w = h;
-        } else {
-            h = w;
-        }
-        setMeasuredDimension(w, h);
-        Log.d("preview", getWidth() + " " + getHeight() + " " + getMeasuredWidth() + " " + getMeasuredHeight());
     }
 }
