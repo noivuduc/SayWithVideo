@@ -30,10 +30,12 @@ public class AddSoundActivity extends AppCompatActivity implements View.OnClickL
             case R.id.llRecord:
                 startActivity(new Intent(AddSoundActivity.this, RecordNewSoundActivity.class));
                 finish();
+                overridePendingTransition(R.anim.activity_in, R.anim.activity_out);
                 break;
             case R.id.llImport:
                 startActivity(new Intent(AddSoundActivity.this, ImportSoundActivity.class));
                 finish();
+                overridePendingTransition(R.anim.activity_in, R.anim.activity_out);
                 break;
             case R.id.rlBack:
                 finish();

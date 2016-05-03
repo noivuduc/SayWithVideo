@@ -129,8 +129,15 @@ public class RecordNewSoundActivity extends Activity implements OnClickListener 
                 break;
             case R.id.rlBack:
                 finish();
+                overridePendingTransition(R.anim.finish_in, R.anim.finish_out);
                 break;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.finish_in, R.anim.finish_out);
     }
 }
 

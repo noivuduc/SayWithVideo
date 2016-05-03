@@ -46,13 +46,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Firebase.setAndroidContext(this);
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
-        mNavigationView.setNavigationItemSelectedListener(this);
+        if (mNavigationView != null) mNavigationView.setNavigationItemSelectedListener(this);
 
         mPager = (ViewPager) findViewById(R.id.pager);
         PagerSlidingTabStrip mTabStrip = (PagerSlidingTabStrip) findViewById(R.id.tab);
         MainPagerAdapter adapter = new MainPagerAdapter(getSupportFragmentManager());
         mPager.setAdapter(adapter);
-        mTabStrip.setViewPager(mPager);
+        if (mTabStrip != null) mTabStrip.setViewPager(mPager);
 
         initNavigation();
     }
@@ -69,10 +69,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             mTvEmail.setText(Utils.getCurrentUserEmail(this));
         }
-        mImgMenu.setOnClickListener(new View.OnClickListener() {
+        if (mImgMenu != null) mImgMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                if (drawer == null) return;
                 if (drawer.isDrawerOpen(GravityCompat.START)) {
                     drawer.closeDrawer(GravityCompat.START);
                 } else {
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer == null) return;
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -103,9 +105,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (id == R.id.nav_email) {
             if (Utils.getCurrentUserEmail(this).equals("")) {
-                Snackbar.make(findViewById(R.id.root), "Can't change your email", Snackbar.LENGTH_LONG).show();
+                showMessage(getResources().getString(R.string.cant_change_email));
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.START);
+                if (drawer != null) drawer.closeDrawer(GravityCompat.START);
                 return true;
             }
             if (showMessage()) {
@@ -124,9 +126,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
         } else if (id == R.id.nav_password) {
             if (Utils.getCurrentUserEmail(this).equals("")) {
-                Snackbar.make(findViewById(R.id.root), "Can't change your password", Snackbar.LENGTH_LONG).show();
+                showMessage(getResources().getString(R.string.cant_change_password));
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.START);
+                if (drawer != null) drawer.closeDrawer(GravityCompat.START);
                 return true;
             }
             if (showMessage()) {
@@ -136,13 +138,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(new Intent(MainActivity.this, SoundActivity.class));
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        if (drawer != null) drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
     private boolean showMessage() {
         if (!Tools.isOnline(MainActivity.this)) {
-            Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+            showMessage(getResources().getString(R.string.internet_connection));
             return false;
         }
         return true;
@@ -172,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 final String fullName = mEdtContent.getText().toString().trim();
                 if (fullName.equals("")) {
-                    Snackbar.make(findViewById(R.id.root), "Add your name", Snackbar.LENGTH_LONG).show();
+                    showMessage(getResources().getString(R.string.add_name));
                     datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(MainActivity.this, dialog.getCurrentFocus());
                 } else {
                     Firebase mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(MainActivity.this) + "/");
@@ -182,9 +184,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             if (firebaseError == null) {
                                 mTvName.setText(fullName);
                                 Utils.updateCurrentUserName(MainActivity.this, fullName);
-                                Toast.makeText(MainActivity.this, "Change full name success.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(MainActivity.this, getResources().getString(R.string.change_name_success), Toast.LENGTH_LONG).show();
                             } else {
-                                Toast.makeText(MainActivity.this, "Change full name error.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(MainActivity.this, getResources().getString(R.string.change_name_error), Toast.LENGTH_LONG).show();
                             }
                         }
                     });
@@ -249,10 +251,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String oldPass = mEdtOldPass.getText().toString();
                 String newPass = mEdtNewPass.getText().toString();
                 if (oldPass.equals("")) {
-                    Toast.makeText(getBaseContext(), "Add your old password", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), getResources().getString(R.string.add_old_password), Toast.LENGTH_SHORT).show();
                     datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(MainActivity.this);
                 } else if (newPass.equals("")) {
-                    Toast.makeText(getBaseContext(), "Add your new password", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), getResources().getString(R.string.add_new_password), Toast.LENGTH_SHORT).show();
                     datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(MainActivity.this);
                 } else {
                     if (showMessage()) {
@@ -260,12 +262,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         mFirebase.changePassword(Utils.getCurrentUserEmail(getBaseContext()), oldPass, newPass, new Firebase.ResultHandler() {
                             @Override
                             public void onSuccess() {
-                                Toast.makeText(getBaseContext(), "Change password success.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getBaseContext(), getResources().getString(R.string.change_password_success), Toast.LENGTH_SHORT).show();
                             }
 
                             @Override
                             public void onError(FirebaseError firebaseError) {
-                                Toast.makeText(getBaseContext(), "Change password error.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getBaseContext(), getResources().getString(R.string.change_password_error), Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -331,6 +333,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
+    private void showMessage(String msg) {
+        View v = findViewById(R.id.root);
+        if (v != null) {
+            Snackbar.make(v, msg, Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
     private void showChangeEmailDialog() {
         final Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.dialog_change_email);
@@ -358,9 +367,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String password = mEdtPassword.getText().toString().trim();
                 final String newEmail = mEdtNewMail.getText().toString().trim();
                 if (password.equals("")) {
-                    Snackbar.make(findViewById(R.id.root), "Add your password", Snackbar.LENGTH_SHORT).show();
+                    showMessage(getResources().getString(R.string.add_password));
                 } else if (newEmail.equals("")) {
-                    Snackbar.make(findViewById(R.id.root), "Add your new email", Snackbar.LENGTH_SHORT).show();
+                    showMessage(getResources().getString(R.string.add_new_email));
                 } else {
                     Firebase mFirebase = new Firebase(FirebaseConstant.BASE_URL);
                     mFirebase.changeEmail(Utils.getCurrentUserEmail(MainActivity.this), password, newEmail, new Firebase.ResultHandler() {
@@ -368,12 +377,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         public void onSuccess() {
                             Utils.updateCurrentEmail(MainActivity.this, newEmail);
                             mTvEmail.setText(newEmail);
-                            Toast.makeText(getBaseContext(), "Change email success.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getBaseContext(), getResources().getString(R.string.change_email_success), Toast.LENGTH_SHORT).show();
                         }
 
                         @Override
                         public void onError(FirebaseError firebaseError) {
-                            Toast.makeText(getBaseContext(), "Change email error.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getBaseContext(), getResources().getString(R.string.change_email_error), Toast.LENGTH_SHORT).show();
                         }
                     });
                     dialog.dismiss();

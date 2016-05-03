@@ -16,5 +16,18 @@
     <string name="progress_dialog_loading">Loading...</string>
     <string name="time_seconds">seconds</string>
     <string name="internet_connection">Please make sure to have an internet connection.</string>
+    <string name="add_password">Add your password</string>
+    <string name="add_new_email">Add your new email</string>
+    <string name="change_email_success">Change email success.</string>
+    <string name="change_email_error">Change email error.</string>
+    <string name="change_password_success">Change password success.</string>
+    <string name="change_password_error">Change password error.</string>
+    <string name="add_new_password">Add your new password</string>
+    <string name="add_old_password">Add your old password</string>
+    <string name="add_name">Add your name</string>
+    <string name="change_name_success">Change full name success.</string>
+    <string name="change_name_error">Change full name error.</string>
+    <string name="cant_change_email">Cant change your email</string>
+    <string name="cant_change_password">Cant change your password</string>
 
 </resources>

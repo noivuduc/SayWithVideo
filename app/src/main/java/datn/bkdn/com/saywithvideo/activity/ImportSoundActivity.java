@@ -70,6 +70,7 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
         switch (v.getId()) {
             case R.id.rlBack:
                 finish();
+                overridePendingTransition(R.anim.finish_in, R.anim.finish_out);
                 break;
         }
     }
@@ -211,5 +212,11 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
             importSound.setIsPlaying(false);
             songsList.add(importSound);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.finish_in, R.anim.finish_out);
     }
 }
