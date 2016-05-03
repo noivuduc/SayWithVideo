@@ -41,7 +41,8 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
     private ArrayList<String> mFavorites;
     private Context mContext;
     private RealmResults<Sound> mSounds;
-    private HashMap<String,String> mUsername = new HashMap<>();
+    private HashMap<String, String> mUsername = new HashMap<>();
+
     private ChildEventListener mListenner = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -74,11 +75,6 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
 
         }
     };
-
-    public SoundAdapter(Query query, Class<Audio> itemClass, Context context) {
-        super(query, itemClass);
-        this.mContext = context;
-    }
 
     public SoundAdapter(Query query, @Nullable Query favorite, Class<Audio> itemClass, RealmResults<Sound> sounds, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
         super(query, itemClass, items, keys);
@@ -161,26 +157,36 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
      */
     @Override
     protected void itemExist(final Audio item, final String key, final int position) {
-        new AsyncTask<Void, Void, String>(){
+        if (mUsername.containsKey(item.getUser_id())) {
+            getItem(position).setAuthor(mUsername.get(item.getUser_id()));
+            notifyDataSetChanged();
+        } else {
 
-            @Override
-            protected String doInBackground(Void... params) {
-                String author = Utils.getUserName(item.getUser_id());
-                return author;
-            }
+            new AsyncTask<Void, Void, String>() {
 
-            @Override
-            protected void onPostExecute(String s) {
-                super.onPostExecute(s);
-                getItem(position).setAuthor(s);
-            }
-        }.execute();
-        if(mFavorites!=null) {
+                @Override
+                protected String doInBackground(Void... params) {
+                    String author = Utils.getUserName(item.getUser_id());
+                    return author;
+                }
+
+                @Override
+                protected void onPostExecute(String s) {
+                    super.onPostExecute(s);
+                    getItem(position).setAuthor(s);
+                    notifyDataSetChanged();
+                    mUsername.put(item.getUser_id(), s);
+                }
+            }.execute();
+        }
+
+        if (mFavorites != null) {
             if (mFavorites.contains(key)) {
                 getItem(position).setIsFavorite(true);
-                notifyItemChanged(position);
+                notifyDataSetChanged();
             } else {
                 getItem(position).setIsFavorite(false);
+                notifyDataSetChanged();
             }
         }
         new AsyncTask<Void, Void, Void>() {
@@ -201,34 +207,33 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
 
     @Override
     protected void itemAdded(final Audio item, final String key, final int position) {
-        if(mUsername.containsKey(item.getUser_id()))
-        {
+        if (mUsername.containsKey(item.getUser_id())) {
             item.setAuthor(mUsername.get(item.getUser_id()));
         } else
 
-        new AsyncTask<Void, Void, String>(){
+            new AsyncTask<Void, Void, String>() {
 
-            @Override
-            protected String doInBackground(Void... params) {
-                String author = Utils.getUserName(item.getUser_id());
-                return author;
-            }
+                @Override
+                protected String doInBackground(Void... params) {
+                    String author = Utils.getUserName(item.getUser_id());
+                    return author;
+                }
 
-            @Override
-            protected void onPostExecute(String s) {
-                super.onPostExecute(s);
-                item.setAuthor(s);
-                mUsername.put(item.getUser_id(),s);
-            }
-        }.execute();
+                @Override
+                protected void onPostExecute(String s) {
+                    super.onPostExecute(s);
+                    item.setAuthor(s);
+                    mUsername.put(item.getUser_id(), s);
+                }
+            }.execute();
         item.setId(key);
         final Sound sound = convertAudio(item);
-        if(mFavorites!=null) {
+        if (mFavorites != null) {
             if (mFavorites.contains(key)) {
-                getItem(position).setIsFavorite(true);
+                item.setIsFavorite(true);
                 notifyItemChanged(position);
             } else {
-                getItem(position).setIsFavorite(false);
+                item.setIsFavorite(false);
             }
         }
         if (!RealmUtils.getRealmUtils(mContext).checkExistSound(mContext, key)) {

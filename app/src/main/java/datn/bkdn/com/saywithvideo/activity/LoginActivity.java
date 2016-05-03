@@ -180,11 +180,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         });
         clearEmail.setOnClickListener(this);
         clearPass.setOnClickListener(this);
-        getEmail();
+       // getEmail();
     }
 
     private void getEmail() {
-        edtEmail.setText(Utils.getPrimaryEmail(this));
+        edtEmail.setText(Utils.getPrimaryEmail(this)==null? "" : Utils.getPrimaryEmail(this));
     }
 
     private void showMesage() {

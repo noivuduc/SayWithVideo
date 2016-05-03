@@ -23,8 +23,10 @@ public class Utils {
         String possibleEmail = null;
         Pattern emailPattern = Patterns.EMAIL_ADDRESS;
         Account[] accounts = AccountManager.get(context).getAccounts();
-        if (emailPattern.matcher(accounts[0].name).matches()) {
-            possibleEmail = accounts[0].name;
+        if(accounts!=null) {
+            if (emailPattern.matcher(accounts[0].name).matches()) {
+                possibleEmail = accounts[0].name;
+            }
         }
         return possibleEmail;
     }
