@@ -25,6 +25,7 @@ import datn.bkdn.com.saywithvideo.activity.ShowVideoActivity;
 import datn.bkdn.com.saywithvideo.adapter.ListMyVideoAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Video;
+import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.RealmResults;
 
 public class UserProfileFragment extends Fragment implements View.OnClickListener, ListMyVideoAdapter.OnItemClicked,
@@ -34,6 +35,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
     private TextView mTvCreateDub;
     private RealmResults<Video> mVideos;
     private BroadcastReceiver mBroadcastReceiver;
+    private String userId;
 
     public static UserProfileFragment newInstance() {
 
@@ -52,8 +54,9 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         mLlCreateDub = (LinearLayout) v.findViewById(R.id.llCreateDub);
         mTvCreateDub = (TextView) v.findViewById(R.id.tvCreateDub);
         ListView mLvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
+        userId = Utils.getCurrentUserID(getContext());
 
-        mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
+        mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext(), userId);
 
         if (mVideos.size() != 0) {
             mLlCreateDub.setVisibility(View.INVISIBLE);
@@ -67,7 +70,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
+                mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext(), userId);
                 mAdapter.notifyDataSetChanged();
                 if (mVideos != null && mVideos.size() > 0) {
                     mLlCreateDub.setVisibility(View.GONE);
@@ -123,7 +126,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
                 RealmUtils.getRealmUtils(getContext()).deleteVideo(getContext(), newid);
                 File file = new File(path);
                 file.deleteOnExit();
-                mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext());
+                mVideos = RealmUtils.getRealmUtils(getContext()).getVideo(getContext(), userId);
                 if (mVideos == null || mVideos.size() == 0) {
                     mLlCreateDub.setVisibility(View.VISIBLE);
                 }

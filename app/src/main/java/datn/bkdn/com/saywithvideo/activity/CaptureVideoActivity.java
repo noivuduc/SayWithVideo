@@ -38,6 +38,7 @@ import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.CameraPreview;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Tools;
+import datn.bkdn.com.saywithvideo.utils.Utils;
 
 @SuppressWarnings("deprecation")
 public class CaptureVideoActivity extends AppCompatActivity implements View.OnClickListener,
@@ -539,7 +540,8 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         protected void onPostExecute(Void aVoid) {
             File file = new File(mVideoOutPut);
             file.deleteOnExit();
-            RealmUtils.getRealmUtils(CaptureVideoActivity.this).addVideo(CaptureVideoActivity.this, mFileName, outputPath);
+            String userId = Utils.getCurrentUserID(CaptureVideoActivity.this);
+            RealmUtils.getRealmUtils(CaptureVideoActivity.this).addVideo(CaptureVideoActivity.this, mFileName, outputPath, userId);
             sendBroadcast(new Intent("AddVideo"));
             Intent intent = new Intent(CaptureVideoActivity.this, ShowVideoActivity.class);
             intent.putExtra("VideoPath", outputPath);

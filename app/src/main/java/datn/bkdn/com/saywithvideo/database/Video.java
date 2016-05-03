@@ -7,15 +7,25 @@ public class Video extends RealmObject {
     private String name;
     private String time;
     private String path;
+    private String userId;
 
-    public Video(String id, String name, String time, String path) {
+    public Video(String id, String name, String time, String path, String userId) {
         this.id = id;
         this.name = name;
         this.time = time;
         this.path = path;
+        this.userId = userId;
     }
 
     public Video() {
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getId() {

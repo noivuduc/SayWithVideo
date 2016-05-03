@@ -258,12 +258,12 @@ public class RealmUtils {
         }
     }
 
-    public boolean addVideo(final Context context, final String name, final String path) {
+    public boolean addVideo(final Context context, final String name, final String path, final String userId) {
         realm = RealmManager.getRealm(context);
         String id = UUID.randomUUID().toString();
         Date date = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy");
-        Video video = new Video(id, name, ft.format(date).toString(), path);
+        Video video = new Video(id, name, ft.format(date).toString(), path, userId);
         realm.beginTransaction();
         realm.copyToRealm(video);
         realm.commitTransaction();
@@ -271,9 +271,9 @@ public class RealmUtils {
         return true;
     }
 
-    public RealmResults<Video> getVideo(Context context) {
+    public RealmResults<Video> getVideo(Context context, String userId) {
         realm = RealmManager.getRealm(context);
-        return realm.where(Video.class).findAll();
+        return realm.where(Video.class).equalTo("userId", userId).findAll();
     }
 
     public void deleteVideo(final Context context, final String id) {

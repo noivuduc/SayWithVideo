@@ -64,7 +64,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ImageView mImgMenu = (ImageView) findViewById(R.id.imgMenu);
 
         mTvName.setText(Utils.getCurrentUserName(this));
-        mTvEmail.setText(Utils.getCurrentUserEmail(this));
+        if (Utils.getCurrentUserEmail(this).equals("")) {
+            mTvEmail.setText(Utils.getCurrentUserID(this));
+        } else {
+            mTvEmail.setText(Utils.getCurrentUserEmail(this));
+        }
         mImgMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
