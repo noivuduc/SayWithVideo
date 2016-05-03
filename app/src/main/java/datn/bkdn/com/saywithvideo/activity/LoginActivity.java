@@ -129,10 +129,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         mProgressDialog.setIndeterminate(true);
 
-        tvLogin.setOnClickListener(this);
-        tvRegister.setOnClickListener(this);
-        tvLoginFacebook.setOnClickListener(this);
-        tvForgot.setOnClickListener(this);
+        if (tvLogin != null) tvLogin.setOnClickListener(this);
+        if (tvRegister != null) tvRegister.setOnClickListener(this);
+        if (tvLoginFacebook != null) tvLoginFacebook.setOnClickListener(this);
+        if (tvForgot != null) tvForgot.setOnClickListener(this);
         edtEmail.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -187,6 +187,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         edtEmail.setText(Utils.getPrimaryEmail(this));
     }
 
+    private void showMesage() {
+        View v;
+        if ((v = findViewById(R.id.root)) != null) {
+            Snackbar.make(v, "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+        }
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -198,7 +205,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.tvLogin:
                 if (!Tools.isOnline(getBaseContext())) {
-                    Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                    showMesage();
                 } else {
                     mProgressDialog.show();
                     checkisValidAccount(edtEmail.getText().toString(), edtPass.getText().toString());
@@ -210,7 +217,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.tvLoginFacebook:
                 if (!Tools.isOnline(getBaseContext())) {
-                    Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                    showMesage();
                 } else {
                     mProgressDialog.show();
                     LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "user_friends", "email"));
@@ -257,7 +264,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void checkisValidAccount(final String email, String pass) {
         if (!Tools.isOnline(LoginActivity.this)) {
-            Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+            showMesage();
             return;
         }
         mProgressDialog.show();

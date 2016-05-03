@@ -19,9 +19,9 @@ public class AddSoundActivity extends AppCompatActivity implements View.OnClickL
         LinearLayout mLlImport = (LinearLayout) findViewById(R.id.llImport);
         RelativeLayout mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
 
-        mLlRecord.setOnClickListener(this);
-        mLlImport.setOnClickListener(this);
-        mRlBack.setOnClickListener(this);
+        if (mLlRecord != null) mLlRecord.setOnClickListener(this);
+        if (mLlImport != null) mLlImport.setOnClickListener(this);
+        if (mRlBack != null) mRlBack.setOnClickListener(this);
     }
 
     @Override
