@@ -16,7 +16,6 @@ import datn.bkdn.com.saywithvideo.R;
 
 public class ShareActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private LinearLayout mLlMessenger;
     private String mFilePath;
 
     @Override
@@ -28,8 +27,8 @@ public class ShareActivity extends AppCompatActivity implements View.OnClickList
 
     private void init() {
         mFilePath = getIntent().getStringExtra("filePath");
-        mLlMessenger = (LinearLayout) findViewById(R.id.llMessenger);
-        mLlMessenger.setOnClickListener(this);
+        LinearLayout mLlMessenger = (LinearLayout) findViewById(R.id.llMessenger);
+        if (mLlMessenger != null) mLlMessenger.setOnClickListener(this);
     }
 
 
@@ -37,9 +36,8 @@ public class ShareActivity extends AppCompatActivity implements View.OnClickList
         FacebookSdk.sdkInitialize(getApplicationContext());
     }
 
-    private String mimeType = "video/mp4";
-
     private void shareVideo() {
+        String mimeType = "video/mp4";
         initFacebook();
         Uri contentUri = Uri.fromFile(new File(mFilePath));
         ShareToMessengerParams shareToMessengerParams = ShareToMessengerParams.newBuilder(contentUri, mimeType).build();

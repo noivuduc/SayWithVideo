@@ -52,8 +52,6 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private String mFilePath;
     private RecyclerView mRecycle;
     private ImageView imgSort;
-    private Realm realm;
-    private RealmResults<Sound> mSounds;
     private ArrayList<Audio> mAdapterItems;
     private ArrayList<String> mAdapterKeys;
     private int mCurrentPos = -1;
@@ -69,6 +67,12 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
+    private void showMessage() {
+        View v = findViewById(R.id.root);
+        if (v != null) {
+            Snackbar.make(v, getResources().getString(R.string.internet_connection), Snackbar.LENGTH_LONG).show();
+        }
+    }
 
     private void initAdapter() {
         Query query = mFirebase.orderByChild("user_id").equalTo(Utils.getCurrentUserID(this));
@@ -104,7 +108,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                         } else {
                             if (sound.getLink_on_Disk() == null) {
                                 if (!Tools.isOnline(SoundActivity.this)) {
-                                    Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                                    showMessage();
                                     break;
                                 }
                                 /**
@@ -120,8 +124,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
                                     @Override
                                     protected String doInBackground(Void... params) {
-                                        String path = AppTools.getContentAudio(audioId, SoundActivity.this);
-                                        return path;
+                                        return AppTools.getContentAudio(audioId, SoundActivity.this);
                                     }
 
                                     @Override
@@ -167,14 +170,14 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                             finishActivity();
                         } else {
                             if (!Tools.isOnline(SoundActivity.this)) {
-                                Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                                showMessage();
                                 break;
                             }
                             new AsyncTask<Void, Void, String>() {
                                 @Override
                                 protected void onPreExecute() {
                                     super.onPreExecute();
-                                    if(mProgressDialog==null){
+                                    if (mProgressDialog == null) {
                                         mProgressDialog = new ProgressDialog(SoundActivity.this);
                                     }
                                     mProgressDialog.show();
@@ -182,8 +185,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
                                 @Override
                                 protected String doInBackground(Void... params) {
-                                    String f = AppTools.getContentAudio(audioId, SoundActivity.this);
-                                    return f;
+                                    return AppTools.getContentAudio(audioId, SoundActivity.this);
                                 }
 
                                 @Override
@@ -192,7 +194,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                                     mProgressDialog.dismiss();
                                     mFilePath = aVoid;
                                     sound.setLink_on_Disk(mFilePath);
-                                    new AsyncUpdatePath().execute(sound.getId(),sound.getLink_on_Disk());
+                                    new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                     finishActivity();
                                 }
                             }.execute();
@@ -206,6 +208,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             }
         });
     }
+
     public class AsyncUpdatePath extends AsyncTask<String, Void, Void> {
 
         @Override
@@ -219,6 +222,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             return null;
         }
     }
+
     class AsyncUpdatePlay extends AsyncTask<String, Void, Void> {
 
         @Override
@@ -340,7 +344,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                                                                 realm.close();
                                                                 if (sound.getLink_on_Disk() != null) {
                                                                     File file = new File(sound.getLink_on_Disk());
-                                                                    file.delete();
+                                                                    file.deleteOnExit();
                                                                 }
                                                                 return null;
 
@@ -423,7 +427,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         Intent intent = new Intent(SoundActivity.this, CaptureVideoActivity.class);
         intent.putExtra("FilePath", mFilePath);
         startActivity(intent);
-       // this.finish();
+        // this.finish();
     }
 
     @Override
@@ -445,8 +449,8 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         }
 
         String id = Utils.getCurrentUserID(this);
-        realm = RealmManager.getRealm(this);
-        mSounds = realm.where(Sound.class).equalTo("idUser", id).findAll();
+        Realm realm = RealmManager.getRealm(this);
+        RealmResults<Sound> mSounds = realm.where(Sound.class).equalTo("idUser", id).findAll();
         for (Sound s : mSounds) {
             Audio audio = convertAudio(s);
             mAdapterItems.add(audio);
@@ -456,9 +460,8 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private Audio convertAudio(Sound sound) {
-        Audio audio = new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
+        return new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
                 sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
-        return audio;
     }
 
     @Override

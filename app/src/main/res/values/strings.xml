@@ -15,5 +15,6 @@
     <string name="end_label">End:</string>
     <string name="progress_dialog_loading">Loading...</string>
     <string name="time_seconds">seconds</string>
+    <string name="internet_connection">Please make sure to have an internet connection.</string>
 
 </resources>

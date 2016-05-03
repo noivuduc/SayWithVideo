@@ -190,7 +190,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void showMesage() {
         View v;
         if ((v = findViewById(R.id.root)) != null) {
-            Snackbar.make(v, "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(v, getResources().getString(R.string.internet_connection), Snackbar.LENGTH_LONG).show();
         }
     }
 
@@ -313,6 +313,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode, resultCode, data);
+        if (data != null) {
+            callbackManager.onActivityResult(requestCode, resultCode, data);
+        }
     }
 }

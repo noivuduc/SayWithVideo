@@ -32,7 +32,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private EditText edtName;
     private EditText edtPass;
     private TextView tvregister;
-    private TextView tvLogin;
     private ImageView clearPass;
     private ImageView clearEmail;
     private ImageView clearName;
@@ -43,10 +42,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         boolean isValid = false;
 
         String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
-        CharSequence inputStr = email;
 
         Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(inputStr);
+        Matcher matcher = pattern.matcher(email);
         if (matcher.matches()) {
             isValid = true;
         }
@@ -67,7 +65,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         edtName = (EditText) findViewById(R.id.edtName);
 
         tvregister = (TextView) findViewById(R.id.tvRegisterUser);
-        tvLogin = (TextView) findViewById(R.id.tvhaveaccount);
+        TextView tvLogin = (TextView) findViewById(R.id.tvhaveaccount);
 
         clearEmail = (ImageView) findViewById(R.id.imgClearEmail);
         clearName = (ImageView) findViewById(R.id.imgClearName);
@@ -80,7 +78,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
         edtEmail.setText(Utils.getPrimaryEmail(this));
         tvregister.setOnClickListener(this);
-        tvLogin.setOnClickListener(this);
+        if (tvLogin != null) tvLogin.setOnClickListener(this);
 
         clearEmail.setOnClickListener(this);
         clearName.setOnClickListener(this);
@@ -163,6 +161,12 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         });
     }
 
+    private void showMessage() {
+        View view = findViewById(R.id.root);
+        if (view != null)
+            Snackbar.make(view, getResources().getString(R.string.internet_connection), Snackbar.LENGTH_LONG).show();
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -177,7 +181,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.tvRegisterUser:
                 if (!Tools.isOnline(getBaseContext())) {
-                    Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                    showMessage();
                     return;
                 }
                 mProgressDialog.show();
@@ -194,7 +198,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                             @Override
                             public void onAuthenticated(AuthData authData) {
                                 Utils.setCurrentUsername(RegisterActivity.this, name, email, authData.getUid());
-                                HashMap<String, String> map = new HashMap<String, String>();
+                                HashMap<String, String> map = new HashMap<>();
                                 map.put("name", name);
                                 map.put("no_sound", "0");
                                 map.put("no_favorite", "0");
@@ -239,9 +243,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         String email = edtEmail.getText().toString().trim();
         String pass = edtPass.getText().toString().trim();
 
-        if (isEmailValid(email) && pass.length() > 6 && name.length() > 0) return true;
-        return false;
-
+        return isEmailValid(email) && pass.length() > 6 && name.length() > 0;
     }
 
 }
