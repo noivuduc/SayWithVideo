@@ -465,21 +465,11 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-    }
-
-    @Override
     public void onBackPressed() {
         super.onBackPressed();
         this.finish();
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
 
     @Override
     public void onClick(View v) {

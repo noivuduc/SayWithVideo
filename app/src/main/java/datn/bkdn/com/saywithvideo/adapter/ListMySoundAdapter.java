@@ -45,12 +45,10 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
         this.mItemClicked = playButtonClicked;
     }
 
-    public ListMySoundAdapter(Query query, Class<Audio> itemClass) {
-        super(query, itemClass);
-    }
+
 
     public ListMySoundAdapter(Context context, Query query, Class<Audio> itemClass, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys) {
-        super(query, itemClass, items, keys);
+        super(query,null, itemClass, items, keys);
         this.mContext = context;
     }
 
@@ -107,8 +105,8 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
 
             @Override
             protected String doInBackground(Void... params) {
-                final String author = Utils.getUserName(item.getUser_id());
-                return author;
+                return Utils.getUserName(item.getUser_id());
+
             }
 
             @Override
@@ -163,13 +161,13 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
     }
 
     public static class AudioViewholder extends RecyclerView.ViewHolder {
-        private TextView tvSoundName;
-        private TextView tvPlays;
-        private TextView tvDateOfCreate;
-        private ImageView imgPlayPause;
-        private LinearLayout linearLayout;
-        private ProgressBar progressPlay;
-        private RelativeLayout rlOption;
+        private final TextView tvSoundName;
+        private final TextView tvPlays;
+        private final TextView tvDateOfCreate;
+        private final ImageView imgPlayPause;
+        private final LinearLayout linearLayout;
+        private final ProgressBar progressPlay;
+        private final RelativeLayout rlOption;
 
         public AudioViewholder(View itemView) {
             super(itemView);

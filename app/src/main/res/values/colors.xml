@@ -4,8 +4,6 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="background_tab_pressed">#6633B5E5</color>
-    <color name="activate_text_color">#FF666666</color>
-    <color name="deactivate_text_color">#FFCCCCCC</color>
     <color name="transparent">#00000000</color>
 
     <color name="waveform_selected">#00BFA5</color>
@@ -15,5 +13,4 @@
     <color name="playback_indicator">#ff0000</color>
     <color name="grid_line">#6D6D6D</color>
     <color name="timecode">#000000</color>
-    <color name="timecode_shadow">#aa000000</color>
 </resources>

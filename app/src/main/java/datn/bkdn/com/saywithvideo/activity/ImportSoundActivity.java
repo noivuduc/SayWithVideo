@@ -33,7 +33,7 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
     private ListImportSoundAdapter mAdapter;
     final String MEDIA_PATH = Environment.getExternalStorageDirectory().getPath() + "/";
     private ArrayList<ImportSound> songsList;
-    private String[] mPattern = new String[]{".mp3", ".aac", ".m4a", ".wav", "ogg"};
+    private final String[] mPattern = new String[]{".mp3", ".aac", ".m4a", ".wav", "ogg"};
     private MediaPlayer mMediaPlayer;
     private int mPrePos;
 

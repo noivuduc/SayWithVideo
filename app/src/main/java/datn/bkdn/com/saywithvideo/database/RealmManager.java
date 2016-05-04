@@ -17,11 +17,10 @@ public class RealmManager {
         return Realm.getInstance(defaultConfig);
     }
 
-    public static RealmConfiguration getConfig(Context context) {
-        RealmConfiguration defaultConfig = new RealmConfiguration.Builder(context)
+    private static RealmConfiguration getConfig(Context context) {
+        return new RealmConfiguration.Builder(context)
                 .schemaVersion(1)
                 .deleteRealmIfMigrationNeeded()
                 .build();
-        return defaultConfig;
     }
 }

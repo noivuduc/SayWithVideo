@@ -18,11 +18,11 @@ package datn.bkdn.com.saywithvideo.soundfile;
 
 class Atom {  // note: latest versions of spec simply call it 'box' instead of 'atom'.
     private int mSize;  // includes atom header (8 bytes)
-    private int mType;
+    private final int mType;
     private byte[] mData;  // an atom can either contain data or children, but not both.
     private Atom[] mChildren;
-    private byte mVersion;  // if negative, then the atom does not contain version and flags data.
-    private int mFlags;
+    private final byte mVersion;  // if negative, then the atom does not contain version and flags data.
+    private final int mFlags;
 
     // create an empty atom of the given type.
     public Atom(String type) {
@@ -470,8 +470,7 @@ public class MP4Header {
     }
 
     private Atom getURLAtom() {
-        Atom atom = new Atom("url ", (byte)0, 0x01);  // flags = 0x01: data is self contained.
-        return atom;
+        return new Atom("url ", (byte)0, 0x01);  // flags = 0x01: data is self contained.
     }
 
     private Atom getSTBLAtom() {

@@ -173,21 +173,19 @@ public class RealmUtils {
 
     public RealmResults<RealmAudioUser> getSoundOfUser(Context context, String id) {
         realm = RealmManager.getRealm(context);
-        RealmResults<RealmAudioUser> sounds = realm.where(RealmAudioUser.class).findAllAsync();
-        return sounds;
+        return realm.where(RealmAudioUser.class).findAllAsync();
     }
 
     public RealmResults<Sound> getAllSound(Context context) {
         realm = RealmManager.getRealm(context);
-        RealmResults<Sound> sounds = realm.where(Sound.class).findAllAsync();
+        return realm.where(Sound.class).findAllAsync();
         //realm.close();
-        return sounds;
     }
 
     public boolean checkExistSound(Context context, String id) {
         realm = RealmManager.getRealm(context);
         int s = realm.where(Sound.class).equalTo("id", id).findAll().size();
-        return s > 0 ? true : false;
+        return s > 0;
     }
 
     public void addSoundContent(Context context, final ContentAudio audio) {
@@ -202,8 +200,7 @@ public class RealmUtils {
 
     public ContentAudio getContentAudio(Context context, String id) {
         realm = RealmManager.getRealm(context);
-        ContentAudio audios = realm.where(ContentAudio.class).equalTo("id", id).findFirst();
-        return audios;
+        return realm.where(ContentAudio.class).equalTo("id", id).findFirst();
     }
 
     public void deleteAllSound(Context context) {
@@ -216,54 +213,12 @@ public class RealmUtils {
         });
     }
 
-    public RealmResults<FavoriteAudio> getFavoriteSound(Context context) {
-        realm = RealmManager.getRealm(context);
-        RealmResults<FavoriteAudio> sounds = realm.where(FavoriteAudio.class).equalTo("isFavorite", true).findAllAsync();
-        return sounds;
-    }
-
-    public User checkisValidAccount(Context context, String email, String pass) {
-        realm = RealmManager.getRealm(context);
-        RealmResults<User> users = realm.where(User.class).equalTo("email", email).equalTo("pass", pass).findAll();
-        if (users.size() > 0) return users.get(0);
-        else
-            return null;
-    }
-
-    public boolean checkExistsEmail(Context context, String email) {
-        realm = RealmManager.getRealm(context);
-        RealmResults<User> users = realm.where(User.class).equalTo("email", email).findAll();
-        if (users.size() > 0) return true;
-        return false;
-    }
-
-
-    public RealmResults<User> getUserWithEmail(Context context, String email) {
-        realm = RealmManager.getRealm(context);
-        RealmResults<User> users3 = realm.where(User.class).findAll();
-        RealmResults<User> users = realm.where(User.class).equalTo("email", email).findAll();
-        return users;
-    }
-
-    public boolean addUser(Context context, String name, String pass, String email) {
-        try {
-            realm = RealmManager.getRealm(context);
-            User user = new User(pass, name, email);
-            realm.beginTransaction();
-            realm.copyToRealm(user);
-            realm.commitTransaction();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     public boolean addVideo(final Context context, final String name, final String path, final String userId) {
         realm = RealmManager.getRealm(context);
         String id = UUID.randomUUID().toString();
         Date date = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy");
-        Video video = new Video(id, name, ft.format(date).toString(), path, userId);
+        Video video = new Video(id, name, ft.format(date), path, userId);
         realm.beginTransaction();
         realm.copyToRealm(video);
         realm.commitTransaction();

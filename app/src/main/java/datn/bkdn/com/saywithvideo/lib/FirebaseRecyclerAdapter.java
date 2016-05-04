@@ -7,10 +7,15 @@ import android.view.ViewGroup;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 
 /**
  * Created by Matteo on 24/08/2015.
@@ -29,21 +34,22 @@ import java.util.ArrayList;
  */
 public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.ViewHolder, T>
         extends RecyclerView.Adapter<ViewHolder> {
-
+    private HashMap<String,String> mUserNames;
     private Query mQuery;
     private Class<T> mItemClass;
     private ArrayList<T> mItems;
     private ArrayList<String> mKeys;
-
+    private ArrayList<String> mFavorites;
+    private Firebase mUserQuery;
     /**
      * @param query     The Firebase location to watch for data changes.
      *                  Can also be a slice of a location, using some combination of
      *                  <code>limit()</code>, <code>startAt()</code>, and <code>endAt()</code>.
      * @param itemClass The class of the items.
      */
-    public FirebaseRecyclerAdapter(Query query, Class<T> itemClass) {
-        this(query, itemClass, null, null);
-    }
+//    public FirebaseRecyclerAdapter(Query query, Class<T> itemClass) {
+//        this(query, itemClass, null, null);
+//    }
 
     /**
      * @param query     The Firebase location to watch for data changes.
@@ -59,7 +65,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
      *                  configuration change (e.g.: reloading the adapter after a device rotation).
      *                  Be careful: items must be coherent with this list.
      */
-    public FirebaseRecyclerAdapter(Query query, Class<T> itemClass,
+    public FirebaseRecyclerAdapter(Query query, @Nullable Query mQuery, Class<T> itemClass,
                                    @Nullable ArrayList<T> items,
                                    @Nullable ArrayList<String> keys) {
         this.mQuery = query;
@@ -71,8 +77,88 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
             mKeys = new ArrayList<String>();
         }
         this.mItemClass = itemClass;
+        if(mQuery!=null){
+            mQuery.addChildEventListener(mListenner);
+        }
+        mUserQuery = new Firebase(FirebaseConstant.BASE_URL+FirebaseConstant.USER_URL);
+        mUserQuery.addChildEventListener(mUserListener);
         query.addChildEventListener(mListener);
     }
+
+    private ChildEventListener mUserListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            final String key = dataSnapshot.getKey();
+            if(mUserNames == null){
+                mUserNames = new HashMap<>();
+            }
+            mUserQuery.child(key).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    mUserNames.put(key,dataSnapshot.getValue().toString());
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(FirebaseError firebaseError) {
+
+        }
+    };
+
+    private ChildEventListener mListenner = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            if (mFavorites == null) {
+                mFavorites = new ArrayList<>();
+            }
+            String key = dataSnapshot.getKey();
+            if (!mFavorites.contains(key)) {
+                mFavorites.add(key);
+            }
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+            mFavorites.remove(dataSnapshot.getKey());
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(FirebaseError firebaseError) {
+
+        }
+    };
 
     private ChildEventListener mListener = new ChildEventListener() {
         @Override
@@ -217,6 +303,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
         return mKeys;
     }
 
+    public HashMap<String,String> getUsernames(){return mUserNames;}
     /**
      * Returns the item in the specified position
      *
@@ -227,6 +314,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
         return mItems.get(position);
     }
 
+    public ArrayList<String> getmFavorites(){return mFavorites;}
     /**
      * Returns the position of the item in the adapter
      *

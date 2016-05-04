@@ -86,12 +86,11 @@ public class SoundFragment extends Fragment {
     }
 
     private Audio convertAudio(Sound sound) {
-        Audio audio = new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
+        return new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
                 sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
-        return audio;
     }
 
-    public void initData() {
+    private void initData() {
         if (mAdapterItems == null) {
             mAdapterItems = new ArrayList<>();
         }
@@ -172,8 +171,7 @@ public class SoundFragment extends Fragment {
 
                                     @Override
                                     protected String doInBackground(Void... params) {
-                                        String path = AppTools.getContentAudio(audioId, getActivity());
-                                        return path;
+                                        return AppTools.getContentAudio(audioId, getActivity());
                                     }
 
                                     @Override
@@ -210,10 +208,6 @@ public class SoundFragment extends Fragment {
                             sound.setIsFavorite(!sound.isFavorite());
                             final Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(getContext()) + "/favorite");
                             new AsyncTask<Void, Void, Void>() {
-                                @Override
-                                protected void onPreExecute() {
-                                    super.onPreExecute();
-                                }
 
                                 @Override
                                 protected Void doInBackground(Void... params) {
@@ -285,8 +279,7 @@ public class SoundFragment extends Fragment {
 
                                 @Override
                                 protected String doInBackground(Void... params) {
-                                    String f = AppTools.getContentAudio(audioId, getActivity());
-                                    return f;
+                                    return AppTools.getContentAudio(audioId, getActivity());
                                 }
 
                                 @Override
@@ -311,7 +304,7 @@ public class SoundFragment extends Fragment {
         mLvSound.setAdapter(mAdapter);
     }
 
-    public class AsyncUpdatePath extends AsyncTask<String, Void, Void> {
+    private class AsyncUpdatePath extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... params) {
@@ -342,12 +335,7 @@ public class SoundFragment extends Fragment {
     }
 
 
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    public void playMp3(String path) {
+    private void playMp3(String path) {
         if (mPlayer == null) {
             mPlayer = new MediaPlayer();
         } else {
@@ -376,7 +364,7 @@ public class SoundFragment extends Fragment {
 
     }
 
-    public class AsyncUpdatePlay extends AsyncTask<String, Void, Void> {
+    private class AsyncUpdatePlay extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... params) {
@@ -388,7 +376,7 @@ public class SoundFragment extends Fragment {
         }
     }
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("aaass","aaaa");

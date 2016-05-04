@@ -180,10 +180,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         });
         clearEmail.setOnClickListener(this);
         clearPass.setOnClickListener(this);
-       // getEmail();
+        setEmail();
     }
 
-    private void getEmail() {
+    private void setEmail() {
         edtEmail.setText(Utils.getPrimaryEmail(this)==null? "" : Utils.getPrimaryEmail(this));
     }
 
@@ -303,11 +303,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     protected void onResume() {
         super.onResume();
         AppEventsLogger.activateApp(getApplication());
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
     }
 
     @Override

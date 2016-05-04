@@ -57,6 +57,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     private RealmResults<Sound> mSounds;
     public static final String BROADCAST_FAVORITE = "com.datn.saywithvideo.UNFAVORITE";
     private Intent mIntentUnFavorite;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +67,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     }
 
 
-    public void initData() {
+    private void initData() {
         if (mAdapterItems == null) {
             mAdapterItems = new ArrayList<>();
         }
@@ -84,9 +85,8 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private Audio convertAudio(Sound sound) {
-        Audio audio = new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
+        return new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
                 sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
-        return audio;
     }
 
     @Override
@@ -101,7 +101,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
 
     }
 
-    public void playMp3(String path) {
+    private void playMp3(String path) {
         mPlayer = new MediaPlayer();
         try {
             mPlayer.setDataSource(path);
@@ -187,8 +187,8 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
 
                                     @Override
                                     protected String doInBackground(Void... params) {
-                                        String path = AppTools.getContentAudio(audioId, FavoriteActivity.this);
-                                        return path;
+                                        return AppTools.getContentAudio(audioId, FavoriteActivity.this);
+
                                     }
 
                                     @Override
@@ -220,10 +220,10 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                         //  mAdapter.notifyDataSetChanged();
                         break;
                     case R.id.rlFavorite:
-                        if(mIntentUnFavorite == null){
+                        if (mIntentUnFavorite == null) {
                             mIntentUnFavorite = new Intent(BROADCAST_FAVORITE);
                         }
-                        mIntentUnFavorite.putExtra("POS",pos);
+                        mIntentUnFavorite.putExtra("POS", pos);
                         sendBroadcast(mIntentUnFavorite);
                         try {
                             final String id = sound.getId();
@@ -301,8 +301,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
 
                                 @Override
                                 protected String doInBackground(Void... params) {
-                                    String f = AppTools.getContentAudio(audioId, FavoriteActivity.this);
-                                    return f;
+                                    return AppTools.getContentAudio(audioId, FavoriteActivity.this);
                                 }
 
                                 @Override
@@ -329,7 +328,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         mLvSound.setAdapter(mAdapter);
     }
 
-    public class AsyncUpdatePath extends AsyncTask<String, Void, Void> {
+    private class AsyncUpdatePath extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... params) {
@@ -381,7 +380,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    public class AsyncUpdatePlay extends AsyncTask<String, Void, Void> {
+    private class AsyncUpdatePlay extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... params) {

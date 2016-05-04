@@ -7,7 +7,8 @@ public class FirebaseUser {
     private String name;
     private int no_favorite;
     private int no_sound;
-    //  private List<String> favorite;
+//    @Ignore
+//    private String[] favorite;
 
 
     public int getNo_favorite() {

@@ -43,8 +43,7 @@ public class AppTools {
     public static FirebaseUser getInfoUser(String id) {
         String link = FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + id + ".json";
         String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
-        FirebaseUser f = new Gson().fromJson(json, FirebaseUser.class);
-        return f;
+        return new Gson().fromJson(json, FirebaseUser.class);
     }
 
 }

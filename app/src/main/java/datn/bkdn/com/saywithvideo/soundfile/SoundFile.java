@@ -81,7 +81,7 @@ public class SoundFile {
     }
 
     // TODO(nfaralli): what is the real list of supported extensions? Is it device dependent?
-    public static String[] getSupportedExtensions() {
+    private static String[] getSupportedExtensions() {
         return new String[] {"mp3", "wav", "3gpp", "3gp", "amr", "aac", "m4a", "ogg"};
     }
 
@@ -666,7 +666,7 @@ public class SoundFile {
         WriteWAVFile(outputFile, startTime, endTime);
     }
 
-    public void WriteWAVFile(File outputFile, float startTime, float endTime)
+    private void WriteWAVFile(File outputFile, float startTime, float endTime)
             throws IOException {
         int startOffset = (int)(startTime * mSampleRate) * 2 * mChannels;
         int numSamples = (int)((endTime - startTime) * mSampleRate);

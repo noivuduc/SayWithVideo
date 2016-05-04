@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#60949292"
+    style="@style/AppTheme.NoActionBar"
     tools:context="datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity">
 
     <RelativeLayout

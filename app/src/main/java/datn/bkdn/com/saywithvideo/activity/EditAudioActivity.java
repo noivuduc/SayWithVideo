@@ -352,7 +352,7 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
         mFirebase.child(FirebaseConstant.USER_URL).child(id).child("no_sound").setValue((f.getNo_sound() + 1) + "");
     }
 
-    public void createDialog() {
+    private void createDialog() {
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_name_audio);
         dialog.setTitle("Pick a name");
@@ -392,11 +392,6 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
             file.deleteOnExit();
         }
         super.onBackPressed();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 
     @Override
@@ -672,7 +667,7 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
         mEndMarker.setLayoutParams(params);
     }
 
-    private Runnable mTimerRunnable = new Runnable() {
+    private final Runnable mTimerRunnable = new Runnable() {
         public void run() {
             if (mStartPos != mLastDisplayedStartPos) {
                 mTvStart.setText(formatTime(mStartPos));

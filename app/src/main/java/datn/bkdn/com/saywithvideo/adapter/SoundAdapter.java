@@ -14,9 +14,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 
 import java.util.ArrayList;
@@ -28,7 +25,6 @@ import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.lib.FirebaseRecyclerAdapter;
 import datn.bkdn.com.saywithvideo.model.Audio;
-import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
@@ -38,52 +34,18 @@ import io.realm.RealmResults;
  */
 
 public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHolder, Audio> implements RealmChangeListener {
-    private ArrayList<String> mFavorites;
-    private Context mContext;
-    private RealmResults<Sound> mSounds;
-    private HashMap<String, String> mUsername = new HashMap<>();
+    private final Context mContext;
+    private final RealmResults<Sound> mSounds;
+    private final HashMap<String, String> mUsername = new HashMap<>();
 
-    private ChildEventListener mListenner = new ChildEventListener() {
-        @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            if (mFavorites == null) {
-                mFavorites = new ArrayList<>();
-            }
-            String key = dataSnapshot.getKey();
-            if (!mFavorites.contains(key)) {
-                mFavorites.add(key);
-            }
-        }
 
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-            mFavorites.remove(dataSnapshot.getKey());
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onCancelled(FirebaseError firebaseError) {
-
-        }
-    };
 
     public SoundAdapter(Query query, @Nullable Query favorite, Class<Audio> itemClass, RealmResults<Sound> sounds, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
-        super(query, itemClass, items, keys);
+        super(query,favorite, itemClass, items, keys);
         this.mSounds = sounds;
         this.mContext = mContext;
         mSounds.addChangeListener(this);
-        if (favorite != null) {
-            favorite.addChildEventListener(mListenner);
-        }
+
     }
 
     @Override
@@ -157,31 +119,13 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
      */
     @Override
     protected void itemExist(final Audio item, final String key, final int position) {
-        if (mUsername.containsKey(item.getUser_id())) {
-            getItem(position).setAuthor(mUsername.get(item.getUser_id()));
-            notifyDataSetChanged();
-        } else {
+        if(getUsernames() != null)
+            if (getUsernames().containsKey(item.getUser_id())) {
+                getItem(position).setAuthor(getUsernames().get(item.getUser_id()));
+            }
 
-            new AsyncTask<Void, Void, String>() {
-
-                @Override
-                protected String doInBackground(Void... params) {
-                    String author = Utils.getUserName(item.getUser_id());
-                    return author;
-                }
-
-                @Override
-                protected void onPostExecute(String s) {
-                    super.onPostExecute(s);
-                    getItem(position).setAuthor(s);
-                    notifyDataSetChanged();
-                    mUsername.put(item.getUser_id(), s);
-                }
-            }.execute();
-        }
-
-        if (mFavorites != null) {
-            if (mFavorites.contains(key)) {
+        if (getmFavorites() != null) {
+            if (getmFavorites().contains(key)) {
                 getItem(position).setIsFavorite(true);
                 notifyDataSetChanged();
             } else {
@@ -196,7 +140,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
                 realm.beginTransaction();
                 Sound s = realm.where(Sound.class).equalTo("id", key).findFirst();
                 s.setIsFavorite(getItem(position).isFavorite());
-                s.setAuthor("");
+                s.setAuthor(getItem(position).getAuthor());
                 s.setPlays(item.getPlays());
                 realm.commitTransaction();
                 realm.close();
@@ -207,35 +151,21 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
 
     @Override
     protected void itemAdded(final Audio item, final String key, final int position) {
-        if (mUsername.containsKey(item.getUser_id())) {
-            item.setAuthor(mUsername.get(item.getUser_id()));
-        } else
-
-            new AsyncTask<Void, Void, String>() {
-
-                @Override
-                protected String doInBackground(Void... params) {
-                    String author = Utils.getUserName(item.getUser_id());
-                    return author;
-                }
-
-                @Override
-                protected void onPostExecute(String s) {
-                    super.onPostExecute(s);
-                    item.setAuthor(s);
-                    mUsername.put(item.getUser_id(), s);
-                }
-            }.execute();
         item.setId(key);
-        final Sound sound = convertAudio(item);
-        if (mFavorites != null) {
-            if (mFavorites.contains(key)) {
+        if(getUsernames() != null)
+        if (getUsernames().containsKey(item.getUser_id())) {
+            item.setAuthor(getUsernames().get(item.getUser_id()));
+        }
+
+        if (getmFavorites() != null) {
+            if (getmFavorites().contains(key)) {
                 item.setIsFavorite(true);
-                notifyItemChanged(position);
+                notifyDataSetChanged();
             } else {
                 item.setIsFavorite(false);
             }
         }
+        final Sound sound = convertAudio(item);
         if (!RealmUtils.getRealmUtils(mContext).checkExistSound(mContext, key)) {
             new AsyncAddSound().execute(sound);
         }
@@ -252,6 +182,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
                     realm.beginTransaction();
                     Sound s = realm.where(Sound.class).equalTo("id", key).findFirst();
                     s.setPlays(newItem.getPlays());
+
                     realm.commitTransaction();
                     realm.close();
                     return null;
@@ -294,16 +225,15 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
     }
 
     private Audio convertAudio(Sound sound) {
-        Audio audio = new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
+        return new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
                 sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
-        return audio;
     }
 
     public interface OnItemClicked {
         void onClick(Audio audio, View v, int pos);
     }
 
-    public OnItemClicked mItemClicked;
+    private OnItemClicked mItemClicked;
 
     public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
         this.mItemClicked = playButtonClicked;
@@ -311,15 +241,15 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
 
     public static class SoundHolder extends RecyclerView.ViewHolder {
         View mView;
-        private TextView tvSoundAuthor;
-        private TextView tvSoundName;
-        private ImageView imgPlayPause;
-        private ImageView imgFavorite;
-        private ProgressBar progressBar;
-        private ProgressBar progressPlay;
-        private LinearLayout linearLayout;
-        private RelativeLayout rlOption;
-        private RelativeLayout rlFavorite;
+        private final TextView tvSoundAuthor;
+        private final TextView tvSoundName;
+        private final ImageView imgPlayPause;
+        private final ImageView imgFavorite;
+        private final ProgressBar progressBar;
+        private final ProgressBar progressPlay;
+        private final LinearLayout linearLayout;
+        private final RelativeLayout rlOption;
+        private final RelativeLayout rlFavorite;
 
         public SoundHolder(View itemView) {
             super(itemView);
@@ -338,7 +268,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
 
     }
 
-    class AsyncAddSound extends AsyncTask<Sound, Void, Void> {
+   private class AsyncAddSound extends AsyncTask<Sound, Void, Void> {
 
         @Override
         protected Void doInBackground(Sound... sound) {
