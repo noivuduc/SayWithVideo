@@ -240,6 +240,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             mPlayer = new MediaPlayer();
         }
         try {
+            mPlayer.reset();
             mPlayer.setDataSource(path);
             mPlayer.prepare();
         } catch (IOException e) {

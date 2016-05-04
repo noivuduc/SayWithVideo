@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -42,13 +43,13 @@ import datn.bkdn.com.saywithvideo.utils.Utils;
 
 @SuppressWarnings("deprecation")
 public class CaptureVideoActivity extends AppCompatActivity implements View.OnClickListener,
-        WaveformView.WaveformListener {
+        WaveformView.WaveformListener, MediaPlayer.OnCompletionListener {
 
     private Camera mCamera;
     private CameraPreview mPreview;
     private RelativeLayout mRlCaptureVideo;
     private RelativeLayout mRlSwitchCamera;
-    private MediaPlayer mMediaPlayer;
+    private static MediaPlayer mMediaPlayer;
     private MediaRecorder mMediaRecorder;
     private String mFilePath;
     private String mFileName;
@@ -137,17 +138,17 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             }
         };
 
+        mMediaPlayer = new MediaPlayer();
         //  mediaplayer
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    mMediaPlayer = new MediaPlayer();
-                    mMediaPlayer.reset();
                     mMediaPlayer.setDataSource(mFilePath);
                     mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mMediaPlayer.prepare();
                 } catch (IOException e) {
-                    mMediaPlayer = null;
+                    e.printStackTrace();
                 }
             }
         }).start();
@@ -166,6 +167,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            mProgressDialog.dismiss();
                             finishOpeningSoundFile();
                         }
                     });
@@ -184,8 +186,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mOffsetGoal = 0;
 
         resetPositions();
-
-        mProgressDialog.dismiss();
         updateDisplay();
     }
 
@@ -213,24 +213,8 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                 mPlayEndMsec = mWaveformView.pixelsToMillisecs(mEndPos);
             }
             mIsPlaying = true;
-            mMediaPlayer.prepare();
-            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mMediaPlayer.start();
-                }
-            });
-            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    mIsPlaying = false;
-                    mMediaPlayer.release();
-                    mMediaPlayer = null;
-                    releaseMediaRecorder();
-                    mWaveformView.setPlayback(-1);
-                    new MuxVideo().execute();
-                }
-            });
+            mMediaPlayer.start();
+            mMediaPlayer.setOnCompletionListener(this);
             updateDisplay();
         } catch (Exception e) {
             e.printStackTrace();
@@ -270,6 +254,10 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
 
         if (mIsPlaying) {
             int now = mMediaPlayer.getCurrentPosition();
+            if (now == mMediaPlayer.getDuration()) {
+                complete();
+                return;
+            }
             int frames = mWaveformView.millisecsToPixels(now);
             mWaveformView.setPlayback(frames);
             setOffsetGoalNoUpdate(frames - mWidth / 2);
@@ -427,7 +415,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             mMediaPlayer.stop();
             mMediaPlayer.release();
-            mMediaPlayer = null;
         }
     }
 
@@ -490,6 +477,20 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         else if (mIsPlaying) {
             updateDisplay();
         }
+    }
+
+    private void complete() {
+        Log.d("Tien", "onCompletion");
+        mIsPlaying = false;
+        mMediaPlayer.release();
+        releaseMediaRecorder();
+        mWaveformView.setPlayback(-1);
+        new MuxVideo().execute();
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        complete();
     }
 
     private class MuxVideo extends AsyncTask<Void, Void, Void> {
