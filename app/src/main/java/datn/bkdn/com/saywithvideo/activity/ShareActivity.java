@@ -4,7 +4,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.facebook.FacebookSdk;
 import com.facebook.messenger.MessengerUtils;
@@ -27,7 +27,7 @@ public class ShareActivity extends AppCompatActivity implements View.OnClickList
 
     private void init() {
         mFilePath = getIntent().getStringExtra("filePath");
-        LinearLayout mLlMessenger = (LinearLayout) findViewById(R.id.llMessenger);
+        TextView mLlMessenger = (TextView) findViewById(R.id.llMessenger);
         if (mLlMessenger != null) mLlMessenger.setOnClickListener(this);
     }
 

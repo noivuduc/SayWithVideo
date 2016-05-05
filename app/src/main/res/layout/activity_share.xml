@@ -49,18 +49,17 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    
+
     <TextView
         android:id="@+id/llMessenger"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:text="@string/share_via_messenger"
-        android:gravity="center_vertical"
-        android:paddingLeft="20dp"
-        android:drawablePadding="20dp"
-        android:drawableLeft="@mipmap/ic_messenger"
         android:layout_below="@+id/rlTop"
         android:layout_marginTop="20dp"
-        />
+        android:drawableLeft="@mipmap/ic_messenger"
+        android:drawablePadding="20dp"
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
+        android:text="@string/share_via_messenger" />
 
 </RelativeLayout>

@@ -49,7 +49,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     private CameraPreview mPreview;
     private RelativeLayout mRlCaptureVideo;
     private RelativeLayout mRlSwitchCamera;
-    private static MediaPlayer mMediaPlayer;
+    private MediaPlayer mMediaPlayer;
     private MediaRecorder mMediaRecorder;
     private String mFilePath;
     private String mFileName;
@@ -116,7 +116,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setTitle(R.string.progress_dialog_loading);
-        mProgressDialog.setCancelable(true);
+        mProgressDialog.setCancelable(false);
         mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
@@ -138,12 +138,12 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             }
         };
 
-        mMediaPlayer = new MediaPlayer();
         //  mediaplayer
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
+                    mMediaPlayer = new MediaPlayer();
                     mMediaPlayer.setDataSource(mFilePath);
                     mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                     mMediaPlayer.prepare();
@@ -308,7 +308,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
-        CamcorderProfile cpHigh = CamcorderProfile.get(CamcorderProfile.QUALITY_1080P);
+        CamcorderProfile cpHigh = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
         mMediaRecorder.setVideoSize(cpHigh.videoFrameWidth, cpHigh.videoFrameHeight);
         mMediaRecorder.setVideoFrameRate(cpHigh.videoFrameRate);
         mMediaRecorder.setVideoEncodingBitRate(cpHigh.videoBitRate);

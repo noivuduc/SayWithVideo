@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (showMessage()) {
                 showChangeEmailDialog();
             }
-        } else if (id == R.id.nav_favourites) {
+        } else if (id == R.id.nav_favorites) {
             startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
         } else if (id == R.id.nav_fullname) {
             if (showMessage()) {
