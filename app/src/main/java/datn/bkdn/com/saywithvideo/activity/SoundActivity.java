@@ -257,6 +257,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void init() {
+        Firebase.setAndroidContext(this);
         mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
         mRecycle = (RecyclerView) findViewById(R.id.recycleViewMySound);
         rlBack = (RelativeLayout) findViewById(R.id.rlBack);

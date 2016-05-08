@@ -22,21 +22,20 @@ public class AppTools {
 
     public static String getContentAudio(final String audioId, final Activity context) {
 
-                String link = FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_CONTENT_URL + "/" + audioId + ".json";
-                String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
-                FireBaseContent c = new Gson().fromJson(json, FireBaseContent.class);
-                String content = c.getContent();
-                String folderPath = Constant.DIRECTORY_PATH + Constant.AUDIO;
-                Tools.createFolder(folderPath);
-                final String path_audio = folderPath + audioId + ".m4a";
-                try {
-                    Base64.decodeToFile(content, path_audio);
-                    return path_audio;
-                } catch (IOException e) {
-                    e.printStackTrace();
+        String link = FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_CONTENT_URL + "/" + audioId + ".json";
+        String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
+        FireBaseContent c = new Gson().fromJson(json, FireBaseContent.class);
+        String content = c.getContent();
+        String folderPath = Constant.DIRECTORY_PATH + Constant.AUDIO;
+        Tools.createFolder(folderPath);
+        final String path_audio = folderPath + audioId + ".m4a";
+        try {
+            Base64.decodeToFile(content, path_audio);
+            return path_audio;
+        } catch (IOException e) {
+            e.printStackTrace();
 
-                }
-
+        }
         return null;
     }
 

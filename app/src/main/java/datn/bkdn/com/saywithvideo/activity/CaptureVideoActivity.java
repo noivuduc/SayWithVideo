@@ -254,6 +254,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
 
         if (mIsPlaying) {
             int now = mMediaPlayer.getCurrentPosition();
+            Log.d("Tien", now + " " + mMediaPlayer.getDuration());
             if (now == mMediaPlayer.getDuration()) {
                 complete();
                 return;

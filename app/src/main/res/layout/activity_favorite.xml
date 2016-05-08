@@ -9,7 +9,7 @@
         android:id="@+id/rlTop"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="#c70407"
+        android:background="#000077"
         android:orientation="horizontal">
 
         <RelativeLayout

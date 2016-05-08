@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.facebook.FacebookSdk;
@@ -29,6 +30,8 @@ public class ShareActivity extends AppCompatActivity implements View.OnClickList
         mFilePath = getIntent().getStringExtra("filePath");
         TextView mLlMessenger = (TextView) findViewById(R.id.llMessenger);
         if (mLlMessenger != null) mLlMessenger.setOnClickListener(this);
+        ViewGroup mRlBack = (ViewGroup) findViewById(R.id.rlBack);
+        if (mRlBack != null) mRlBack.setOnClickListener(this);
     }
 
 
@@ -50,6 +53,9 @@ public class ShareActivity extends AppCompatActivity implements View.OnClickList
         switch (v.getId()) {
             case R.id.llMessenger:
                 shareVideo();
+                break;
+            case R.id.rlBack:
+                finish();
                 break;
         }
     }

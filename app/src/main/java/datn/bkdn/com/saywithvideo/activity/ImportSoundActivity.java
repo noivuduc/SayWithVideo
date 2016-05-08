@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -50,6 +49,7 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
         mSearchView.setFocusable(true);
         songsList = new ArrayList<>();
         mMediaPlayer = new MediaPlayer();
+        mPrePos = -1;
 
         new LoadAllSound().execute();
     }
@@ -89,11 +89,11 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Log.d("Tien", "Click");
         Intent intent = new Intent(ImportSoundActivity.this, EditAudioActivity.class);
         intent.putExtra("FileName", songsList.get(position).getPath());
         intent.putExtra("Type", "Import");
         startActivity(intent);
+        finish();
     }
 
     @Override
@@ -101,6 +101,10 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
         if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.stop();
             songsList.get(mPrePos).setIsPlaying(false);
+            mAdapter.notifyDataSetChanged();
+            if (pos == mPrePos) {
+                return;
+            }
         }
 
         mPrePos = pos;
@@ -218,5 +222,14 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(R.anim.finish_in, R.anim.finish_out);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
+            mMediaPlayer.release();
+        }
     }
 }

@@ -6,7 +6,7 @@
     <RelativeLayout
         android:id="@+id/rlTop"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="50dp"
         android:background="#f1ce08"
         android:orientation="horizontal">
 
