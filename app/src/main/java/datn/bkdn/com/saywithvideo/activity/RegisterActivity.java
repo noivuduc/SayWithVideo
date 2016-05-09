@@ -72,7 +72,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         clearPass = (ImageView) findViewById(R.id.imgClearPass);
 
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Please wait...");
+        mProgressDialog.setMessage(getResources().getString(R.string.please_wait));
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         mProgressDialog.setIndeterminate(true);
 

@@ -17,7 +17,6 @@ import android.widget.TextView;
 import com.firebase.client.Query;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
@@ -36,9 +35,6 @@ import io.realm.RealmResults;
 public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHolder, Audio> implements RealmChangeListener {
     private final Context mContext;
     private final RealmResults<Sound> mSounds;
-    private final HashMap<String, String> mUsername = new HashMap<>();
-
-
 
     public SoundAdapter(Query query, @Nullable Query favorite, Class<Audio> itemClass, RealmResults<Sound> sounds, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
         super(query,favorite, itemClass, items, keys);
@@ -123,7 +119,6 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
             if (getUsernames().containsKey(item.getUser_id())) {
                 getItem(position).setAuthor(getUsernames().get(item.getUser_id()));
             }
-
         if (getmFavorites() != null) {
             if (getmFavorites().contains(key)) {
                 getItem(position).setIsFavorite(true);
@@ -167,6 +162,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         }
         final Sound sound = convertAudio(item);
         if (!RealmUtils.getRealmUtils(mContext).checkExistSound(mContext, key)) {
+            Log.d("SoundAdapter","run");
             new AsyncAddSound().execute(sound);
         }
     }
@@ -182,7 +178,6 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
                     realm.beginTransaction();
                     Sound s = realm.where(Sound.class).equalTo("id", key).findFirst();
                     s.setPlays(newItem.getPlays());
-
                     realm.commitTransaction();
                     realm.close();
                     return null;

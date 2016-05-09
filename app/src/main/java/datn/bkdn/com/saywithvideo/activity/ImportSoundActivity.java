@@ -137,7 +137,7 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
             super.onPreExecute();
             mProgressDialog = new ProgressDialog(ImportSoundActivity.this);
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            mProgressDialog.setTitle("Loading...");
+            mProgressDialog.setTitle(getString(R.string.progress_dialog_loading));
             mProgressDialog.setCancelable(true);
             mProgressDialog.show();
         }

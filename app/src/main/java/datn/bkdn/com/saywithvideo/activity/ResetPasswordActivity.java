@@ -73,7 +73,7 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
         mImgClearEmail = (ImageView) findViewById(R.id.imgClearEmail);
 
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Please wait...");
+        mProgressDialog.setMessage(getResources().getString(R.string.please_wait));
         mProgressDialog.setIndeterminate(true);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
     }
@@ -85,7 +85,7 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
                 datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(ResetPasswordActivity.this);
                 if (!Tools.isOnline(getBaseContext())) {
                     if (getCurrentFocus() != null) {
-                        Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(getCurrentFocus(), getResources().getString(R.string.internet_connection), Snackbar.LENGTH_LONG).show();
                     }
                 } else {
                     mProgressDialog.show();
@@ -94,14 +94,14 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
                         @Override
                         public void onSuccess() {
                             mProgressDialog.dismiss();
-                            Toast.makeText(getBaseContext(), "Reset password success\nPassword sent to your email.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getBaseContext(), getResources().getString(R.string.reset_pass_success), Toast.LENGTH_LONG).show();
                             finish();
                         }
 
                         @Override
                         public void onError(FirebaseError firebaseError) {
                             mProgressDialog.dismiss();
-                            Toast.makeText(getBaseContext(), "Reset password error", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getBaseContext(), getResources().getString(R.string.reset_pass_fail), Toast.LENGTH_LONG).show();
                         }
                     });
                 }

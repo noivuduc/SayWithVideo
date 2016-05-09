@@ -80,6 +80,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void init() {
+
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         RelativeLayout mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         mRlCaptureVideo = (RelativeLayout) findViewById(R.id.rlCaptureVideo);
@@ -254,7 +255,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
 
         if (mIsPlaying) {
             int now = mMediaPlayer.getCurrentPosition();
-            Log.d("Tien", now + " " + mMediaPlayer.getDuration());
             if (now == mMediaPlayer.getDuration()) {
                 complete();
                 return;

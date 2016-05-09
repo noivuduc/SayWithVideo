@@ -23,13 +23,13 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
+import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
@@ -287,142 +287,92 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private void createSoundMenu(View v, final Audio sound) {
         PopupMenu menu = new PopupMenu(this, v);
         menu.getMenuInflater().inflate(R.menu.sound_menu, menu.getMenu());
-        menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                                            @Override
-                                            public boolean onMenuItemClick(MenuItem item) {
-                                                switch (item.getItemId()) {
-                                                    case R.id.delete:
-                                                        //  mAdapter.getItems().remove(sound);
-                        /*
-                        delete audio
-                         */
-                                                        Firebase firebase = new Firebase(FirebaseConstant.BASE_URL);
-                                                        Query query = firebase.child(FirebaseConstant.AUDIO_URL).orderByChild(sound.getId());
-                                                        query.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                            @Override
-                                                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                                                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                                                                    if (data.getKey().equals(sound.getId())) {
-                                                                        data.getRef().removeValue();
-                                                                    }
-                                                                }
-                                                            }
-
-                                                            @Override
-                                                            public void onCancelled(FirebaseError firebaseError) {
-
-                                                            }
-                                                        });
-                        /*
-                        delete content
-                         */
-                                                        Query query1 = firebase.child(FirebaseConstant.AUDIO_CONTENT_URL).orderByChild(sound.getId());
-                                                        query1.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                            @Override
-                                                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                                                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                                                                    if (data.getKey().equals(sound.getId())) {
-                                                                        data.getRef().removeValue();
-                                                                    }
-                                                                }
-                                                            }
-
-                                                            @Override
-                                                            public void onCancelled(FirebaseError firebaseError) {
-
-                                                            }
-                                                        });
+        menu.setOnMenuItemClickListener(
+                new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.delete:
+                                new DecNoSoundUser().execute();
+                                new DeleteContentFirebase().execute(sound.getId());
+                                new DeleteFavoriteUserFirebase().execute(sound.getId());
+                                new DeleteSoundFirebase().execute(sound.getId());
+                                RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this, sound.getId());
+                                mAdapter.notifyDataSetChanged();
+                                break;
 
 
-                                                        new AsyncTask<String, Void, Void>() {
-
-                                                            @Override
-                                                            protected Void doInBackground(String... params) {
-                                                                String id = params[0];
-                                                                Realm realm = RealmManager.getRealm(SoundActivity.this);
-                                                                realm.beginTransaction();
-                                                                realm.where(Sound.class).equalTo("id", id).findAll().clear();
-                                                                realm.commitTransaction();
-                                                                realm.close();
-                                                                if (sound.getLink_on_Disk() != null) {
-                                                                    File file = new File(sound.getLink_on_Disk());
-                                                                    file.deleteOnExit();
-                                                                }
-                                                                return null;
-
-                                                            }
-                                                        }.execute(sound.getId());
-
-                         /*
-                    Dec no_sound
-                     */
-                                                        new AsyncTask<Void, Void, Void>()
-
-                                                        {
-
-                                                            @Override
-                                                            protected Void doInBackground(Void... params) {
-                                                                String userID = Utils.getCurrentUserID(SoundActivity.this);
-                                                                FirebaseUser f = AppTools.getInfoUser(userID);
-                                                                if (f.getNo_sound() > 0) {
-                                                                    Firebase ff = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + userID).child("no_sound");
-                                                                    ff.setValue(f.getNo_sound() - 1);
-                                                                }
-                                                                return null;
-                                                            }
-                                                        }
-
-                                                                .
-
-                                                                        execute();
-
-                         /*
-                    delete all user's favorite has this sound
-                     */
-                                                        new AsyncTask<Void, Void, Void>()
-
-                                                        {
-                                                            @Override
-                                                            protected Void doInBackground(Void... params) {
-                                                                final Firebase f = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
-                                                                f.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                    @Override
-                                                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                                                        for (DataSnapshot data : dataSnapshot.getChildren()) {
-                                                                            String key = data.getKey();
-                                                                            FirebaseUser fu = AppTools.getInfoUser(key);
-                                                                            if (fu.getNo_favorite() > 0) {
-                                                                                f.child(key).child("favorite").child(sound.getId()).removeValue();
-                                                                                f.child(key).child("no_favorite").setValue(fu.getNo_favorite() - 1);
-                                                                            }
-
-                                                                        }
-                                                                    }
-
-                                                                    @Override
-                                                                    public void onCancelled(FirebaseError firebaseError) {
-
-                                                                    }
-                                                                });
-                                                                return null;
-                                                            }
-                                                        }
-
-                                                                .
-
-                                                                        execute();
-
-                                                        mAdapter.notifyDataSetChanged();
-                                                        break;
-
-
-                                                }
-                                                return false;
-                                            }
-                                        }
+                        }
+                        return false;
+                    }
+                }
 
         );
         menu.show();
+    }
+
+    private Firebase firebase = new Firebase(FirebaseConstant.BASE_URL);
+
+    private class DeleteSoundFirebase extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(final String... params) {
+            Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
+            firebase.child(params[0]).removeValue();
+            return null;
+        }
+    }
+
+    private class DeleteContentFirebase extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_CONTENT_URL);
+            firebase.child(params[0]).removeValue();
+            return null;
+        }
+    }
+
+    private class DecNoSoundUser extends AsyncTask<Void, Void, Void>
+
+    {
+
+        @Override
+        protected Void doInBackground
+                (Void... params) {
+            String userID = Utils.getCurrentUserID(SoundActivity.this);
+            FirebaseUser f = AppTools.getInfoUser(userID);
+            if (f.getNo_sound() > 0) {
+                Firebase ff = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + userID).child("no_sound");
+                ff.setValue(f.getNo_sound() - 1);
+            }
+            return null;
+        }
+    }
+
+    private class DeleteFavoriteUserFirebase extends android.os.AsyncTask<String, Void, Void>
+
+    {
+        @Override
+        protected Void doInBackground(final String... params) {
+            final String id = params[0];
+            final Firebase f = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
+            f.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot data : dataSnapshot.getChildren()) {
+                        String key = data.getKey();
+                        f.child(key).child("favorite").child(id).removeValue();
+                    }
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+            return null;
+        }
     }
 
     private void finishActivity() {

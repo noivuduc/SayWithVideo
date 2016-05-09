@@ -30,7 +30,7 @@
             android:layout_height="match_parent"
             android:background="#f1ce08"
             android:gravity="center_vertical"
-            android:text="Select range"
+            android:text="@string/select_range"
             android:textColor="#fff"
             android:textSize="17sp"
             android:textStyle="bold" />
@@ -173,7 +173,7 @@
         android:layout_alignParentBottom="true"
         android:background="@drawable/background_button_next_edit_audio"
         android:gravity="center"
-        android:text="Next"
+        android:text="@string/select_next"
         android:textColor="#fff"
         android:textSize="17sp"
         android:textStyle="bold" />

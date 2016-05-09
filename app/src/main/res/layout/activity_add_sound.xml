@@ -40,7 +40,7 @@
                 android:layout_height="match_parent"
                 android:background="@null"
                 android:gravity="center_vertical"
-                android:text="Add sound"
+                android:text="@string/add_sound"
                 android:textColor="#fff"
                 android:textSize="17sp"
                 android:textStyle="bold" />
@@ -76,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="10dp"
-                android:text="Record a sound"
+                android:text="@string/record_a_sound"
                 android:textColor="@android:color/white"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -105,7 +105,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="10dp"
-                android:text="Import a sound"
+                android:text="@string/import_a_sound"
                 android:textColor="@android:color/white"
                 android:textSize="15sp"
                 android:textStyle="bold" />

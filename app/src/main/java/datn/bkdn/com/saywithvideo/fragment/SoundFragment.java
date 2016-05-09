@@ -7,13 +7,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,9 +41,9 @@ import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
+import datn.bkdn.com.saywithvideo.utils.PermissionUtils;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
 public class SoundFragment extends Fragment {
@@ -59,6 +59,7 @@ public class SoundFragment extends Fragment {
     private ArrayList<String> mAdapterKeys;
     private SoundAdapter mAdapter;
     private ProgressDialog mProgressDialog;
+    private Audio mCurrentAudio;
 
     public static SoundFragment newInstance() {
 
@@ -82,7 +83,7 @@ public class SoundFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        getActivity().registerReceiver(mReceiver,new IntentFilter(FavoriteActivity.BROADCAST_FAVORITE));
+        getActivity().registerReceiver(mReceiver, new IntentFilter(FavoriteActivity.BROADCAST_FAVORITE));
     }
 
     private Audio convertAudio(Sound sound) {
@@ -100,12 +101,6 @@ public class SoundFragment extends Fragment {
 
         realm = RealmManager.getRealm(getContext());
         mSounds = realm.where(Sound.class).findAll();
-        mSounds.addChangeListener(new RealmChangeListener() {
-            @Override
-            public void onChange() {
-                Log.d("onChange", "onChange");
-            }
-        });
         for (Sound s : mSounds) {
             Audio audio = convertAudio(s);
             mAdapterItems.add(audio);
@@ -126,7 +121,7 @@ public class SoundFragment extends Fragment {
         Firebase.setAndroidContext(getContext());
         mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
         final Firebase fFavorite = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(getContext()) + "/favorite/");
-        mAdapter = new SoundAdapter(mFirebase,fFavorite, Audio.class, mSounds, mAdapterItems, mAdapterKeys, getContext());
+        mAdapter = new SoundAdapter(mFirebase, fFavorite, Audio.class, mSounds, mAdapterItems, mAdapterKeys, getContext());
         mAdapter.setPlayButtonClicked(new SoundAdapter.OnItemClicked() {
             @Override
             public void onClick(final Audio sound, View v, final int pos) {
@@ -153,14 +148,16 @@ public class SoundFragment extends Fragment {
                             mPlayer.reset();
                             mAdapter.notifyDataSetChanged();
                         } else {
+                            mCurrentAudio = sound;
                             if (sound.getLink_on_Disk() == null) {
                                 if (!Tools.isOnline(getContext())) {
-                                    Snackbar.make(getActivity().getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                                    Snackbar.make(getActivity().getCurrentFocus(), R.string.internet_connection, Snackbar.LENGTH_LONG).show();
                                     break;
                                 }
                                 /**
                                  * download sound
                                  */
+
                                 new AsyncTask<Void, String, String>() {
                                     @Override
                                     protected void onPreExecute() {
@@ -171,7 +168,8 @@ public class SoundFragment extends Fragment {
 
                                     @Override
                                     protected String doInBackground(Void... params) {
-                                        return AppTools.getContentAudio(audioId, getActivity());
+                                        return AppTools.getContentAudio(audioId,getActivity());
+
                                     }
 
                                     @Override
@@ -189,6 +187,7 @@ public class SoundFragment extends Fragment {
 
                                     }
                                 }.execute();
+
 
                             } else {
                                 mFilePath = sound.getLink_on_Disk();
@@ -211,18 +210,18 @@ public class SoundFragment extends Fragment {
 
                                 @Override
                                 protected Void doInBackground(Void... params) {
-                                    RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(),audioId);
+                                    RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), audioId);
                                     favoriteFirebase.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
                                             if (dataSnapshot.hasChild(id)) {
                                                 favoriteFirebase.child(id).removeValue();
                                             } else {
-                                                Map<String,String> values = new HashMap<String, String>();
-                                                values.put("name",sound.getName());
-                                                values.put("date_create",sound.getDate_create());
-                                                values.put("user_id",sound.getUser_id());
-                                                values.put("plays",sound.getPlays()+"");
+                                                Map<String, String> values = new HashMap<String, String>();
+                                                values.put("name", sound.getName());
+                                                values.put("date_create", sound.getDate_create());
+                                                values.put("user_id", sound.getUser_id());
+                                                values.put("plays", sound.getPlays() + "");
                                                 favoriteFirebase.child(id).setValue(values);
                                             }
                                         }
@@ -264,14 +263,14 @@ public class SoundFragment extends Fragment {
                             finishActivity();
                         } else {
                             if (!Tools.isOnline(getContext())) {
-                                Snackbar.make(getActivity().getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                                Snackbar.make(getActivity().getCurrentFocus(), R.string.internet_connection, Snackbar.LENGTH_LONG).show();
                                 break;
                             }
                             new AsyncTask<Void, Void, String>() {
                                 @Override
                                 protected void onPreExecute() {
                                     super.onPreExecute();
-                                    if(mProgressDialog==null){
+                                    if (mProgressDialog == null) {
                                         mProgressDialog = new ProgressDialog(getContext());
                                     }
                                     mProgressDialog.show();
@@ -279,7 +278,7 @@ public class SoundFragment extends Fragment {
 
                                 @Override
                                 protected String doInBackground(Void... params) {
-                                    return AppTools.getContentAudio(audioId, getActivity());
+                                    return AppTools.downloadAudio(audioId, getActivity());
                                 }
 
                                 @Override
@@ -288,7 +287,7 @@ public class SoundFragment extends Fragment {
                                     mProgressDialog.dismiss();
                                     mFilePath = aVoid;
                                     sound.setLink_on_Disk(mFilePath);
-                                    new AsyncUpdatePath().execute(sound.getId(),sound.getLink_on_Disk());
+                                    new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                     finishActivity();
                                 }
                             }.execute();
@@ -318,10 +317,19 @@ public class SoundFragment extends Fragment {
         }
     }
 
+
     private void finishActivity() {
         Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
         intent.putExtra("FilePath", mFilePath);
+        PermissionUtils.getRequestCamera(getActivity());
+        // PermissionUtils.getrequestReadExtenalStorage(this);
         startActivity(intent);
+    }
+
+    private void setPermission() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            PermissionUtils.getrequestWriteExtenalStorage(getActivity());
+        }
     }
 
     @Override
@@ -364,7 +372,7 @@ public class SoundFragment extends Fragment {
 
     }
 
-    private class AsyncUpdatePlay extends AsyncTask<String, Void, Void> {
+    private class AsyncUpdatePlay extends AsyncTask<String, Integer, Void> {
 
         @Override
         protected Void doInBackground(String... params) {
@@ -379,10 +387,9 @@ public class SoundFragment extends Fragment {
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("aaass","aaaa");
-            if(intent.getAction()== FavoriteActivity.BROADCAST_FAVORITE){
-                int pos = intent.getIntExtra("POS",-1);
-                if(pos != -1) {
+            if (intent.getAction() == FavoriteActivity.BROADCAST_FAVORITE) {
+                int pos = intent.getIntExtra("POS", -1);
+                if (pos != -1) {
                     mAdapter.getItem(pos).setFavorite(false);
                     mAdapter.notifyDataSetChanged();
                 }

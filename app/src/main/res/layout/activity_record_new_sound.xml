@@ -40,7 +40,7 @@
                 android:layout_height="match_parent"
                 android:background="@null"
                 android:gravity="center_vertical"
-                android:text="Record a sound"
+                android:text="@string/text_record_a_sound"
                 android:textColor="#fff"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -55,7 +55,7 @@
         android:layout_below="@+id/rlTop"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
-        android:text="Tab 'Start' to record your sound"
+        android:text="@string/hint_record_sound"
         android:textSize="15sp"
         android:textStyle="bold" />
 
@@ -94,7 +94,7 @@
             android:layout_below="@+id/imgRecord"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
-            android:text="Start"
+            android:text="@string/text_start_record"
             android:textColor="#fff"
             android:textSize="22sp"
             android:textStyle="bold" />

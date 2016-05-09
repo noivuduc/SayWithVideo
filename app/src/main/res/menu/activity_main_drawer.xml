@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="My Profile">
+    <item android:title="@string/title_my_profile">
         <menu>
             <item
                 android:id="@+id/nav_sounds"
                 android:icon="@mipmap/ic_nav_sound"
-                android:title="Sounds" />
+                android:title="@string/sound_text" />
 
             <item
                 android:id="@+id/nav_favorites"
                 android:icon="@mipmap/ic_nav_favourite"
-                android:title="Favorites" />
+                android:title="@string/favorite_text" />
         </menu>
     </item>
 
-    <item android:title="Change Info">
+    <item android:title="@string/title_change_info">
         <menu>
             <item
                 android:id="@+id/nav_fullname"
                 android:icon="@mipmap/ic_nav_name"
-                android:title="Full Name" />
+                android:title="@string/item_full_name" />
             <item
                 android:id="@+id/nav_email"
                 android:icon="@mipmap/ic_nav_email"
-                android:title="Email" />
+                android:title="@string/item_email" />
 
             <item
                 android:id="@+id/nav_password"
                 android:icon="@mipmap/ic_nav_password"
-                android:title="Password" />
+                android:title="@string/item_password" />
         </menu>
     </item>
 
-    <item android:title="Action">
+    <item android:title="@string/title_action">
         <menu>
             <item
                 android:id="@+id/nav_logout"
                 android:icon="@mipmap/ic_nav_logout"
-                android:title="Logout" />
+                android:title="@string/item_action_logout" />
         </menu>
     </item>
 

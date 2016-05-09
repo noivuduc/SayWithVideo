@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="17dp"
-                android:text="Register to Dubsmash"
+                android:text="@string/title_register"
                 android:textColor="#494848"
                 android:textSize="17sp" />
 
@@ -38,7 +38,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="15dp"
                 android:gravity="center"
-                android:text="Please enter your Dubsmash username or email and password below"
+                android:text="@string/hint_register_new_account"
                 android:textColor="#aeabab"
                 android:textSize="13sp" />
 
@@ -56,7 +56,7 @@
                     android:layout_toLeftOf="@+id/imgClearEmail"
                     android:background="@null"
                     android:gravity="center_horizontal"
-                    android:hint="Enter your email"
+                    android:hint="@string/hint_enter_email"
                     android:inputType="textEmailAddress"
                     android:singleLine="true"
                     android:textSize="16sp" />
@@ -84,7 +84,7 @@
                     android:layout_toLeftOf="@+id/imgClearName"
                     android:background="@null"
                     android:gravity="center_horizontal"
-                    android:hint="Enter your name"
+                    android:hint="@string/hint_enter_yourname"
                     android:singleLine="true"
                     android:textSize="16sp" />
 
@@ -111,8 +111,8 @@
                     android:layout_toLeftOf="@+id/imgClearPass"
                     android:background="@null"
                     android:gravity="center_horizontal"
-                    android:hint="Enter password"
-                    android:password="true"
+                    android:hint="@string/hint_enter_password"
+                    android:inputType="numberPassword"
                     android:singleLine="true"
                     android:textSize="16sp" />
 
@@ -132,7 +132,7 @@
                 android:layout_gravity="center"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="20dp"
-                android:text="Already have an account. Login now?"
+                android:text="@string/already_have_an_account"
                 android:textColor="#44c9e7"
                 android:textSize="13sp"
                 android:textStyle="bold" />

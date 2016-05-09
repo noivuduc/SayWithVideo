@@ -286,7 +286,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                             finishActivity();
                         } else {
                             if (!Tools.isOnline(FavoriteActivity.this)) {
-                                Snackbar.make(getCurrentFocus(), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                                Snackbar.make(getCurrentFocus(), getResources().getString(R.string.internet_connection), Snackbar.LENGTH_LONG).show();
                                 break;
                             }
                             new AsyncTask<Void, Void, String>() {

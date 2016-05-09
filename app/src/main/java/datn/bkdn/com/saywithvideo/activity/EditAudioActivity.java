@@ -29,12 +29,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.UUID;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.custom.MarkerView;
 import datn.bkdn.com.saywithvideo.custom.WaveformView;
-import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseAudio;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
@@ -169,7 +167,6 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 
     @Override
     public void markerTouchStart(MarkerView marker, float x) {
-        Log.d("marker", "markerTouchStart");
         mTouchDragging = true;
         mTouchStart = x;
         mTouchInitialStartPos = mStartPos;
@@ -178,7 +175,6 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 
     @Override
     public void markerTouchMove(MarkerView marker, float x) {
-        Log.d("marker", "markerTouchMove");
         float delta = x - mTouchStart;
 
         if (marker == mStartMarker) {
@@ -195,7 +191,6 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 
     @Override
     public void markerTouchEnd(MarkerView marker) {
-        Log.d("marker", "markerTouchEnd");
         mTouchDragging = false;
         if (marker == mStartMarker) {
             setOffsetGoalStart();
@@ -206,7 +201,6 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 
     @Override
     public void markerFocus(MarkerView marker) {
-        Log.d("marker", "markerFocus");
         mKeyDown = false;
         if (marker == mStartMarker) {
             setOffsetGoalStartNoUpdate();
@@ -223,7 +217,6 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 
     @Override
     public void markerLeft(MarkerView marker, int velocity) {
-        Log.d("marker", "markerLeft");
         mKeyDown = true;
 
         if (marker == mStartMarker) {
@@ -323,12 +316,9 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
     }
 
     private void createSound(String name) {
-        String idSound = UUID.randomUUID().toString();
         Date date = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
         final String id = Utils.getCurrentUserID(EditAudioActivity.this);
-        Sound sound = new Sound(idSound, name, Utils.getCurrentUserName(EditAudioActivity.this), mOutputPath, mOutputPath, ft.format(date));
-        sound.setIdUser(id);
 
         //  send to server
         FirebaseAudio mAudio = new FirebaseAudio(name, id, ft.format(date), 0);

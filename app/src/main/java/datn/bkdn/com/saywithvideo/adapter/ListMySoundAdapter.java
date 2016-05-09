@@ -1,7 +1,6 @@
 package datn.bkdn.com.saywithvideo.adapter;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -19,13 +18,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.database.RealmManager;
-import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.lib.FirebaseRecyclerAdapter;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.utils.Utils;
-import io.realm.Realm;
 
 import static java.util.Collections.sort;
 
@@ -101,34 +97,6 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
 
     @Override
     protected void itemExist(final Audio item, final String key, final int position) {
-        new AsyncTask<Void, Void, String>() {
-
-            @Override
-            protected String doInBackground(Void... params) {
-                return Utils.getUserName(item.getUser_id());
-
-            }
-
-            @Override
-            protected void onPostExecute(String s) {
-                super.onPostExecute(s);
-                getItem(position).setAuthor(s);
-            }
-        }.execute();
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                Realm realm = RealmManager.getRealm(mContext);
-                realm.beginTransaction();
-                Sound s = realm.where(Sound.class).equalTo("id", key).findFirst();
-                s.setIsFavorite(getItem(position).isFavorite());
-                s.setAuthor(getItem(position).getAuthor());
-                s.setPlays(item.getPlays());
-                realm.commitTransaction();
-                realm.close();
-                return null;
-            }
-        }.execute();
 
     }
 
@@ -137,18 +105,11 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
         String author = Utils.getCurrentUserName(mContext);
         item.setId(key);
         item.setAuthor(author);
-        final Sound sound = convertAudio(item);
-        if (!RealmUtils.getRealmUtils(mContext).checkExistSound(mContext, key)) {
-            new AsyncAddSound().execute(sound);
-        }
     }
 
 
     @Override
     protected void itemChanged(Audio oldItem, Audio newItem, String key, int position) {
-        oldItem.setPlays(newItem.getPlays());
-        getItems().set(position, oldItem);
-        notifyDataSetChanged();
     }
 
     @Override
@@ -178,24 +139,6 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
             linearLayout = (LinearLayout) itemView.findViewById(R.id.llSoundInfor);
             rlOption = (RelativeLayout) itemView.findViewById(R.id.rlOption);
             progressPlay = (ProgressBar) itemView.findViewById(R.id.progressPlay);
-        }
-    }
-
-    class AsyncAddSound extends AsyncTask<Sound, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Sound... sound) {
-            Realm realm = RealmManager.getRealm(mContext);
-            realm.beginTransaction();
-            realm.copyToRealm(sound[0]);
-            realm.commitTransaction();
-            realm.close();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
         }
     }
 

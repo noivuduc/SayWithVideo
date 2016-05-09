@@ -2,8 +2,11 @@ package datn.bkdn.com.saywithvideo.utils;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
+import android.util.Log;
 import android.util.Patterns;
 
 import com.google.gson.Gson;
@@ -20,10 +23,14 @@ public class Utils {
     private static final String CURRENT_USER_ID = "id_key";
 
     public static final String getPrimaryEmail(Context context) {
+        if(Build.VERSION.SDK_INT>=23) {
+            PermissionUtils.getrequestGetAccounts((Activity) context);
+        }
         String possibleEmail = null;
         Pattern emailPattern = Patterns.EMAIL_ADDRESS;
         Account[] accounts = AccountManager.get(context).getAccounts();
-        if(accounts!=null) {
+        Log.d("maill",accounts.length+"");
+        if(accounts.length>0) {
             if (emailPattern.matcher(accounts[0].name).matches()) {
                 possibleEmail = accounts[0].name;
             }

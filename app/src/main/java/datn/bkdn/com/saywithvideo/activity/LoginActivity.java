@@ -91,13 +91,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                 @Override
                 public void onCancel() {
-                    Toast.makeText(LoginActivity.this, "Login facebook cancel by user", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, getResources().getString(R.string.facebook_cancel_by_user), Toast.LENGTH_SHORT).show();
                     mProgressDialog.dismiss();
                 }
 
                 @Override
                 public void onError(FacebookException error) {
-                    Toast.makeText(LoginActivity.this, "Login facebook error", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this,getResources().getString( R.string.facebook_login_error), Toast.LENGTH_SHORT).show();
                     mProgressDialog.dismiss();
                 }
             });
@@ -125,7 +125,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         clearPass = (ImageView) findViewById(R.id.imgClearPass);
         TextView tvLoginFacebook = (TextView) findViewById(R.id.tvLoginFacebook);
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Please wait...");
+        mProgressDialog.setMessage(getResources().getString(R.string.please_wait));
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         mProgressDialog.setIndeterminate(true);
 
@@ -294,7 +294,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     @Override
                     public void onAuthenticationError(FirebaseError error) {
                         mProgressDialog.dismiss();
-                        Toast.makeText(LoginActivity.this, "Email or password is wrong!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, R.string.login_fail, Toast.LENGTH_SHORT).show();
                     }
                 });
     }

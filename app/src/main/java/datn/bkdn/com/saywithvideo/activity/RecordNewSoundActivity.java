@@ -120,10 +120,8 @@ public class RecordNewSoundActivity extends Activity implements OnClickListener 
                 if (!mIsRecord) {
                     mTvTime.setVisibility(View.VISIBLE);
                     mRlRecord.setBackgroundResource(R.drawable.selector_button_record_a_sound_pressed);
-                    String s = "Done";
-                    String s2 = "Tap when you are done!";
-                    mTvStart.setText(s);
-                    mTvInfor.setText(s2);
+                    mTvStart.setText(getResources().getString(R.string.record_done));
+                    mTvInfor.setText(getResources().getString(R.string.hint_record_done));
                 }
                 record();
                 break;

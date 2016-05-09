@@ -91,7 +91,7 @@
         android:layout_alignParentBottom="true"
         android:background="@drawable/background_button_add_sound"
         android:gravity="center"
-        android:text="Add Sound"
+        android:text="@string/add_sound"
         android:textColor="#fff"
         android:textSize="17sp"
         android:textStyle="bold" />

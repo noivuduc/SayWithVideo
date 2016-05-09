@@ -10,7 +10,6 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +33,7 @@ import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
  */
 public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.ViewHolder, T>
         extends RecyclerView.Adapter<ViewHolder> {
-    private HashMap<String,String> mUserNames;
+    private HashMap<String, String> mUserNames;
     private Query mQuery;
     private Class<T> mItemClass;
     private ArrayList<T> mItems;
@@ -77,11 +76,12 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
             mKeys = new ArrayList<String>();
         }
         this.mItemClass = itemClass;
-        if(mQuery!=null){
+        mUserQuery = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
+        mUserQuery.setPriority(1000);
+        mUserQuery.addChildEventListener(mUserListener);
+        if (mQuery != null) {
             mQuery.addChildEventListener(mListenner);
         }
-        mUserQuery = new Firebase(FirebaseConstant.BASE_URL+FirebaseConstant.USER_URL);
-        mUserQuery.addChildEventListener(mUserListener);
         query.addChildEventListener(mListener);
     }
 
@@ -89,20 +89,11 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
             final String key = dataSnapshot.getKey();
-            if(mUserNames == null){
+            if (mUserNames == null) {
                 mUserNames = new HashMap<>();
             }
-            mUserQuery.child(key).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    mUserNames.put(key,dataSnapshot.getValue().toString());
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-
-                }
-            });
+            String name = dataSnapshot.child("name").getValue().toString();
+            mUserNames.put(key, name);
 
         }
 
@@ -189,7 +180,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
                 int currentPosition = mKeys.indexOf(key);
                 itemExist(item, key, currentPosition);
 
-                }
+            }
         }
 
         @Override
@@ -201,7 +192,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
                 int index = mKeys.indexOf(key);
                 T oldItem = mItems.get(index);
                 T newItem = dataSnapshot.getValue(FirebaseRecyclerAdapter.this.mItemClass);
-              //  mItems.set(index, newItem);
+                //  mItems.set(index, newItem);
                 notifyItemChanged(index);
                 itemChanged(oldItem, newItem, key, index);
             }
@@ -303,7 +294,10 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
         return mKeys;
     }
 
-    public HashMap<String,String> getUsernames(){return mUserNames;}
+    public HashMap<String, String> getUsernames() {
+        return mUserNames;
+    }
+
     /**
      * Returns the item in the specified position
      *
@@ -314,7 +308,10 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
         return mItems.get(position);
     }
 
-    public ArrayList<String> getmFavorites(){return mFavorites;}
+    public ArrayList<String> getmFavorites() {
+        return mFavorites;
+    }
+
     /**
      * Returns the position of the item in the adapter
      *
@@ -337,8 +334,9 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
 
     /**
      * Called after an item has already exist
-     * @param item item exist
-     * @param key key of item
+     *
+     * @param item    item exist
+     * @param key     key of item
      * @param postion position of item
      */
     protected abstract void itemExist(T item, String key, int postion);

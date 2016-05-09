@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SayWithVideo</string>
+    <string name="app_name"></string>
     <string name="facebook_app_id">1682083695406081</string>
 
     <string name="start_marker">Start marker</string>
@@ -23,4 +23,49 @@
     <string name="cant_change_email">Can\'t change your email</string>
     <string name="cant_change_password">Can\'t change your password</string>
     <string name="share_via_messenger">Messenger</string>
+
+    <string name="hint_login">Please enter your Dubsmash username or email and password below</string>
+    <string name="hint_enter_email">Enter your email</string>
+    <string name="hint_enter_password">Enter your password</string>
+    <string name="dont_have_account">I don\'t have any account. Register?</string>
+    <string name="forgot_password">Forgot?</string>
+    <string name="login_app_text">Login to Dubsmash</string>
+    <string name="sound_text">Sounds</string>
+    <string name="favorite_text">Favorites</string>
+    <string name="title_my_profile">My profile</string>
+    <string name="title_change_info">Change info</string>
+    <string name="item_full_name">Full name</string>
+    <string name="item_email">Email</string>
+    <string name="item_password">Password</string>
+    <string name="title_action">Action</string>
+    <string name="item_action_logout">Logout</string>
+    <string name="text_record_a_sound">Record a sound</string>
+    <string name="hint_record_sound">Tab \'Start\' to record your sound</string>
+    <string name="text_start_record">Start</string>
+    <string name="text_stop_record">Stop</string>
+    <string name="title_register">Register to Dubsmash</string>
+    <string name="hint_enter_yourname">Enter your name</string>
+    <string name="hint_register_new_account">Please enter your Dubsmash username or email and password below</string>
+    <string name="already_have_an_account">Already have an account. Login now?</string>
+    <string name="register_successfully">Register successfully</string>
+    <string name="hint_continue">Press \'Continue\' to start using app</string>
+    <string name="select_next">Next</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="hint_reset_password">Please enter the email address of your Dubsmash account below</string>
+    <string name="hint_email">Email</string>
+    <string name="add_sound">Add Sound</string>
+
+    <string name="login_fail">Email or password is wrong!</string>
+    <string name="facebook_cancel_by_user">Facebook cancel by user</string>
+    <string name="facebook_login_error">Facebook login error</string>
+    <string name="record_done">Done</string>
+    <string name="hint_record_done">Tap when you are done!</string>
+    <string name="please_wait">Please wait&#8230;</string>
+    <string name="reset_pass_success">Reset password success. Password sent to your email.</string>
+    <string name="reset_pass_fail">Reset password fail</string>
+    <string name="sounds">Sounds</string>
+    <string name="videos">Videos</string>
+    <string name="dont_have_video">You don\'t have any Video yet!</string>
+    <string name="btn_create_video">Create your video</string>
+
 </resources>

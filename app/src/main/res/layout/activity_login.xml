@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="15dp"
-            android:text="Login to Dubsmash"
+            android:text="@string/login_app_text"
             android:textColor="#494848"
             android:textSize="17sp" />
 
@@ -34,7 +34,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="15dp"
             android:gravity="center"
-            android:text="Please enter your Dubsmash username or email and password below"
+            android:text="@string/hint_login"
             android:textColor="#aeabab"
             android:textSize="13sp" />
     </LinearLayout>
@@ -61,7 +61,7 @@
                 android:background="@null"
                 android:inputType="textEmailAddress"
                 android:gravity="center"
-                android:hint="Enter your email"
+                android:hint="@string/hint_enter_email"
                 android:singleLine="true"
                 android:textSize="18sp" />
 
@@ -92,7 +92,7 @@
                 android:background="@null"
                 android:gravity="center"
                 android:hint="Enter password"
-                android:password="true"
+                android:inputType="textPassword"
                 android:singleLine="true"
                 android:textSize="18sp" />
 
@@ -112,7 +112,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:gravity="center"
-                android:text="Forgot?"
+                android:text="@string/forgot_password"
                 android:textColor="#44c9e7"
                 android:textSize="12sp" />
         </RelativeLayout>
@@ -134,7 +134,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
-            android:text="I don't have any account. Register?"
+            android:text="@string/dont_have_account"
             android:textColor="#44c9e7"
             android:textSize="13sp"
             android:textStyle="italic" />
