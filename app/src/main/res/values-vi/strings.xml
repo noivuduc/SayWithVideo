@@ -1,0 +1,74 @@
+<resources>
+    <string name="app_name">Say With Video</string>
+    <string name="facebook_app_id">1682083695406081</string>
+
+    <string name="start_marker">Bắt đầu đánh dấu</string>
+    <string name="end_marker">Kết thúc đánh dấu</string>
+    <string name="play">Chạy</string>
+    <string name="stop">Dừng</string>
+    <string name="progress_dialog_loading">Đang tải&#8230;</string>
+    <string name="time_seconds">seconds</string>
+    <string name="internet_connection">Máy của bạn hiện không có kết nối mạng</string>
+    <string name="add_password">Nhập vào mật khẩu của bạn</string>
+    <string name="add_new_email">Nhập vào email mới</string>
+    <string name="change_email_success">Thay đổi email thành công</string>
+    <string name="change_email_error">Thay đổi email thất bại</string>
+    <string name="change_password_success">Thay đổi mật khẩu thành công</string>
+    <string name="change_password_error">Thay đổi mật khẩu thất bại</string>
+    <string name="add_new_password">Nhập mật khẩu mới</string>
+    <string name="add_old_password">Nhập mật khẩu hiện tại</string>
+    <string name="add_name">Nhập tên của bạn</string>
+    <string name="change_name_success">Thay đổi tên thành công</string>
+    <string name="change_name_error">Thay đổi tên thất bại</string>
+    <string name="cant_change_email">Không thể thay đổi email</string>
+    <string name="cant_change_password">Không thể thay đổi mật khẩu</string>
+    <string name="share_via_messenger">Messenger</string>
+
+    <string name="add_sound">Thêm mới âm thanh</string>
+    <string name="record_a_sound">Ghi âm</string>
+    <string name="import_a_sound">Thêm âm thanh có sẵn</string>
+    <string name="select_range">Chỉnh sửa âm thanh</string>
+    <string name="select_next">Tiếp theo</string>
+    <string name="hint_login">Nhập email và mật khẩu để đăng nhập vào ứng dụng</string>
+
+    <string name="hint_enter_email">Nhập vào email</string>
+    <string name="hint_enter_password">Nhập vào mật khẩu</string>
+    <string name="dont_have_account">Chưa có tài khoản Dubsmash? Đăng ký</string>
+    <string name="forgot_password">Quên mật khẩu</string>
+    <string name="login_app_text">Đăng nhập vào Dubsmash</string>
+    <string name="sound_text">Âm thanh của tôi</string>
+    <string name="favorite_text">Yêu thích của tôi</string>
+    <string name="title_my_profile">Thông tin</string>
+    <string name="title_change_info">Thay đổi thông tin</string>
+    <string name="item_full_name">Đổi tên</string>
+    <string name="item_email">Đổi email</string>
+    <string name="item_password">Đổi password</string>
+    <string name="title_action">Hành động</string>
+    <string name="item_action_logout">Đăng xuất</string>
+    <string name="text_record_a_sound">Ghi âm</string>
+    <string name="hint_record_sound">Nhấn \'Bắt đầu\' để ghi âm</string>
+    <string name="text_start_record">Bắt đầu</string>
+    <string name="text_stop_record">Dừng lại</string>
+    <string name="title_register">Đăng ký tài khoản Dubsmash</string>
+    <string name="hint_enter_yourname">Nhập tên của bạn</string>
+    <string name="hint_register_new_account">Nhập tên, email và password vào các ô bên dưới để đăng ký</string>
+    <string name="already_have_an_account">Tôi đã có tài khoản. Đăng nhập bây giờ</string>
+    <string name="register_successfully">Chúc mừng bạn đã đăng ký thành công!</string>
+    <string name="hint_continue">Nhấn \'Tiếp theo\' để bắt đầu sử dụng</string>
+    <string name="reset_password">Khôi phục mật khẩu</string>
+    <string name="hint_reset_password">Điền vào email của bạn vào ô dưới đây.b</string>
+    <string name="hint_email">Email</string>
+
+    <string name="login_fail">Email hoặc mật khẩu không đúng!</string>
+    <string name="facebook_cancel_by_user">Đăng nhập bị thoát bởi người dùng!</string>
+    <string name="facebook_login_error">Đăng nhập không thành công</string>
+    <string name="record_done">Xong</string>
+    <string name="hint_record_done">Nhấn vào \'Xong\' khi bạn hoàn thành</string>
+    <string name="please_wait">Vui lòng đợi&#8230;</string>
+    <string name="reset_pass_success">Mật khẩu mới đã được đặt lại. Hãy kiểm tra email của bạn!</string>
+    <string name="reset_pass_fail">Cập nhật mật khẩu không thành công</string>
+    <string name="sounds">Âm thanh</string>
+    <string name="videos">Video của tôi</string>
+    <string name="dont_have_video">Bạn chưa tạo video nào</string>
+    <string name="btn_create_video">Tạo mới video</string>
+</resources>
