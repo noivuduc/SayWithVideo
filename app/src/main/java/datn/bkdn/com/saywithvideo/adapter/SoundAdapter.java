@@ -162,7 +162,6 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         }
         final Sound sound = convertAudio(item);
         if (!RealmUtils.getRealmUtils(mContext).checkExistSound(mContext, key)) {
-            Log.d("SoundAdapter","run");
             new AsyncAddSound().execute(sound);
         }
     }
