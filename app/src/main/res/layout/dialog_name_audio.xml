@@ -28,7 +28,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:padding="15dp"
-            android:text="Cancel"
+            android:text="@string/cancel"
             android:textColor="#1a65cf"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -40,7 +40,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:padding="15dp"
-            android:text="OK"
+            android:text="@string/ok"
             android:textColor="#1a65cf"
             android:textSize="15sp"
             android:textStyle="bold" />

@@ -25,6 +25,7 @@ import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.MainPagerAdapter;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.network.Tools;
+import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.PagerSlidingTabStrip;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
@@ -32,9 +33,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private ViewPager mPager;
     private NavigationView mNavigationView;
-    private static final String FULLNAME = "Add your name ...";
-    private static final String EMAIL = "Verify your mail";
-    private static final String CHANGE_PASSWORD = "Add your new password ...";
     private TextView mTvName;
     private TextView mTvEmail;
 
@@ -153,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showChangeFullNameDialog() {
         final Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.dialog_setting);
-        dialog.setTitle(FULLNAME);
+        dialog.setTitle(getResources().getString(R.string.add_your_name));
 
         TextView mTvCancel = (TextView) dialog.findViewById(R.id.tvCancel);
         final EditText mEdtContent = (EditText) dialog.findViewById(R.id.edtContent);
@@ -175,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 final String fullName = mEdtContent.getText().toString().trim();
                 if (fullName.equals("")) {
                     showMessage(getResources().getString(R.string.add_name));
-                    datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(MainActivity.this, dialog.getCurrentFocus());
+                    AppTools.hideKeyboard(MainActivity.this, dialog.getCurrentFocus());
                 } else {
                     Firebase mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(MainActivity.this) + "/");
                     mFirebase.child("name/").setValue(fullName, new Firebase.CompletionListener() {
@@ -227,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showChangePasswordDialog() {
         final Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.dialog_change_password);
-        dialog.setTitle(CHANGE_PASSWORD);
+        dialog.setTitle(getResources().getString(R.string.add_your_new_pass));
 
         TextView mTvCancel = (TextView) dialog.findViewById(R.id.tvCancel);
         final EditText mEdtOldPass = (EditText) dialog.findViewById(R.id.edtOldPass);
@@ -252,10 +250,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String newPass = mEdtNewPass.getText().toString();
                 if (oldPass.equals("")) {
                     Toast.makeText(getBaseContext(), getResources().getString(R.string.add_old_password), Toast.LENGTH_SHORT).show();
-                    datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(MainActivity.this);
+                    AppTools.hideKeyboard(MainActivity.this);
                 } else if (newPass.equals("")) {
                     Toast.makeText(getBaseContext(), getResources().getString(R.string.add_new_password), Toast.LENGTH_SHORT).show();
-                    datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(MainActivity.this);
+                    AppTools.hideKeyboard(MainActivity.this);
                 } else {
                     if (showMessage()) {
                         Firebase mFirebase = new Firebase(FirebaseConstant.BASE_URL);
@@ -343,7 +341,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showChangeEmailDialog() {
         final Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.dialog_change_email);
-        dialog.setTitle(EMAIL);
+        dialog.setTitle(getResources().getString(R.string.verify_your_email));
 
         final EditText mEdtPassword = (EditText) dialog.findViewById(R.id.edtPassword);
         final EditText mEdtNewMail = (EditText) dialog.findViewById(R.id.edtNewMail);
@@ -387,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     });
                     dialog.dismiss();
                 }
-                datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(MainActivity.this, dialog.getCurrentFocus());
+                AppTools.hideKeyboard(MainActivity.this, dialog.getCurrentFocus());
             }
         });
 

@@ -1,5 +1,7 @@
 package datn.bkdn.com.saywithvideo.lib;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -10,10 +12,12 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 
 /**
@@ -36,6 +40,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
     private HashMap<String, String> mUserNames;
     private Query mQuery;
     private Class<T> mItemClass;
+    private ProgressDialog mProgressDialog;
     private ArrayList<T> mItems;
     private ArrayList<String> mKeys;
     private ArrayList<String> mFavorites;
@@ -64,7 +69,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
      *                  configuration change (e.g.: reloading the adapter after a device rotation).
      *                  Be careful: items must be coherent with this list.
      */
-    public FirebaseRecyclerAdapter(Query query, @Nullable Query mQuery, Class<T> itemClass,
+    public FirebaseRecyclerAdapter(Context context, Query query, @Nullable Query mQuery, Class<T> itemClass,
                                    @Nullable ArrayList<T> items,
                                    @Nullable ArrayList<String> keys) {
         this.mQuery = query;
@@ -72,43 +77,36 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
             this.mItems = items;
             this.mKeys = keys;
         } else {
-            mItems = new ArrayList<T>();
-            mKeys = new ArrayList<String>();
+            mItems = new ArrayList<>();
+            mKeys = new ArrayList<>();
         }
+        mProgressDialog = new ProgressDialog(context);
+        mProgressDialog.setMessage(context.getResources().getString(R.string.please_wait));
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+        query.addListenerForSingleValueEvent(valueEventListener);
         this.mItemClass = itemClass;
         mUserQuery = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
-        mUserQuery.setPriority(1000);
-        mUserQuery.addChildEventListener(mUserListener);
+        mUserQuery.addListenerForSingleValueEvent(mUserListener);
         if (mQuery != null) {
             mQuery.addChildEventListener(mListenner);
         }
         query.addChildEventListener(mListener);
     }
 
-    private ChildEventListener mUserListener = new ChildEventListener() {
+    private ValueEventListener mUserListener = new ValueEventListener() {
+
         @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            final String key = dataSnapshot.getKey();
-            if (mUserNames == null) {
-                mUserNames = new HashMap<>();
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.d("FirebaseAdapter","onDataChange");
+            for(DataSnapshot data : dataSnapshot.getChildren()){
+                final String key = data.getKey();
+                if (mUserNames == null) {
+                    mUserNames = new HashMap<>();
+                }
+                String name = data.child("name").getValue().toString();
+                mUserNames.put(key, name);
             }
-            String name = dataSnapshot.child("name").getValue().toString();
-            mUserNames.put(key, name);
-
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
         }
 
@@ -121,6 +119,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
     private ChildEventListener mListenner = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            Log.d("FirebaseAdapter","onDataChange.Favorite");
             if (mFavorites == null) {
                 mFavorites = new ArrayList<>();
             }
@@ -151,9 +150,24 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
         }
     };
 
+
+    private ValueEventListener valueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.d("FirebaseAdapter","end loading");
+            mProgressDialog.dismiss();
+        }
+
+        @Override
+        public void onCancelled(FirebaseError firebaseError) {
+
+        }
+    };
+
     private ChildEventListener mListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+            Log.d("FirebaseAdapter","onChildAdded");
             String key = dataSnapshot.getKey();
             T item = dataSnapshot.getValue(FirebaseRecyclerAdapter.this.mItemClass);
             int insertedPosition;
@@ -186,7 +200,6 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
             String key = dataSnapshot.getKey();
-            //don't need for my App, sorry author :)
 //
             if (mKeys.contains(key)) {
                 int index = mKeys.indexOf(key);
@@ -363,6 +376,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
      * @param position Position of the changed item in the adapter
      */
     protected abstract void itemChanged(T oldItem, T newItem, String key, int position);
+
 
     /**
      * Called after an item has been removed from the adapter

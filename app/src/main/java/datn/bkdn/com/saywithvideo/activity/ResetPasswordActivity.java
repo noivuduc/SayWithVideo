@@ -18,6 +18,7 @@ import com.firebase.client.FirebaseError;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.network.Tools;
+import datn.bkdn.com.saywithvideo.utils.AppTools;
 
 public class ResetPasswordActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -82,7 +83,7 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.tvResetPassword:
-                datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(ResetPasswordActivity.this);
+                AppTools.hideKeyboard(ResetPasswordActivity.this);
                 if (!Tools.isOnline(getBaseContext())) {
                     if (getCurrentFocus() != null) {
                         Snackbar.make(getCurrentFocus(), getResources().getString(R.string.internet_connection), Snackbar.LENGTH_LONG).show();

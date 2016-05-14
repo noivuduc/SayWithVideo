@@ -24,12 +24,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.adapter.SoundAdapter;
+import datn.bkdn.com.saywithvideo.adapter.ListFavoriteAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
-import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
@@ -41,14 +40,13 @@ import io.realm.RealmResults;
 public class FavoriteActivity extends AppCompatActivity implements View.OnClickListener, RealmChangeListener {
     private ArrayList<Audio> mAdapterItems;
     private ArrayList<String> mAdapterKeys;
-    private SoundAdapter mAdapter;
+    private ListFavoriteAdapter mAdapter;
     private RelativeLayout mRlBack;
     private RelativeLayout mRlSort;
     private EditText mTvSearch;
     private MediaPlayer mPlayer;
     private RecyclerView mLvSound;
     private Realm realm;
-    private FirebaseUser mFirebaseUser;
     private String mFilePath;
     private Firebase mFirebaseFavorite;
     private ImageView mImgSort;
@@ -120,15 +118,10 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     }
 
 
-    @Override
-    public void onChange() {
-        mAdapter.notifyDataSetChanged();
-    }
-
     private void init() {
         initData();
         mFirebaseFavorite = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(this) + "/favorite");
-        mAdapter = new SoundAdapter(mFirebaseFavorite, null, Audio.class, mSounds, mAdapterItems, mAdapterKeys, this);
+        mAdapter = new ListFavoriteAdapter(mFirebaseFavorite, null, Audio.class, mSounds, mAdapterItems, mAdapterKeys, this);
         mLvSound = (RecyclerView) findViewById(R.id.lvSoundFavorite);
         mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         mRlSort = (RelativeLayout) findViewById(R.id.rlSort);
@@ -143,7 +136,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         mRlBack.setOnClickListener(this);
         mRlSort.setOnClickListener(this);
         mTvSearch.setOnClickListener(this);
-        mAdapter.setPlayButtonClicked(new SoundAdapter.OnItemClicked() {
+        mAdapter.setPlayButtonClicked(new ListFavoriteAdapter.OnItemClicked() {
             @Override
             public void onClick(final Audio sound, View v, final int pos) {
                 final String audioId = sound.getId();
@@ -221,9 +214,10 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                         break;
                     case R.id.rlFavorite:
                         if (mIntentUnFavorite == null) {
-                            mIntentUnFavorite = new Intent(BROADCAST_FAVORITE);
+                            mIntentUnFavorite = new Intent();
                         }
                         mIntentUnFavorite.putExtra("POS", pos);
+                        mIntentUnFavorite.setAction(BROADCAST_FAVORITE);
                         sendBroadcast(mIntentUnFavorite);
                         try {
                             final String id = sound.getId();
@@ -258,7 +252,6 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                                 protected void onPostExecute(Void aVoid) {
                                     super.onPostExecute(aVoid);
                                     sound.setLoadFavorite(false);
-                                    mAdapter.getItems().remove(pos);
                                     mAdapter.notifyDataSetChanged();
                                 }
                             }.execute();
@@ -326,6 +319,11 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         });
 
         mLvSound.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void onChange(Object element) {
+        
     }
 
     private class AsyncUpdatePath extends AsyncTask<String, Void, Void> {

@@ -177,7 +177,7 @@
             android:paddingBottom="5dp"
             android:paddingRight="15dp"
             android:paddingTop="5dp"
-            android:text="Login With Facebook"
+            android:text="@string/login_with_facbook"
             android:textColor="#fff"
             android:textSize="16sp" />
     </LinearLayout>
@@ -196,7 +196,7 @@
             android:gravity="center"
             android:paddingBottom="15dp"
             android:paddingTop="15dp"
-            android:text="Log in"
+            android:text="@string/log_in"
             android:textColor="#fff"
             android:textSize="18sp"
             android:textStyle="bold"

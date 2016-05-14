@@ -11,16 +11,22 @@ public class RealmManager {
     public static Realm getRealm(Context context) {
 
         if (defaultConfig == null) {
-            defaultConfig = getConfig(context);
-            Realm.migrateRealm(defaultConfig,new Migration());
+            defaultConfig = getDefaultConfig(context);
         }
         return Realm.getInstance(defaultConfig);
     }
 
-    private static RealmConfiguration getConfig(Context context) {
+    public static RealmConfiguration getConfig(Context context) {
         return new RealmConfiguration.Builder(context)
-                .schemaVersion(1)
+                .schemaVersion(0)
+                .migration(new Migration())
                 .deleteRealmIfMigrationNeeded()
                 .build();
+    }
+
+    public static RealmConfiguration getDefaultConfig(Context context){
+        RealmConfiguration config = new RealmConfiguration.Builder(context)
+                .build();
+        return config;
     }
 }

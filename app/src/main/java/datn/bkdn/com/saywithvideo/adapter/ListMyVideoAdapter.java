@@ -24,7 +24,7 @@ public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
     private final Context mContext;
 
     public ListMyVideoAdapter(Context context, RealmResults<Video> videos) {
-        super(context, videos, true);
+        super(context, videos);
         mContext = context;
     }
 

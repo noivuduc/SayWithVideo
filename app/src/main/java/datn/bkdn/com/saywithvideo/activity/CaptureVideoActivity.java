@@ -38,7 +38,6 @@ import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.CameraPreview;
 import datn.bkdn.com.saywithvideo.utils.Constant;
-import datn.bkdn.com.saywithvideo.utils.Tools;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
 @SuppressWarnings("deprecation")
@@ -319,7 +318,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             mMediaRecorder.setOrientationHint(90);
         }
 
-        Tools.createFolder(Constant.VIDEO_DIRECTORY_PATH);
+        AppTools.createFolder(Constant.VIDEO_DIRECTORY_PATH);
         mVideoOutPut = Constant.VIDEO_DIRECTORY_PATH + "VIDEO_" + AppTools.getDate() + ".mp4";
         mMediaRecorder.setOutputFile(mVideoOutPut);
         try {
@@ -525,7 +524,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
 
                 Container container = new DefaultMp4Builder().build(outputVideo);
                 String folderPath = Constant.VIDEO_DIRECTORY_PATH;
-                Tools.createFolder(folderPath);
+                AppTools.createFolder(folderPath);
                 outputPath = folderPath + "VIDEO_" + AppTools.getDate() + ".mp4";
                 FileChannel fileChannel = new FileOutputStream(new File(outputPath)).getChannel();
                 container.writeContainer(fileChannel);

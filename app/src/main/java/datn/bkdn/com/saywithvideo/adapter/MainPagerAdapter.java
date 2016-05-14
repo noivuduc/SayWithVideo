@@ -9,7 +9,7 @@ import datn.bkdn.com.saywithvideo.fragment.UserProfileFragment;
 
 public class MainPagerAdapter extends FragmentPagerAdapter {
     public static final int NUM_TAB = 2;
-    public static final String[] TAB_NAME = {"Âm thanh", "Video của tôi"};
+    public static final String[] TAB_NAME = { "Âm thanh", "Video của tôi"};
 
     public MainPagerAdapter(FragmentManager fm) {
         super(fm);

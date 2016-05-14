@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.firebase.client.Query;
+import com.jpardogo.android.googleprogressbar.library.FoldingCirclesDrawable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -44,24 +45,25 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
 
 
     public ListMySoundAdapter(Context context, Query query, Class<Audio> itemClass, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys) {
-        super(query,null, itemClass, items, keys);
+        super(context,query,null, itemClass, items, keys);
         this.mContext = context;
     }
 
     @Override
     public AudioViewholder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list_mysound, parent, false);
-        return new AudioViewholder(view);
+        return new AudioViewholder(view,mContext);
     }
 
     @Override
-    public void onBindViewHolder(AudioViewholder viewHolder, final int position) {
+    public void onBindViewHolder(AudioViewholder viewHolder, int position) {
         final Audio sound = getItem(position);
+        final int pos = viewHolder.getAdapterPosition();
         viewHolder.imgPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mItemClicked != null) {
-                    mItemClicked.onClick(position, v, sound);
+                    mItemClicked.onClick(pos, v, sound);
                 }
             }
         });
@@ -69,7 +71,7 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
             @Override
             public void onClick(View v) {
                 if (mItemClicked != null) {
-                    mItemClicked.onClick(position, v, sound);
+                    mItemClicked.onClick(pos, v, sound);
                 }
             }
         });
@@ -77,7 +79,7 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
             @Override
             public void onClick(View v) {
                 if (mItemClicked != null) {
-                    mItemClicked.onClick(position, v, sound);
+                    mItemClicked.onClick(pos, v, sound);
                 }
             }
         });
@@ -130,7 +132,7 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
         private final ProgressBar progressPlay;
         private final RelativeLayout rlOption;
 
-        public AudioViewholder(View itemView) {
+        public AudioViewholder(View itemView, Context context) {
             super(itemView);
             tvSoundName = (TextView) itemView.findViewById(R.id.tvSoundName);
             tvPlays = (TextView) itemView.findViewById(R.id.tvPlays);
@@ -139,6 +141,7 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
             linearLayout = (LinearLayout) itemView.findViewById(R.id.llSoundInfor);
             rlOption = (RelativeLayout) itemView.findViewById(R.id.rlOption);
             progressPlay = (ProgressBar) itemView.findViewById(R.id.progressPlay);
+            progressPlay.setIndeterminateDrawable(new FoldingCirclesDrawable.Builder(context).build());
         }
     }
 

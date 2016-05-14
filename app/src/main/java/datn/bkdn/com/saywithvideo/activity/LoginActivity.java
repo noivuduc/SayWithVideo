@@ -1,7 +1,7 @@
 package datn.bkdn.com.saywithvideo.activity;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -34,9 +34,11 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.network.Tools;
+import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
@@ -48,7 +50,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private ImageView clearEmail;
     private Firebase root;
     private CallbackManager callbackManager;
-    private ProgressDialog mProgressDialog;
+    private SweetAlertDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,10 +126,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         clearEmail = (ImageView) findViewById(R.id.imgClearEmail);
         clearPass = (ImageView) findViewById(R.id.imgClearPass);
         TextView tvLoginFacebook = (TextView) findViewById(R.id.tvLoginFacebook);
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage(getResources().getString(R.string.please_wait));
-        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgressDialog.setIndeterminate(true);
+        mProgressDialog = new SweetAlertDialog(this,SweetAlertDialog.PROGRESS_TYPE);
+        mProgressDialog.setTitleText(getResources().getString(R.string.please_wait));
+        mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+        mProgressDialog.setCancelable(false);
 
         if (tvLogin != null) tvLogin.setOnClickListener(this);
         if (tvRegister != null) tvRegister.setOnClickListener(this);
@@ -210,7 +212,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     mProgressDialog.show();
                     checkisValidAccount(edtEmail.getText().toString(), edtPass.getText().toString());
                 }
-                datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(LoginActivity.this);
+                AppTools.hideKeyboard(LoginActivity.this);
                 break;
             case R.id.tvregister:
                 startActivity(new Intent(LoginActivity.this, RegisterActivity.class));

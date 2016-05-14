@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
@@ -30,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.custom.MarkerView;
 import datn.bkdn.com.saywithvideo.custom.WaveformView;
@@ -39,7 +41,6 @@ import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
-import datn.bkdn.com.saywithvideo.utils.Tools;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
 public class EditAudioActivity extends Activity implements MarkerView.MarkerListener,
@@ -291,19 +292,20 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
                 onPlay(mStartPos);
                 break;
             case R.id.tvNext:
-                Tools.hideKeyboard(EditAudioActivity.this);
+                AppTools.hideKeyboard(EditAudioActivity.this);
                 if (!datn.bkdn.com.saywithvideo.network.Tools.isOnline(this)) {
-                    Snackbar.make(findViewById(R.id.root), "Please make sure to have an internet connection.", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(findViewById(R.id.root), getResources().getString(R.string.internet_connection), Snackbar.LENGTH_LONG).show();
                     return;
                 }
 
                 float start = Float.parseFloat(mTvStart.getText().toString());
                 float end = Float.parseFloat(mTvEnd.getText().toString());
                 if (end - start > MAX_SECOND) {
-                    Toast.makeText(getBaseContext(), "The length of audio over " + MAX_SECOND + " seconds", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), getResources().getString(R.string.length_audio_over)+" " + MAX_SECOND + " "+ getResources().getString(R.string.second), Toast.LENGTH_SHORT).show();
                     return;
                 } else if (end - start < MIN_SECOND) {
-                    Toast.makeText(getBaseContext(), "The length of audio less than " + MAX_SECOND + " second", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), getResources().getString(R.string.length_audio_less_than)+" "
+                            + MAX_SECOND +" "+ getResources().getString(R.string.second), Toast.LENGTH_SHORT).show();
                 } else {
                     createDialog();
                 }
@@ -328,7 +330,7 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
             @Override
             public void onComplete(FirebaseError firebaseError, Firebase firebase) {
                 if (firebaseError != null) {
-                    Toast.makeText(getBaseContext(), "Audio cound not saved", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), getResources().getString(R.string.audio_coundnt_save), Toast.LENGTH_SHORT).show();
                 } else {
                     String audio_id = firebase.getKey();
                     try {
@@ -367,7 +369,7 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
     private void createDialog() {
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_name_audio);
-        dialog.setTitle("Pick a name");
+        dialog.setTitle(getResources().getString(R.string.pick_name_audio));
 
         TextView tvOK = (TextView) dialog.findViewById(R.id.tvOK);
         TextView tvCancel = (TextView) dialog.findViewById(R.id.tvCancel);
@@ -473,6 +475,8 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setTitle(R.string.progress_dialog_loading);
         mProgressDialog.setCancelable(true);
+
+
         mProgressDialog.setOnCancelListener(
                 new DialogInterface.OnCancelListener() {
                     public void onCancel(DialogInterface dialog) {
@@ -839,14 +843,20 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 
         private float start;
         private float end;
-        private ProgressDialog mProgressBar;
+        private SweetAlertDialog mProgressBar;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mProgressBar = new ProgressDialog(EditAudioActivity.this);
-            mProgressBar.setMessage("Waiting...");
-            mProgressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+//            mProgressBar = new ProgressDialog(EditAudioActivity.this);
+//            mProgressBar.setMessage(getResources().getString(R.string.please_wait));
+//            mProgressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+//            mProgressBar.show();
+
+            mProgressBar = new SweetAlertDialog(EditAudioActivity.this,SweetAlertDialog.PROGRESS_TYPE);
+            mProgressBar.setTitleText(getResources().getString(R.string.please_wait));
+            mProgressBar.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+            mProgressBar.setCancelable(false);
             mProgressBar.show();
             start = Float.parseFloat(mTvStart.getText().toString());
             end = Float.parseFloat(mTvEnd.getText().toString());
@@ -855,7 +865,7 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
         @Override
         protected Void doInBackground(Void... params) {
             String folderPath = Constant.DIRECTORY_PATH + Constant.AUDIO;
-            Tools.createFolder(folderPath);
+            AppTools.createFolder(folderPath);
             mOutputPath = folderPath + "AUDIO_" + AppTools.getDate() + ".m4a";
             try {
                 SoundFile soundFile = SoundFile.create(mFilename, null);

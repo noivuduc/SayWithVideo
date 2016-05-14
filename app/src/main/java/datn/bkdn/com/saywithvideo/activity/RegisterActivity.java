@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.network.Tools;
+import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
@@ -230,7 +231,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         mProgressDialog.dismiss();
                     }
                 });
-                datn.bkdn.com.saywithvideo.utils.Tools.hideKeyboard(RegisterActivity.this);
+                AppTools.hideKeyboard(RegisterActivity.this);
                 break;
             case R.id.tvhaveaccount:
                 startActivity(new Intent(RegisterActivity.this, LoginActivity.class));

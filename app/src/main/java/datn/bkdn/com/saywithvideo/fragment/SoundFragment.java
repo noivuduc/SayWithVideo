@@ -1,10 +1,10 @@
 package datn.bkdn.com.saywithvideo.fragment;
 
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -14,6 +14,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,11 +25,15 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity;
 import datn.bkdn.com.saywithvideo.activity.FavoriteActivity;
@@ -37,7 +42,6 @@ import datn.bkdn.com.saywithvideo.database.RealmManager;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
-import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
@@ -45,21 +49,26 @@ import datn.bkdn.com.saywithvideo.utils.PermissionUtils;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
+/**
+ *
+ */
 public class SoundFragment extends Fragment {
     private int mCurrentPos = -1;
     private RealmResults<Sound> mSounds;
     private MediaPlayer mPlayer;
     private RecyclerView mLvSound;
     private Firebase mFirebase;
-    private Realm realm;
-    private FirebaseUser mFirebaseUser;
     private String mFilePath;
     private ArrayList<Audio> mAdapterItems;
     private ArrayList<String> mAdapterKeys;
     private SoundAdapter mAdapter;
-    private ProgressDialog mProgressDialog;
-    private Audio mCurrentAudio;
+    private SweetAlertDialog mProgressDialog;
 
     public static SoundFragment newInstance() {
 
@@ -79,7 +88,6 @@ public class SoundFragment extends Fragment {
         return v;
     }
 
-
     @Override
     public void onStart() {
         super.onStart();
@@ -98,15 +106,33 @@ public class SoundFragment extends Fragment {
         if (mAdapterKeys == null) {
             mAdapterKeys = new ArrayList<>();
         }
+    //TODO:
+    }
 
-        realm = RealmManager.getRealm(getContext());
-        mSounds = realm.where(Sound.class).findAll();
-        for (Sound s : mSounds) {
-            Audio audio = convertAudio(s);
-            mAdapterItems.add(audio);
-            mAdapterKeys.add(audio.getId());
+    class GetData extends AsyncTask<Void, Void, ArrayList<Audio>> {
+
+        @Override
+        protected ArrayList<Audio> doInBackground(Void... params) {
+            Realm realm = RealmManager.getRealm(getContext());
+            RealmResults<Sound> mSounds = realm.where(Sound.class).findAll();
+            ArrayList<Audio> sounds = new ArrayList<Audio>();
+            for (Sound sound : mSounds) {
+                Audio audio = convertAudio(sound);
+                sounds.add(audio);
+            }
+            return sounds;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Audio> aVoid) {
+            super.onPostExecute(aVoid);
+            for (Audio audio : aVoid) {
+                mAdapterItems.add(audio);
+                mAdapterKeys.add(audio.getId());
+            }
         }
     }
+
 
     @Override
     public void onStop() {
@@ -114,6 +140,12 @@ public class SoundFragment extends Fragment {
         getActivity().unregisterReceiver(mReceiver);
     }
 
+    /**
+     * Khởi tạo dữ liệu,
+     * đăng ký sự kiện cho adapter
+     * <p/>
+     * WARNING: Đừng đọc nó vì bạn sẽ tẩu hỏa nhập ma đó,
+     */
     private void init() {
         mLvSound.setHasFixedSize(true);
         mLvSound.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -121,13 +153,20 @@ public class SoundFragment extends Fragment {
         Firebase.setAndroidContext(getContext());
         mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
         final Firebase fFavorite = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(getContext()) + "/favorite/");
-        mAdapter = new SoundAdapter(mFirebase, fFavorite, Audio.class, mSounds, mAdapterItems, mAdapterKeys, getContext());
+        if (Tools.isOnline(getActivity())) {
+            mAdapter = new SoundAdapter(mFirebase, fFavorite, Audio.class, null, null, null, getContext());
+            RealmUtils.getRealmUtils(getContext()).deleteAllSound(getContext());
+        } else {
+            new GetData().execute();
+            mAdapter = new SoundAdapter(mFirebase, fFavorite, Audio.class, mSounds, mAdapterItems, mAdapterKeys, getContext());
+        }
         mAdapter.setPlayButtonClicked(new SoundAdapter.OnItemClicked() {
             @Override
             public void onClick(final Audio sound, View v, final int pos) {
                 final String audioId = sound.getId();
                 switch (v.getId()) {
                     case R.id.imgPlay:
+                        download();
                         if (mCurrentPos != -1 && pos != mCurrentPos) {
                             Audio sound1 = mAdapter.getItems().get(mCurrentPos);
                             if (sound1.isPlaying()) {
@@ -148,7 +187,6 @@ public class SoundFragment extends Fragment {
                             mPlayer.reset();
                             mAdapter.notifyDataSetChanged();
                         } else {
-                            mCurrentAudio = sound;
                             if (sound.getLink_on_Disk() == null) {
                                 if (!Tools.isOnline(getContext())) {
                                     Snackbar.make(getActivity().getCurrentFocus(), R.string.internet_connection, Snackbar.LENGTH_LONG).show();
@@ -168,7 +206,7 @@ public class SoundFragment extends Fragment {
 
                                     @Override
                                     protected String doInBackground(Void... params) {
-                                        return AppTools.getContentAudio(audioId,getActivity());
+                                        return AppTools.getContentAudio(audioId, getActivity());
 
                                     }
 
@@ -263,7 +301,7 @@ public class SoundFragment extends Fragment {
                             finishActivity();
                         } else {
                             if (!Tools.isOnline(getContext())) {
-                                Snackbar.make(getActivity().getCurrentFocus(), R.string.internet_connection, Snackbar.LENGTH_LONG).show();
+                                Snackbar.make(getActivity().getCurrentFocus(), getResources().getString(R.string.internet_connection), Snackbar.LENGTH_LONG).show();
                                 break;
                             }
                             new AsyncTask<Void, Void, String>() {
@@ -271,7 +309,10 @@ public class SoundFragment extends Fragment {
                                 protected void onPreExecute() {
                                     super.onPreExecute();
                                     if (mProgressDialog == null) {
-                                        mProgressDialog = new ProgressDialog(getContext());
+                                        mProgressDialog = new SweetAlertDialog(getActivity(), SweetAlertDialog.PROGRESS_TYPE);
+                                        mProgressDialog.setTitleText(getResources().getString(R.string.please_wait));
+                                        mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+                                        mProgressDialog.setCancelable(false);
                                     }
                                     mProgressDialog.show();
                                 }
@@ -286,6 +327,10 @@ public class SoundFragment extends Fragment {
                                     super.onPostExecute(aVoid);
                                     mProgressDialog.dismiss();
                                     mFilePath = aVoid;
+                                    if (mFilePath == null) {
+                                        Snackbar.make(getActivity().getCurrentFocus(), getResources().getString(R.string.resource_not_found), Snackbar.LENGTH_LONG).show();
+                                        return;
+                                    }
                                     sound.setLink_on_Disk(mFilePath);
                                     new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                     finishActivity();
@@ -387,7 +432,8 @@ public class SoundFragment extends Fragment {
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction() == FavoriteActivity.BROADCAST_FAVORITE) {
+            Log.d("aaa", "receive");
+            if (intent.getAction().equals(FavoriteActivity.BROADCAST_FAVORITE)) {
                 int pos = intent.getIntExtra("POS", -1);
                 if (pos != -1) {
                     mAdapter.getItem(pos).setFavorite(false);
@@ -397,4 +443,32 @@ public class SoundFragment extends Fragment {
         }
     };
 
+    public void download() {
+        String link = "https://saywithvideo.firebaseio.com/audio_content/-KHTKTVBG7v18P_VY0ur.json";
+        Request request = new Request.Builder()
+                .url(link)
+                .build();
+        OkHttpClient client = new OkHttpClient();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d("onFailure", e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                Log.d("onResponse", "onResponse");
+                try {
+                    String res = response.body().string();
+                    JSONObject jsonObject = new JSONObject(res);
+                    String a = jsonObject.getString("content");
+                    Log.d("datass", a);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        Log.d("onFailure", "aaaa");
+    }
 }

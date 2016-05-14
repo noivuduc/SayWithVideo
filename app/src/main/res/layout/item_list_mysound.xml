@@ -9,6 +9,7 @@
     <ImageView
         android:id="@+id/imgPlay"
         android:layout_width="50dp"
+        android:contentDescription="@string/add_name"
         android:layout_height="match_parent"
         android:scaleType="centerInside"
         android:layout_centerVertical="true"
@@ -16,11 +17,11 @@
         android:src="@mipmap/ic_play" />
     <ProgressBar
         android:id="@+id/progressPlay"
-        android:layout_width="50dp"
+        android:layout_width="32dp"
         android:visibility="invisible"
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
-        android:layout_marginRight="5dp"
+        android:layout_marginLeft="10dp"
         />
 
     <LinearLayout

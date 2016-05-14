@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name"></string>
+    <string name="app_name">Say With Video</string>
     <string name="facebook_app_id">1682083695406081</string>
 
     <string name="start_marker">Start marker</string>
@@ -42,7 +42,7 @@
     <string name="text_record_a_sound">Record a sound</string>
     <string name="hint_record_sound">Tab \'Start\' to record your sound</string>
     <string name="text_start_record">Start</string>
-    <string name="text_stop_record">Stop</string>
+
     <string name="title_register">Register to Dubsmash</string>
     <string name="hint_enter_yourname">Enter your name</string>
     <string name="hint_register_new_account">Please enter your Dubsmash username or email and password below</string>
@@ -67,5 +67,46 @@
     <string name="videos">Videos</string>
     <string name="dont_have_video">You don\'t have any Video yet!</string>
     <string name="btn_create_video">Create your video</string>
+
+    <string name="login_with_facbook">Login with facebook</string>
+    <string name="upload_by">upload by </string>
+
+    <string name="record_a_sound">Record a sound</string>
+    <string name="import_a_sound">Import a sound</string>
+    <string name="select_range">Edit an audio</string>
+
+    <string name="sort_by_name">Sort by name</string>
+    <string name="sort_by_plays">Sort by plays</string>
+    <string name="sort_by_upload_date">Sort by upload day</string>
+
+    <string name="add_to_soundboard">Add to soundboard</string>
+    <string name="share_it">Share it</string>
+    <string name="report">Report</string>
+    <string name="improve">Improve</string>
+
+    <string name="delete">Delete</string>
+
+    <string name="add_your_name">Add your name</string>
+    <string name="verify_your_email">Verify your mail</string>
+    <string name="add_your_new_pass">Add your new password</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+
+    <string name="new_email">New Email</string>
+    <string name="password">Password</string>
+    <string name="old_password">Old password</string>
+    <string name="new_password">New password</string>
+
+    <string name="length_audio_over">The length of audio over </string>
+    <string name="length_audio_less_than">he length of audio less than </string>
+    <string name="second">Seconds</string>
+    <string name="audio_coundnt_save">Audio cound not saved</string>
+    <string name="pick_name_audio">Enter name</string>
+
+    <string name="resource_not_found">Resource not found</string>
+
+    <string name="log_in">Login</string>
+    <string name="register">Register</string>
 
 </resources>

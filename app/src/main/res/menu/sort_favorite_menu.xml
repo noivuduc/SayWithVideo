@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/byName" android:title="Sort by name"/>
-    <item android:id="@+id/byDate" android:title="Sort by upload date"/>
+    <item android:id="@+id/byName" android:title="@string/sort_by_name"/>
+    <item android:id="@+id/byDate" android:title="@string/sort_by_upload_date"/>
 </menu>

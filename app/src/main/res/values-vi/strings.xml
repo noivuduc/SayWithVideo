@@ -48,7 +48,7 @@
     <string name="text_record_a_sound">Ghi âm</string>
     <string name="hint_record_sound">Nhấn \'Bắt đầu\' để ghi âm</string>
     <string name="text_start_record">Bắt đầu</string>
-    <string name="text_stop_record">Dừng lại</string>
+
     <string name="title_register">Đăng ký tài khoản Dubsmash</string>
     <string name="hint_enter_yourname">Nhập tên của bạn</string>
     <string name="hint_register_new_account">Nhập tên, email và password vào các ô bên dưới để đăng ký</string>
@@ -71,4 +71,41 @@
     <string name="videos">Video của tôi</string>
     <string name="dont_have_video">Bạn chưa tạo video nào</string>
     <string name="btn_create_video">Tạo mới video</string>
+
+    <string name="login_with_facbook">Đăng nhập bằng facebook</string>
+    <string name="upload_by">Tải lên bởi </string>
+
+    <string name="sort_by_name">Sắp xếp theo tên</string>
+    <string name="sort_by_plays">Sắp xếp theo lượt play</string>
+    <string name="sort_by_upload_date">Sắp xếp theo ngày tạo</string>
+
+    <string name="add_to_soundboard">Thêm vào phân loại</string>
+    <string name="share_it">Chia sẻ âm thanh</string>
+    <string name="report">Báo cáo</string>
+    <string name="improve">Cải thiện</string>
+
+    <string name="delete">Xóa</string>
+
+    <string name="add_your_name">Thay đổi tên</string>
+    <string name="verify_your_email">Thay đổi email</string>
+    <string name="add_your_new_pass">Thay đổi mật khẩu</string>
+
+    <string name="cancel">Thoát</string>
+    <string name="ok">Lưu lại</string>
+
+    <string name="new_email">Email mới</string>
+    <string name="password">Mật khẩu</string>
+    <string name="old_password">Mật khẩu cũ</string>
+    <string name="new_password">Mật khẩu mới</string>
+
+    <string name="resource_not_found">Không thể tải âm thanh</string>
+
+    <string name="length_audio_over">Âm thanh quá dài </string>
+    <string name="length_audio_less_than">Âm thanh quá ngắn </string>
+    <string name="second">Giây</string>
+    <string name="audio_coundnt_save">Không thể lưu âm thanh</string>
+    <string name="pick_name_audio">Chọn tên</string>
+
+    <string name="log_in">Đăng nhập</string>
+    <string name="register">Đăng ký</string>
 </resources>

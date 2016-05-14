@@ -10,13 +10,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.skyfishjy.library.RippleBackground;
+
 import java.io.File;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
-import datn.bkdn.com.saywithvideo.utils.Tools;
 
 public class RecordNewSoundActivity extends Activity implements OnClickListener {
     private static String mFileName = null;
@@ -24,6 +25,7 @@ public class RecordNewSoundActivity extends Activity implements OnClickListener 
     private TextView mTvStart;
     private TextView mTvTime;
     private TextView mTvInfor;
+    private  RippleBackground rippleBackground;
     private static final int MAX_RECORD = 20;
     private long mRecordingLastUpdateTime;
     private double mRecordingTime;
@@ -41,6 +43,7 @@ public class RecordNewSoundActivity extends Activity implements OnClickListener 
 
     private void init() {
         mRlRecord = (RelativeLayout) findViewById(R.id.rlStartRecord);
+       rippleBackground =(RippleBackground)findViewById(R.id.content);
         ViewGroup vgBack = (ViewGroup) findViewById(R.id.rlBack);
         mTvStart = (TextView) findViewById(R.id.tvStart);
         mTvTime = (TextView) findViewById(R.id.tvTime);
@@ -48,9 +51,8 @@ public class RecordNewSoundActivity extends Activity implements OnClickListener 
 
         String idSound = AppTools.getDate();
         String folderPath = Constant.DIRECTORY_PATH + Constant.AUDIO;
-        Tools.createFolder(folderPath);
+        AppTools.createFolder(folderPath);
         mFileName = folderPath + "AUDIO_" + idSound + ".aac";
-
         vgBack.setOnClickListener(this);
         mRlRecord.setOnClickListener(this);
     }
@@ -119,9 +121,12 @@ public class RecordNewSoundActivity extends Activity implements OnClickListener 
             case R.id.rlStartRecord:
                 if (!mIsRecord) {
                     mTvTime.setVisibility(View.VISIBLE);
-                    mRlRecord.setBackgroundResource(R.drawable.selector_button_record_a_sound_pressed);
+                    mRlRecord.setBackgroundResource(R.color.transparent);
                     mTvStart.setText(getResources().getString(R.string.record_done));
                     mTvInfor.setText(getResources().getString(R.string.hint_record_done));
+                    rippleBackground.startRippleAnimation();
+                } else {
+                    rippleBackground.stopRippleAnimation();
                 }
                 record();
                 break;

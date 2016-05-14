@@ -32,11 +32,11 @@ import io.realm.RealmResults;
  * Created by Admin on 4/7/2016.
  */
 
-public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHolder, Audio> implements RealmChangeListener {
+public class ListFavoriteAdapter extends FirebaseRecyclerAdapter<ListFavoriteAdapter.SoundHolder, Audio> implements RealmChangeListener {
     public final Context mContext;
     private final RealmResults<Sound> mSounds;
 
-    public SoundAdapter(Query query, @Nullable Query favorite, Class<Audio> itemClass, RealmResults<Sound> sounds, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
+    public ListFavoriteAdapter(Query query, @Nullable Query favorite, Class<Audio> itemClass, RealmResults<Sound> sounds, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
         super(mContext,query, favorite, itemClass, items, keys);
         this.mSounds = sounds;
         this.mContext = mContext;
@@ -105,7 +105,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         viewHolder.imgFavorite.setImageResource(model.isFavorite() ? R.mipmap.favorite_selected : R.mipmap.favorite_unselected);
         viewHolder.imgPlayPause.setImageResource(model.isPlaying() ? R.mipmap.ic_pause : R.mipmap.ic_play);
         viewHolder.tvSoundName.setText(model.getName());
-        viewHolder.tvSoundAuthor.setText(mContext.getResources().getString(R.string.upload_by)+" " + model.getAuthor());
+        viewHolder.tvSoundAuthor.setText(mContext.getString(R.string.upload_by)+" " + model.getAuthor());
     }
 
     /**
@@ -169,32 +169,16 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
 
     @Override
     protected void itemChanged(final Audio oldItem, final Audio newItem, final String key, final int position) {
-        if (datn.bkdn.com.saywithvideo.network.Tools.isOnline(mContext)) {
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... params) {
-                    Realm realm = RealmManager.getRealm(mContext);
-                    realm.beginTransaction();
-                    Sound s = realm.where(Sound.class).equalTo("id", key).findFirst();
-                    s.setPlays(newItem.getPlays());
-                    realm.commitTransaction();
-                    realm.close();
-                    return null;
-                }
-            }.execute();
-        }
+
+
     }
 
     @Override
     protected void itemRemoved(Audio item, final String key, int position) {
         new AsyncTask<Void, Void, Void>() {
-
             @Override
             protected Void doInBackground(Void... params) {
-                Realm realm = RealmManager.getRealm(mContext);
-                realm.beginTransaction();
-                realm.where(Sound.class).equalTo("id", key).findAll().deleteFirstFromRealm();
-                realm.commitTransaction();
+               RealmUtils.getRealmUtils(mContext).updateFavorite(mContext,key);
                 return null;
             }
         }.execute();
@@ -204,7 +188,6 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
     protected void itemMoved(Audio item, String key, int oldPosition, int newPosition) {
 
     }
-
 
     @Override
     public void onChange(Object element) {
@@ -270,6 +253,25 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         }
     }
 
+    protected void sortByPlays() {
+//        int size = getItemCount();
+//        for (int i = 0; i < size - 1; i++) {
+//            int plays1 = getItem(i).getPlays();
+//            for (int j = i + 1; j < size; j++) {
+//                int plays2 = getItem(j).getPlays();
+//                if (plays1 < plays2) {
+//                    //change position of audio
+//                    Audio audio = getItem(i);
+//                    getItems().add(i, getItem(j));
+//                    getItems().add(j, audio);
+//                    // change pos key
+//                    String key = getKeys().get(i);
+//                    getKeys().add(i, getKeys().get(j));
+//                    getKeys().add(j, key);
+//                }
+//            }
+//        }
+    }
 
     private Sound convertAudio(Audio audio) {
         return new Sound(audio.getId(), audio.getName(), audio.getAuthor(),
