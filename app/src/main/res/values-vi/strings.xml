@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Say With Video</string>
+    <string name="app_name">Ape-voice</string>
     <string name="facebook_app_id">1682083695406081</string>
 
     <string name="start_marker">Bắt đầu đánh dấu</string>
@@ -110,4 +110,7 @@
     <string name="register">Đăng ký</string>
 
     <string name="come_in_soon">Chức năng chưa hoàn thành</string>
+
+    <string name="title_favorite">Yêu thích của tôi</string>
+    <string name="title_mysound">Âm thanh của tôi</string>
 </resources>

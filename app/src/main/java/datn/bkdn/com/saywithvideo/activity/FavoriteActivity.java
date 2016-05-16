@@ -2,6 +2,7 @@ package datn.bkdn.com.saywithvideo.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,10 +11,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -43,7 +44,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     private ListFavoriteAdapter mAdapter;
     private RelativeLayout mRlBack;
     private RelativeLayout mRlSort;
-    private EditText mTvSearch;
+    private TextView mTvSearch;
     private MediaPlayer mPlayer;
     private RecyclerView mLvSound;
     private Realm realm;
@@ -126,7 +127,8 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         mRlSort = (RelativeLayout) findViewById(R.id.rlSort);
         mImgSort = (ImageView) findViewById(R.id.imgSort);
-        mTvSearch = (EditText) findViewById(R.id.edtSearch);
+        mTvSearch = (TextView) findViewById(R.id.edtSearch);
+        mTvSearch.setTextColor(Color.WHITE);
         mLvSound.setHasFixedSize(true);
         mLvSound.setLayoutManager(new LinearLayoutManager(this));
         setEvent();
@@ -180,7 +182,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
 
                                     @Override
                                     protected String doInBackground(Void... params) {
-                                        return AppTools.getContentAudio(audioId, FavoriteActivity.this);
+                                        return AppTools.downloadAudio(audioId, FavoriteActivity.this);
 
                                     }
 
@@ -295,7 +297,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
 
                                 @Override
                                 protected String doInBackground(Void... params) {
-                                    return AppTools.getContentAudio(audioId, FavoriteActivity.this);
+                                    return AppTools.downloadAudio(audioId, FavoriteActivity.this);
                                 }
 
                                 @Override

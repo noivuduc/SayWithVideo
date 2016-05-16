@@ -3,6 +3,7 @@ package datn.bkdn.com.saywithvideo.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -13,7 +14,6 @@ import android.widget.Toast;
 import com.skyfishjy.library.RippleBackground;
 
 import java.io.File;
-import java.util.Locale;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
@@ -63,6 +63,7 @@ public class RecordNewSoundActivity extends Activity implements OnClickListener 
     }
 
     private void record() {
+        Log.d("running","running 0");
         mIsRecord = !mIsRecord;
         mRecordingLastUpdateTime = getCurrentTime();
         mRecordingKeepGoing = mIsRecord;
@@ -82,7 +83,7 @@ public class RecordNewSoundActivity extends Activity implements OnClickListener 
                                     if (sec >= MAX_RECORD) {
                                         mRecordingKeepGoing = false;
                                     }
-                                    mTvTime.setText(String.format(Locale.getDefault(),"%d:%05.2f", min, time));
+                                    mTvTime.setText(String.format("%d:%05.2f", min, time));
                                 }
                             });
                             mRecordingLastUpdateTime = now;

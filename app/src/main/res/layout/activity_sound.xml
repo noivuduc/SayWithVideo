@@ -38,17 +38,19 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp">
 
-            <EditText
+            <TextView
                 android:id="@+id/edtSearch"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerVertical="true"
                 android:background="@null"
                 android:focusable="false"
-                android:hint="Search Snips"
+                android:text="@string/title_mysound"
+                android:gravity="center"
+                android:textSize="20sp"
                 android:singleLine="true"
                 android:textColor="#fff"
-                android:textColorHint="#fff" />
+                />
         </RelativeLayout>
 
         <RelativeLayout

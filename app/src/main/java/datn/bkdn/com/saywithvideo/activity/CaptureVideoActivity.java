@@ -11,6 +11,7 @@ import android.media.CamcorderProfile;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +39,7 @@ import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.CameraPreview;
 import datn.bkdn.com.saywithvideo.utils.Constant;
+import datn.bkdn.com.saywithvideo.utils.PermissionUtils;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
 @SuppressWarnings("deprecation")
@@ -79,7 +81,9 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void init() {
-
+        if(Build.VERSION.SDK_INT >=23){
+            PermissionUtils.getRequestCamera(this);
+        }
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         RelativeLayout mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         mRlCaptureVideo = (RelativeLayout) findViewById(R.id.rlCaptureVideo);

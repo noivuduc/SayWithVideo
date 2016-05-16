@@ -2,6 +2,7 @@ package datn.bkdn.com.saywithvideo.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,7 +12,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
@@ -47,7 +47,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private RelativeLayout rlBack;
     private RelativeLayout rlSort;
     private TextView tvAddSound;
-    private EditText tvSearch;
+    private TextView tvSearch;
     private MediaPlayer mPlayer;
     private String mFilePath;
     private RecyclerView mRecycle;
@@ -129,7 +129,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
                                     @Override
                                     protected String doInBackground(Void... params) {
-                                        return AppTools.getContentAudio(audioId, SoundActivity.this);
+                                        return AppTools.downloadAudio(audioId, SoundActivity.this);
                                     }
 
                                     @Override
@@ -194,7 +194,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
                                 @Override
                                 protected String doInBackground(Void... params) {
-                                    return AppTools.getContentAudio(audioId, SoundActivity.this);
+                                    return AppTools.downloadAudio(audioId, SoundActivity.this);
                                 }
 
                                 @Override
@@ -253,8 +253,10 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         rlBack = (RelativeLayout) findViewById(R.id.rlBack);
         rlSort = (RelativeLayout) findViewById(R.id.rlSort);
         imgSort = (ImageView) findViewById(R.id.imgSort);
-        tvSearch = (EditText) findViewById(R.id.edtSearch);
+        tvSearch = (TextView) findViewById(R.id.edtSearch);
+        tvSearch.setTextColor(Color.WHITE);
         tvAddSound = (TextView) findViewById(R.id.tvAddsound);
+        tvAddSound.setTextColor(Color.WHITE);
         mRecycle.setHasFixedSize(true);
         mRecycle.setLayoutManager(new LinearLayoutManager(this));
         setEvent();

@@ -31,11 +31,13 @@ public class AppTools {
     }
 
     public static String downloadAudio(String audioId, Activity activity) {
-        if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            PermissionUtils.requestWriteExtenalStorage(activity);
+        if(Build.VERSION.SDK_INT>=23) {
+            if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                PermissionUtils.requestWriteExtenalStorage(activity);
+            }
             return getContentAudio(audioId, activity);
-        } else {
+        }else {
             return getContentAudio(audioId, activity);
         }
     }
@@ -44,10 +46,10 @@ public class AppTools {
         if (Build.VERSION.SDK_INT >= 23) {
             PermissionUtils.getrequestWriteExtenalStorage(context);
         }
+
     }
 
     public static String getContentAudio(String audioId, final Activity context) {
-        setPermission(context);
         String link = FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_CONTENT_URL + "/" + audioId + ".json";
         String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
         FireBaseContent c = new Gson().fromJson(json, FireBaseContent.class);

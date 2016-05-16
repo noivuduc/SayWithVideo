@@ -36,7 +36,6 @@ import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
-import datn.bkdn.com.saywithvideo.utils.PermissionUtils;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -115,7 +114,7 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
     /**
      * Khởi tạo dữ liệu,
      * đăng ký sự kiện cho adapter
-     * <p>
+     * <p/>
      * WARNING: Đừng đọc nó vì bạn sẽ tẩu hỏa nhập ma đó,
      */
     private void init() {
@@ -124,13 +123,9 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
         Firebase.setAndroidContext(getContext());
         mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
         final Firebase fFavorite = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(getContext()) + "/favorite/");
-        if (Tools.isOnline(getActivity())) {
-            mAdapter = new SoundAdapter(mFirebase, fFavorite, true, Audio.class, null, null, getContext());
-            RealmUtils.getRealmUtils(getContext()).deleteAllSound(getContext());
-        } else {
-            initData();
-            mAdapter = new SoundAdapter(mFirebase, fFavorite, false, Audio.class, mAdapterItems, mAdapterKeys, getContext());
-        }
+        boolean isOnline = Tools.isOnline(getActivity());
+        initData();
+        mAdapter = new SoundAdapter(mFirebase, fFavorite, isOnline, Audio.class, mAdapterItems, mAdapterKeys, getContext());
         mAdapter.setPlayButtonClicked(new SoundAdapter.OnItemClicked() {
             @Override
             public void onClick(final Audio sound, View v, final int pos) {
@@ -176,7 +171,7 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
 
                                     @Override
                                     protected String doInBackground(Void... params) {
-                                        return AppTools.getContentAudio(audioId, getActivity());
+                                        return AppTools.downloadAudio(audioId, getActivity());
 
                                     }
 
@@ -326,8 +321,6 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
     private void finishActivity() {
         Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
         intent.putExtra("FilePath", mFilePath);
-        PermissionUtils.getRequestCamera(getActivity());
-        // PermissionUtils.getrequestReadExtenalStorage(this);
         startActivity(intent);
     }
 

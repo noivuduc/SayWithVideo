@@ -1,6 +1,7 @@
 package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -35,7 +36,7 @@ public class ShowVideoActivity extends AppCompatActivity implements View.OnClick
         RelativeLayout mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         TextureView mTextureView = (TextureView) findViewById(R.id.playback_video);
         TextView mTvShare = (TextView) findViewById(R.id.tvShare);
-
+        mTvShare.setTextColor(Color.WHITE);
         if (mRlBack != null) mRlBack.setOnClickListener(this);
         if (mTvShare != null) mTvShare.setOnClickListener(this);
         if (mTextureView != null) mTextureView.setSurfaceTextureListener(this);

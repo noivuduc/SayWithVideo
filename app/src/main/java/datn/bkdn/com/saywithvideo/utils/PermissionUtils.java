@@ -106,25 +106,25 @@ public class PermissionUtils {
     }
 
     public static void requestCamera(final Activity activity) {
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA))
-//        {
-//            showMessageOKCancel("You need to allow access to Camera",
-//                    new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            ActivityCompat.requestPermissions(activity,
-//                                    new String[]{Manifest.permission.CAMERA},
-//                                    REQUEST_CAMERA);
-//                        }
-//                    },activity);
-//            return;
-//        }else
-        {
-            ActivityCompat.requestPermissions(activity,
-                    new String[]{Manifest.permission.CAMERA},
-                    REQUEST_CAMERA);
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)) {
+            showMessageOKCancel("You need to allow access to Camera",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions(activity,
+                                    new String[]{Manifest.permission.CAMERA},
+                                    REQUEST_CAMERA);
+                        }
+                    }, activity);
             return;
         }
+//        }else
+//        {
+//            ActivityCompat.requestPermissions(activity,
+//                    new String[]{Manifest.permission.CAMERA},
+//                    REQUEST_CAMERA);
+//            return;
+//        }
 
 
     }
