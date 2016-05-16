@@ -19,9 +19,9 @@ import io.realm.RealmResults;
 
 public class ListMyVideoAdapter extends RealmBaseAdapter<Video> {
 
+    private final Context mContext;
     public OnItemClicked mItemClicked;
     public OnMenuItemClicked mMenuItemClicked;
-    private final Context mContext;
 
     public ListMyVideoAdapter(Context context, RealmResults<Video> videos) {
         super(context, videos);

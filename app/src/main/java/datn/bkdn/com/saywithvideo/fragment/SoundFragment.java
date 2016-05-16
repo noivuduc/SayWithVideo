@@ -1,21 +1,16 @@
 package datn.bkdn.com.saywithvideo.fragment;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
@@ -25,9 +20,6 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +28,6 @@ import java.util.Map;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity;
-import datn.bkdn.com.saywithvideo.activity.FavoriteActivity;
 import datn.bkdn.com.saywithvideo.adapter.SoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
@@ -49,18 +40,12 @@ import datn.bkdn.com.saywithvideo.utils.PermissionUtils;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  *
  */
-public class SoundFragment extends Fragment {
+public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
     private int mCurrentPos = -1;
-    private RealmResults<Sound> mSounds;
     private MediaPlayer mPlayer;
     private RecyclerView mLvSound;
     private Firebase mFirebase;
@@ -88,12 +73,6 @@ public class SoundFragment extends Fragment {
         return v;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        getActivity().registerReceiver(mReceiver, new IntentFilter(FavoriteActivity.BROADCAST_FAVORITE));
-    }
-
     private Audio convertAudio(Sound sound) {
         return new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
                 sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
@@ -106,59 +85,51 @@ public class SoundFragment extends Fragment {
         if (mAdapterKeys == null) {
             mAdapterKeys = new ArrayList<>();
         }
-    //TODO:
-    }
-
-    class GetData extends AsyncTask<Void, Void, ArrayList<Audio>> {
-
-        @Override
-        protected ArrayList<Audio> doInBackground(Void... params) {
-            Realm realm = RealmManager.getRealm(getContext());
-            RealmResults<Sound> mSounds = realm.where(Sound.class).findAll();
-            ArrayList<Audio> sounds = new ArrayList<Audio>();
-            for (Sound sound : mSounds) {
-                Audio audio = convertAudio(sound);
-                sounds.add(audio);
-            }
-            return sounds;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<Audio> aVoid) {
-            super.onPostExecute(aVoid);
-            for (Audio audio : aVoid) {
-                mAdapterItems.add(audio);
-                mAdapterKeys.add(audio.getId());
-            }
-        }
+        new GetData().execute();
     }
 
 
     @Override
-    public void onStop() {
-        super.onStop();
-        getActivity().unregisterReceiver(mReceiver);
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.addToSoundBoard:
+                //TODO: Do somethings
+                AppTools.showSnackBar(getString(R.string.come_in_soon), getActivity());
+                break;
+            case R.id.shareIT:
+                //TODO: Do somethings
+                AppTools.showSnackBar(getString(R.string.come_in_soon), getActivity());
+                break;
+            case R.id.report:
+                //TODO: Do somethings
+                AppTools.showSnackBar(getString(R.string.come_in_soon), getActivity());
+                break;
+            case R.id.improve:
+                //TODO: Do somethings
+                AppTools.showSnackBar(getString(R.string.come_in_soon), getActivity());
+                break;
+        }
+        return false;
     }
 
     /**
      * Khởi tạo dữ liệu,
      * đăng ký sự kiện cho adapter
-     * <p/>
+     * <p>
      * WARNING: Đừng đọc nó vì bạn sẽ tẩu hỏa nhập ma đó,
      */
     private void init() {
         mLvSound.setHasFixedSize(true);
         mLvSound.setLayoutManager(new LinearLayoutManager(getContext()));
-        initData();
         Firebase.setAndroidContext(getContext());
         mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
         final Firebase fFavorite = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(getContext()) + "/favorite/");
         if (Tools.isOnline(getActivity())) {
-            mAdapter = new SoundAdapter(mFirebase, fFavorite, Audio.class, null, null, null, getContext());
+            mAdapter = new SoundAdapter(mFirebase, fFavorite, true, Audio.class, null, null, getContext());
             RealmUtils.getRealmUtils(getContext()).deleteAllSound(getContext());
         } else {
-            new GetData().execute();
-            mAdapter = new SoundAdapter(mFirebase, fFavorite, Audio.class, mSounds, mAdapterItems, mAdapterKeys, getContext());
+            initData();
+            mAdapter = new SoundAdapter(mFirebase, fFavorite, false, Audio.class, mAdapterItems, mAdapterKeys, getContext());
         }
         mAdapter.setPlayButtonClicked(new SoundAdapter.OnItemClicked() {
             @Override
@@ -166,7 +137,6 @@ public class SoundFragment extends Fragment {
                 final String audioId = sound.getId();
                 switch (v.getId()) {
                     case R.id.imgPlay:
-                        download();
                         if (mCurrentPos != -1 && pos != mCurrentPos) {
                             Audio sound1 = mAdapter.getItems().get(mCurrentPos);
                             if (sound1.isPlaying()) {
@@ -189,7 +159,7 @@ public class SoundFragment extends Fragment {
                         } else {
                             if (sound.getLink_on_Disk() == null) {
                                 if (!Tools.isOnline(getContext())) {
-                                    Snackbar.make(getActivity().getCurrentFocus(), R.string.internet_connection, Snackbar.LENGTH_LONG).show();
+                                    AppTools.showSnackBar(getString(R.string.internet_connection), getActivity());
                                     break;
                                 }
                                 /**
@@ -214,6 +184,11 @@ public class SoundFragment extends Fragment {
                                     protected void onPostExecute(String aVoid) {
                                         super.onPostExecute(aVoid);
                                         mFilePath = aVoid;
+                                        if (mFilePath == null) {
+                                            AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), getActivity());
+                                            return;
+                                        }
+
                                         sound.setLink_on_Disk(mFilePath);
                                         new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                         if (mCurrentPos == pos) {
@@ -255,7 +230,7 @@ public class SoundFragment extends Fragment {
                                             if (dataSnapshot.hasChild(id)) {
                                                 favoriteFirebase.child(id).removeValue();
                                             } else {
-                                                Map<String, String> values = new HashMap<String, String>();
+                                                Map<String, String> values = new HashMap<>();
                                                 values.put("name", sound.getName());
                                                 values.put("date_create", sound.getDate_create());
                                                 values.put("user_id", sound.getUser_id());
@@ -301,7 +276,7 @@ public class SoundFragment extends Fragment {
                             finishActivity();
                         } else {
                             if (!Tools.isOnline(getContext())) {
-                                Snackbar.make(getActivity().getCurrentFocus(), getResources().getString(R.string.internet_connection), Snackbar.LENGTH_LONG).show();
+                                AppTools.showSnackBar(getResources().getString(R.string.internet_connection), getActivity());
                                 break;
                             }
                             new AsyncTask<Void, Void, String>() {
@@ -328,7 +303,7 @@ public class SoundFragment extends Fragment {
                                     mProgressDialog.dismiss();
                                     mFilePath = aVoid;
                                     if (mFilePath == null) {
-                                        Snackbar.make(getActivity().getCurrentFocus(), getResources().getString(R.string.resource_not_found), Snackbar.LENGTH_LONG).show();
+                                        AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), getActivity());
                                         return;
                                     }
                                     sound.setLink_on_Disk(mFilePath);
@@ -348,33 +323,12 @@ public class SoundFragment extends Fragment {
         mLvSound.setAdapter(mAdapter);
     }
 
-    private class AsyncUpdatePath extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected Void doInBackground(String... params) {
-            Realm realm = RealmManager.getRealm(getContext());
-            realm.beginTransaction();
-            Sound sound = realm.where(Sound.class).equalTo("id", params[0]).findFirst();
-            sound.setLinkOnDisk(params[1]);
-            realm.commitTransaction();
-            realm.close();
-            return null;
-        }
-    }
-
-
     private void finishActivity() {
         Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
         intent.putExtra("FilePath", mFilePath);
         PermissionUtils.getRequestCamera(getActivity());
         // PermissionUtils.getrequestReadExtenalStorage(this);
         startActivity(intent);
-    }
-
-    private void setPermission() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            PermissionUtils.getrequestWriteExtenalStorage(getActivity());
-        }
     }
 
     @Override
@@ -386,7 +340,6 @@ public class SoundFragment extends Fragment {
             }
         }
     }
-
 
     private void playMp3(String path) {
         if (mPlayer == null) {
@@ -413,10 +366,55 @@ public class SoundFragment extends Fragment {
     private void createPopupMenu(View v) {
         PopupMenu menu = new PopupMenu(getContext(), v);
         menu.getMenuInflater().inflate(R.menu.popup_menu, menu.getMenu());
+        menu.setOnMenuItemClickListener(this);
         menu.show();
 
     }
 
+    class GetData extends AsyncTask<Void, Void, ArrayList<Audio>> {
+
+        @Override
+        protected ArrayList<Audio> doInBackground(Void... params) {
+            Realm realm = RealmManager.getRealm(getContext());
+            RealmResults<Sound> mSounds = realm.where(Sound.class).findAll();
+            ArrayList<Audio> sounds = new ArrayList<>();
+            for (Sound sound : mSounds) {
+                Audio audio = convertAudio(sound);
+                sounds.add(audio);
+            }
+            return sounds;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Audio> aVoid) {
+            super.onPostExecute(aVoid);
+            for (Audio audio : aVoid) {
+                mAdapterItems.add(audio);
+                mAdapterKeys.add(audio.getId());
+            }
+        }
+    }
+
+    /**
+     * Cập nhật đường dẫn của file
+     */
+    private class AsyncUpdatePath extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            Realm realm = RealmManager.getRealm(getContext());
+            realm.beginTransaction();
+            Sound sound = realm.where(Sound.class).equalTo("id", params[0]).findFirst();
+            sound.setLinkOnDisk(params[1]);
+            realm.commitTransaction();
+            realm.close();
+            return null;
+        }
+    }
+
+    /**
+     * Cập nhật số lượt tải của mỗi audio
+     */
     private class AsyncUpdatePlay extends AsyncTask<String, Integer, Void> {
 
         @Override
@@ -429,46 +427,4 @@ public class SoundFragment extends Fragment {
         }
     }
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("aaa", "receive");
-            if (intent.getAction().equals(FavoriteActivity.BROADCAST_FAVORITE)) {
-                int pos = intent.getIntExtra("POS", -1);
-                if (pos != -1) {
-                    mAdapter.getItem(pos).setFavorite(false);
-                    mAdapter.notifyDataSetChanged();
-                }
-            }
-        }
-    };
-
-    public void download() {
-        String link = "https://saywithvideo.firebaseio.com/audio_content/-KHTKTVBG7v18P_VY0ur.json";
-        Request request = new Request.Builder()
-                .url(link)
-                .build();
-        OkHttpClient client = new OkHttpClient();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.d("onFailure", e.getMessage());
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                Log.d("onResponse", "onResponse");
-                try {
-                    String res = response.body().string();
-                    JSONObject jsonObject = new JSONObject(res);
-                    String a = jsonObject.getString("content");
-                    Log.d("datass", a);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        Log.d("onFailure", "aaaa");
-    }
 }

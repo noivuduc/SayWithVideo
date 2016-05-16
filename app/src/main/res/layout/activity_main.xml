@@ -28,13 +28,14 @@
                 android:src="@mipmap/ic_menu_toolbar" />
 
             <TextView
+                android:id="@+id/txtAppname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="10dp"
                 android:layout_toRightOf="@+id/imgMenu"
                 android:text="@string/app_name"
-                android:textColor="#ffffff"
+                android:textColor="#fff"
                 android:textSize="17sp"
                 android:textStyle="bold" />
 
@@ -52,7 +53,7 @@
                 android:layout_height="match_parent"
                 android:background="#fff">
 
-                <datn.bkdn.com.saywithvideo.utils.PagerSlidingTabStrip
+                <datn.bkdn.com.saywithvideo.lib.PagerSlidingTabStrip
                     android:id="@+id/tab"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"

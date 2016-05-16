@@ -42,7 +42,7 @@
     <string name="title_change_info">Thay đổi thông tin</string>
     <string name="item_full_name">Đổi tên</string>
     <string name="item_email">Đổi email</string>
-    <string name="item_password">Đổi password</string>
+    <string name="item_password">Đổi mật khẩu</string>
     <string name="title_action">Hành động</string>
     <string name="item_action_logout">Đăng xuất</string>
     <string name="text_record_a_sound">Ghi âm</string>
@@ -73,7 +73,7 @@
     <string name="btn_create_video">Tạo mới video</string>
 
     <string name="login_with_facbook">Đăng nhập bằng facebook</string>
-    <string name="upload_by">Tải lên bởi </string>
+    <string name="upload_by">Tải lên bởi&#160;</string>
 
     <string name="sort_by_name">Sắp xếp theo tên</string>
     <string name="sort_by_plays">Sắp xếp theo lượt play</string>
@@ -108,4 +108,6 @@
 
     <string name="log_in">Đăng nhập</string>
     <string name="register">Đăng ký</string>
+
+    <string name="come_in_soon">Chức năng chưa hoàn thành</string>
 </resources>

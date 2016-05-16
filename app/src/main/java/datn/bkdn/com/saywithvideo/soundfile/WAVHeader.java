@@ -16,12 +16,12 @@ public class WAVHeader {
         setHeader();
     }
 
-    public byte[] getWAVHeader() {
-        return mHeader;
-    }
-
     public static byte[] getWAVHeader(int sampleRate, int numChannels, int numSamples) {
         return new WAVHeader(sampleRate, numChannels, numSamples).mHeader;
+    }
+
+    public byte[] getWAVHeader() {
+        return mHeader;
     }
 
     public String toString() {

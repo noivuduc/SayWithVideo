@@ -53,7 +53,6 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     private int mCurrentPos = -1;
     private ProgressDialog mProgressDialog;
     private RealmResults<Sound> mSounds;
-    public static final String BROADCAST_FAVORITE = "com.datn.saywithvideo.UNFAVORITE";
     private Intent mIntentUnFavorite;
 
     @Override
@@ -120,8 +119,9 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
 
     private void init() {
         initData();
+        boolean isOnline = Tools.isOnline(this);
         mFirebaseFavorite = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(this) + "/favorite");
-        mAdapter = new ListFavoriteAdapter(mFirebaseFavorite, null, Audio.class, mSounds, mAdapterItems, mAdapterKeys, this);
+        mAdapter = new ListFavoriteAdapter(mFirebaseFavorite, null, isOnline, Audio.class, mAdapterItems, mAdapterKeys, this);
         mLvSound = (RecyclerView) findViewById(R.id.lvSoundFavorite);
         mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         mRlSort = (RelativeLayout) findViewById(R.id.rlSort);
@@ -188,6 +188,10 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                                     protected void onPostExecute(String aVoid) {
                                         super.onPostExecute(aVoid);
                                         mFilePath = aVoid;
+                                        if (mFilePath == null) {
+                                            AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), FavoriteActivity.this);
+                                            return;
+                                        }
                                         sound.setLink_on_Disk(mFilePath);
                                         new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                         if (mCurrentPos == pos) {
@@ -216,9 +220,6 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                         if (mIntentUnFavorite == null) {
                             mIntentUnFavorite = new Intent();
                         }
-                        mIntentUnFavorite.putExtra("POS", pos);
-                        mIntentUnFavorite.setAction(BROADCAST_FAVORITE);
-                        sendBroadcast(mIntentUnFavorite);
                         try {
                             final String id = sound.getId();
                             new AsyncTask<Void, Void, Void>() {
@@ -279,7 +280,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                             finishActivity();
                         } else {
                             if (!Tools.isOnline(FavoriteActivity.this)) {
-                                Snackbar.make(getCurrentFocus(), getResources().getString(R.string.internet_connection), Snackbar.LENGTH_LONG).show();
+                                AppTools.showSnackBar(getResources().getString(R.string.internet_connection), FavoriteActivity.this);
                                 break;
                             }
                             new AsyncTask<Void, Void, String>() {
@@ -302,6 +303,10 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                                     super.onPostExecute(aVoid);
                                     mProgressDialog.dismiss();
                                     mFilePath = aVoid;
+                                    if (mFilePath == null) {
+                                        AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), FavoriteActivity.this);
+                                        return;
+                                    }
                                     sound.setLink_on_Disk(mFilePath);
                                     new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                     finishActivity();
@@ -323,21 +328,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onChange(Object element) {
-        
-    }
 
-    private class AsyncUpdatePath extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected Void doInBackground(String... params) {
-            Realm realm = RealmManager.getRealm(FavoriteActivity.this);
-            realm.beginTransaction();
-            Sound sound = realm.where(Sound.class).equalTo("id", params[0]).findFirst();
-            sound.setLinkOnDisk(params[1]);
-            realm.commitTransaction();
-            realm.close();
-            return null;
-        }
     }
 
     private void createPopupMenu(View v) {
@@ -375,6 +366,20 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                 mTvSearch.setFocusable(true);
                 mTvSearch.setFocusableInTouchMode(true);
                 break;
+        }
+    }
+
+    private class AsyncUpdatePath extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            Realm realm = RealmManager.getRealm(FavoriteActivity.this);
+            realm.beginTransaction();
+            Sound sound = realm.where(Sound.class).equalTo("id", params[0]).findFirst();
+            sound.setLinkOnDisk(params[1]);
+            realm.commitTransaction();
+            realm.close();
+            return null;
         }
     }
 

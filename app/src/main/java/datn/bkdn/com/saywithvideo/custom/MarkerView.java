@@ -10,29 +10,8 @@ import android.widget.ImageView;
 
 public class MarkerView extends ImageView {
 
-    public interface MarkerListener {
-        void markerTouchStart(MarkerView marker, float pos);
-
-        void markerTouchMove(MarkerView marker, float pos);
-
-        void markerTouchEnd(MarkerView marker);
-
-        void markerFocus(MarkerView marker);
-
-        void markerLeft(MarkerView marker, int velocity);
-
-        void markerRight(MarkerView marker, int velocity);
-
-        void markerEnter(MarkerView marker);
-
-        void markerKeyUp();
-
-        void markerDraw();
-    }
-
     private int mVelocity;
     private MarkerListener mListener;
-
     public MarkerView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -105,5 +84,25 @@ public class MarkerView extends ImageView {
         if (mListener != null)
             mListener.markerKeyUp();
         return super.onKeyDown(keyCode, event);
+    }
+
+    public interface MarkerListener {
+        void markerTouchStart(MarkerView marker, float pos);
+
+        void markerTouchMove(MarkerView marker, float pos);
+
+        void markerTouchEnd(MarkerView marker);
+
+        void markerFocus(MarkerView marker);
+
+        void markerLeft(MarkerView marker, int velocity);
+
+        void markerRight(MarkerView marker, int velocity);
+
+        void markerEnter(MarkerView marker);
+
+        void markerKeyUp();
+
+        void markerDraw();
     }
 }

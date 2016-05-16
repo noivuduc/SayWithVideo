@@ -26,13 +26,13 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
         SearchView.OnQueryTextListener, AdapterView.OnItemClickListener, ListImportSoundAdapter.OnItemClicked,
         MediaPlayer.OnCompletionListener {
 
+    final String MEDIA_PATH = Environment.getExternalStorageDirectory().getPath() + "/";
+    private final String[] mPattern = new String[]{".mp3", ".aac", ".m4a", ".wav", "ogg"};
     private RelativeLayout mRlBack;
     private SearchView mSearchView;
     private ListView mLvSound;
     private ListImportSoundAdapter mAdapter;
-    final String MEDIA_PATH = Environment.getExternalStorageDirectory().getPath() + "/";
     private ArrayList<ImportSound> songsList;
-    private final String[] mPattern = new String[]{".mp3", ".aac", ".m4a", ".wav", "ogg"};
     private MediaPlayer mMediaPlayer;
     private int mPrePos;
 
@@ -128,34 +128,6 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
         mAdapter.notifyDataSetChanged();
     }
 
-    private class LoadAllSound extends AsyncTask<Void, Void, Void> {
-
-        private ProgressDialog mProgressDialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mProgressDialog = new ProgressDialog(ImportSoundActivity.this);
-            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            mProgressDialog.setTitle(getString(R.string.progress_dialog_loading));
-            mProgressDialog.setCancelable(true);
-            mProgressDialog.show();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            getPlayList();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            mProgressDialog.dismiss();
-            init();
-        }
-    }
-
     private List<ImportSound> filter(String s) {
         List<ImportSound> importSounds = new ArrayList<>();
         for (ImportSound sound : songsList) {
@@ -167,8 +139,6 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
     }
 
     public void getPlayList() {
-        System.out.println(MEDIA_PATH);
-        if (MEDIA_PATH != null) {
             File home = new File(MEDIA_PATH);
             File[] listFiles = home.listFiles();
             if (listFiles != null && listFiles.length > 0) {
@@ -181,7 +151,7 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
                     }
                 }
             }
-        }
+
     }
 
     private void scanDirectory(File directory) {
@@ -207,7 +177,6 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
         return false;
     }
 
-
     private void addSongToList(File song) {
         if (isAudio(song.getName())) {
             ImportSound importSound = new ImportSound();
@@ -230,6 +199,34 @@ public class ImportSoundActivity extends AppCompatActivity implements View.OnCli
         if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.stop();
             mMediaPlayer.release();
+        }
+    }
+
+    private class LoadAllSound extends AsyncTask<Void, Void, Void> {
+
+        private ProgressDialog mProgressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mProgressDialog = new ProgressDialog(ImportSoundActivity.this);
+            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mProgressDialog.setTitle(getString(R.string.progress_dialog_loading));
+            mProgressDialog.setCancelable(true);
+            mProgressDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            getPlayList();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mProgressDialog.dismiss();
+            init();
         }
     }
 }

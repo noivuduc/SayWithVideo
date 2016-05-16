@@ -22,13 +22,13 @@ import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 
 /**
  * Created by Matteo on 24/08/2015.
- * <p/>
+ * <p>
  * This class is a generic way of backing an Android RecyclerView with a Firebase location.
  * It handles all of the child events at the given Firebase location.
  * It marshals received data into the given class type.
  * Extend this class and provide an implementation of the abstract methods, which will notify when
  * the adapter list changes.
- * <p/>
+ * <p>
  * This class also simplifies the management of configuration change (e.g.: device rotation)
  * allowing the restore of the list.
  *
@@ -54,52 +54,11 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
 //    public FirebaseRecyclerAdapter(Query query, Class<T> itemClass) {
 //        this(query, itemClass, null, null);
 //    }
-
-    /**
-     * @param query     The Firebase location to watch for data changes.
-     *                  Can also be a slice of a location, using some combination of
-     *                  <code>limit()</code>, <code>startAt()</code>, and <code>endAt()</code>.
-     * @param itemClass The class of the items.
-     * @param items     List of items that will load the adapter before starting the listener.
-     *                  Generally null or empty, but this can be useful when dealing with a
-     *                  configuration change (e.g.: reloading the adapter after a device rotation).
-     *                  Be careful: keys must be coherent with this list.
-     * @param keys      List of keys of items that will load the adapter before starting the listener.
-     *                  Generally null or empty, but this can be useful when dealing with a
-     *                  configuration change (e.g.: reloading the adapter after a device rotation).
-     *                  Be careful: items must be coherent with this list.
-     */
-    public FirebaseRecyclerAdapter(Context context, Query query, @Nullable Query mQuery, Class<T> itemClass,
-                                   @Nullable ArrayList<T> items,
-                                   @Nullable ArrayList<String> keys) {
-        this.mQuery = query;
-        if (items != null && keys != null) {
-            this.mItems = items;
-            this.mKeys = keys;
-        } else {
-            mItems = new ArrayList<>();
-            mKeys = new ArrayList<>();
-        }
-        mProgressDialog = new ProgressDialog(context);
-        mProgressDialog.setMessage(context.getResources().getString(R.string.please_wait));
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.show();
-        query.addListenerForSingleValueEvent(valueEventListener);
-        this.mItemClass = itemClass;
-        mUserQuery = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
-        mUserQuery.addListenerForSingleValueEvent(mUserListener);
-        if (mQuery != null) {
-            mQuery.addChildEventListener(mListenner);
-        }
-        query.addChildEventListener(mListener);
-    }
-
     private ValueEventListener mUserListener = new ValueEventListener() {
 
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            Log.d("FirebaseAdapter","onDataChange");
-            for(DataSnapshot data : dataSnapshot.getChildren()){
+            for (DataSnapshot data : dataSnapshot.getChildren()) {
                 final String key = data.getKey();
                 if (mUserNames == null) {
                     mUserNames = new HashMap<>();
@@ -115,11 +74,9 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
 
         }
     };
-
     private ChildEventListener mListenner = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            Log.d("FirebaseAdapter","onDataChange.Favorite");
             if (mFavorites == null) {
                 mFavorites = new ArrayList<>();
             }
@@ -137,6 +94,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
             mFavorites.remove(dataSnapshot.getKey());
+            itemFavoriteRemoved(dataSnapshot.getKey());
         }
 
         @Override
@@ -149,12 +107,10 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
 
         }
     };
-
-
     private ValueEventListener valueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            Log.d("FirebaseAdapter","end loading");
+            Log.d("FirebaseAdapter", "end loading");
             mProgressDialog.dismiss();
         }
 
@@ -163,11 +119,10 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
 
         }
     };
-
     private ChildEventListener mListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-            Log.d("FirebaseAdapter","onChildAdded");
+            Log.d("FirebaseAdapter", "onChildAdded");
             String key = dataSnapshot.getKey();
             T item = dataSnapshot.getValue(FirebaseRecyclerAdapter.this.mItemClass);
             int insertedPosition;
@@ -263,6 +218,54 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
         }
 
     };
+
+    /**
+     * @param query     The Firebase location to watch for data changes.
+     *                  Can also be a slice of a location, using some combination of
+     *                  <code>limit()</code>, <code>startAt()</code>, and <code>endAt()</code>.
+     * @param itemClass The class of the items.
+     * @param items     List of items that will load the adapter before starting the listener.
+     *                  Generally null or empty, but this can be useful when dealing with a
+     *                  configuration change (e.g.: reloading the adapter after a device rotation).
+     *                  Be careful: keys must be coherent with this list.
+     * @param keys      List of keys of items that will load the adapter before starting the listener.
+     *                  Generally null or empty, but this can be useful when dealing with a
+     *                  configuration change (e.g.: reloading the adapter after a device rotation).
+     *                  Be careful: items must be coherent with this list.
+     */
+    public FirebaseRecyclerAdapter(Context context, Query query, boolean isOnline, @Nullable Query mQuery, Class<T> itemClass,
+                                   @Nullable ArrayList<T> items,
+                                   @Nullable ArrayList<String> keys) {
+        this.mQuery = query;
+        this.mItemClass = itemClass;
+
+        if (items != null && keys != null) {
+            this.mItems = items;
+            this.mKeys = keys;
+        } else {
+            mItems = new ArrayList<>();
+            mKeys = new ArrayList<>();
+        }
+
+        /* Thêm cái này vào để biết được lúc nào thì dữ liệu được tải xong
+         * Neu may ket noi mang thi moi lay du lieu ve
+         *
+         */
+        if (isOnline) {
+            mProgressDialog = new ProgressDialog(context);
+            mProgressDialog.setMessage(context.getResources().getString(R.string.please_wait));
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+            query.addListenerForSingleValueEvent(valueEventListener);
+        }
+        mUserQuery = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
+        mUserQuery.addListenerForSingleValueEvent(mUserListener);
+
+        if (mQuery != null) {
+            mQuery.addChildEventListener(mListenner);
+        }
+        query.addChildEventListener(mListener);
+    }
 
     @Override
     public abstract ViewHolder onCreateViewHolder(ViewGroup parent, int viewType);
@@ -397,4 +400,5 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
      */
     protected abstract void itemMoved(T item, String key, int oldPosition, int newPosition);
 
+    protected abstract void itemFavoriteRemoved(String key);
 }

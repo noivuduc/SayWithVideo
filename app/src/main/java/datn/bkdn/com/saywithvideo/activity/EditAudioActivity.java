@@ -74,6 +74,21 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
     private int mPlayStartMsec;
     private int mPlayEndMsec;
     private Handler mHandler;
+    private final Runnable mTimerRunnable = new Runnable() {
+        public void run() {
+            if (mStartPos != mLastDisplayedStartPos) {
+                mTvStart.setText(formatTime(mStartPos));
+                mLastDisplayedStartPos = mStartPos;
+            }
+
+            if (mEndPos != mLastDisplayedEndPos) {
+                mTvEnd.setText(formatTime(mEndPos));
+                mLastDisplayedEndPos = mEndPos;
+            }
+
+            mHandler.postDelayed(mTimerRunnable, 100);
+        }
+    };
     private boolean mIsPlaying;
     private MediaPlayer mPlayer;
     private boolean mTouchDragging;
@@ -164,7 +179,6 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 
         updateDisplay();
     }
-
 
     @Override
     public void markerTouchStart(MarkerView marker, float x) {
@@ -301,11 +315,11 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
                 float start = Float.parseFloat(mTvStart.getText().toString());
                 float end = Float.parseFloat(mTvEnd.getText().toString());
                 if (end - start > MAX_SECOND) {
-                    Toast.makeText(getBaseContext(), getResources().getString(R.string.length_audio_over)+" " + MAX_SECOND + " "+ getResources().getString(R.string.second), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), getResources().getString(R.string.length_audio_over) + " " + MAX_SECOND + " " + getResources().getString(R.string.second), Toast.LENGTH_SHORT).show();
                     return;
                 } else if (end - start < MIN_SECOND) {
-                    Toast.makeText(getBaseContext(), getResources().getString(R.string.length_audio_less_than)+" "
-                            + MAX_SECOND +" "+ getResources().getString(R.string.second), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), getResources().getString(R.string.length_audio_less_than) + " "
+                            + MAX_SECOND + " " + getResources().getString(R.string.second), Toast.LENGTH_SHORT).show();
                 } else {
                     createDialog();
                 }
@@ -316,6 +330,22 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 
         }
     }
+
+//    public byte[] fileToByte(String path) {
+//        File file = new File(path);
+//        int size = (int) file.length();
+//        byte[] bytes = new byte[size];
+//        try {
+//            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
+//            buf.read(bytes, 0, bytes.length);
+//            buf.close();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return bytes;
+//    }
 
     private void createSound(String name) {
         Date date = new Date();
@@ -350,22 +380,6 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
         mFirebase.child(FirebaseConstant.USER_URL).child(id).child("no_sound").setValue((f.getNo_sound() + 1) + "");
     }
 
-//    public byte[] fileToByte(String path) {
-//        File file = new File(path);
-//        int size = (int) file.length();
-//        byte[] bytes = new byte[size];
-//        try {
-//            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-//            buf.read(bytes, 0, bytes.length);
-//            buf.close();
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return bytes;
-//    }
-
     private void createDialog() {
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_name_audio);
@@ -397,7 +411,6 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
     private long getCurrentTime() {
         return System.nanoTime() / 1000000;
     }
-
 
     @Override
     public void onBackPressed() {
@@ -685,22 +698,6 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
         mEndMarker.setLayoutParams(params);
     }
 
-    private final Runnable mTimerRunnable = new Runnable() {
-        public void run() {
-            if (mStartPos != mLastDisplayedStartPos) {
-                mTvStart.setText(formatTime(mStartPos));
-                mLastDisplayedStartPos = mStartPos;
-            }
-
-            if (mEndPos != mLastDisplayedEndPos) {
-                mTvEnd.setText(formatTime(mEndPos));
-                mLastDisplayedEndPos = mEndPos;
-            }
-
-            mHandler.postDelayed(mTimerRunnable, 100);
-        }
-    };
-
     private void enableDisableButtons() {
         if (mIsPlaying) {
             mImgPlay.setImageResource(android.R.drawable.ic_media_pause);
@@ -853,7 +850,7 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 //            mProgressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 //            mProgressBar.show();
 
-            mProgressBar = new SweetAlertDialog(EditAudioActivity.this,SweetAlertDialog.PROGRESS_TYPE);
+            mProgressBar = new SweetAlertDialog(EditAudioActivity.this, SweetAlertDialog.PROGRESS_TYPE);
             mProgressBar.setTitleText(getResources().getString(R.string.please_wait));
             mProgressBar.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
             mProgressBar.setCancelable(false);

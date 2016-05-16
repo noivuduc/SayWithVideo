@@ -11,16 +11,16 @@ import android.support.v7.app.AlertDialog;
  * Created by Admin on 5/4/2016.
  */
 public class PermissionUtils {
-    public static final int REQUEST_READ_EXTERNAL_STORAGE=0;
-    public static final int REQUEST_WRITE_EXTERNAL_STORAGE=1;
-    public static final int REQUEST_GET_ACCOUNTS=2;
-    public static final int REQUEST_CAMERA=0;
+    public static final int REQUEST_READ_EXTERNAL_STORAGE = 0;
+    public static final int REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+    public static final int REQUEST_GET_ACCOUNTS = 2;
+    public static final int REQUEST_CAMERA = 0;
 
 
     public static void getrequestWriteExtenalStorage(Activity activity) {
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-                   requestWriteExtenalStorage(activity);
+            requestWriteExtenalStorage(activity);
 
         } else {
 
@@ -28,14 +28,13 @@ public class PermissionUtils {
 
     }
 
-    public static void requestWriteExtenalStorage(final Activity activity){
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity,Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+    public static void requestWriteExtenalStorage(final Activity activity) {
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             ActivityCompat.requestPermissions(activity,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_WRITE_EXTERNAL_STORAGE);
             return;
-        }else
-        {
+        } else {
             ActivityCompat.requestPermissions(activity,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_WRITE_EXTERNAL_STORAGE);
@@ -56,8 +55,8 @@ public class PermissionUtils {
 
     }
 
-    public static void requestReadExtenalStorage(final Activity activity){
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity,Manifest.permission.READ_EXTERNAL_STORAGE)) {
+    public static void requestReadExtenalStorage(final Activity activity) {
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             showMessageOKCancel("You need to allow access to read SD Card",
                     new DialogInterface.OnClickListener() {
                         @Override
@@ -66,7 +65,7 @@ public class PermissionUtils {
                                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                                     REQUEST_READ_EXTERNAL_STORAGE);
                         }
-                    },activity);
+                    }, activity);
             return;
         }
         return;
@@ -81,8 +80,8 @@ public class PermissionUtils {
 
     }
 
-    public static void requestGetAccounts(final Activity activity){
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity,Manifest.permission.GET_ACCOUNTS)) {
+    public static void requestGetAccounts(final Activity activity) {
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.GET_ACCOUNTS)) {
             showMessageOKCancel("You need to allow access to accounts",
                     new DialogInterface.OnClickListener() {
                         @Override
@@ -91,7 +90,7 @@ public class PermissionUtils {
                                     new String[]{Manifest.permission.GET_ACCOUNTS},
                                     REQUEST_GET_ACCOUNTS);
                         }
-                    },activity);
+                    }, activity);
             return;
         }
         return;
@@ -106,8 +105,8 @@ public class PermissionUtils {
 
     }
 
-    public static void requestCamera(final Activity activity){
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity,Manifest.permission.CAMERA))
+    public static void requestCamera(final Activity activity) {
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA))
 //        {
 //            showMessageOKCancel("You need to allow access to Camera",
 //                    new DialogInterface.OnClickListener() {
@@ -130,7 +129,7 @@ public class PermissionUtils {
 
     }
 
-    private static void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener,Activity activity) {
+    private static void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener, Activity activity) {
         new AlertDialog.Builder(activity)
                 .setMessage(message)
                 .setPositiveButton("OK", okListener)

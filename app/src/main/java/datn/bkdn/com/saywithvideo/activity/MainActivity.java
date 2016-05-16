@@ -2,6 +2,7 @@ package datn.bkdn.com.saywithvideo.activity;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -26,7 +27,7 @@ import datn.bkdn.com.saywithvideo.adapter.MainPagerAdapter;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
 import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
-import datn.bkdn.com.saywithvideo.utils.PagerSlidingTabStrip;
+import datn.bkdn.com.saywithvideo.lib.PagerSlidingTabStrip;
 import datn.bkdn.com.saywithvideo.utils.Utils;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -42,7 +43,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         Firebase.setAndroidContext(this);
-
+        TextView mAppname;
+        mAppname = (TextView) findViewById(R.id.txtAppname);
+        mAppname.setTextColor(Color.WHITE);
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         if (mNavigationView != null) mNavigationView.setNavigationItemSelectedListener(this);
 

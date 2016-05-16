@@ -45,15 +45,15 @@
 
             <TextView
                 android:id="@+id/tvContinue"
-                android:text="@string/select_next"
-                android:width="140dp"
-                android:textColor="@android:color/white"
-                android:layout_centerHorizontal="true"
-                android:height="50dp"
-                android:gravity="center"
-                android:background="@drawable/selector_create_dub"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:width="140dp"
+                android:height="50dp"
+                android:background="@drawable/selector_create_dub"
+                android:gravity="center"
+                android:text="@string/select_next"
+                android:textColor="@android:color/white" />
         </RelativeLayout>
 
 

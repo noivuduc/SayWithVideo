@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/addToSoundBoard" android:title="@string/add_to_soundboard"/>
-    <item android:id="@+id/shareIT" android:title="@string/share_it"/>
-    <item android:id="@+id/report" android:title="@string/report"/>
-    <item android:id="@+id/improve" android:title="@string/improve" />
+    <item
+        android:id="@+id/addToSoundBoard"
+        android:title="@string/add_to_soundboard" />
+    <item
+        android:id="@+id/shareIT"
+        android:title="@string/share_it" />
+    <item
+        android:id="@+id/report"
+        android:title="@string/report" />
+    <item
+        android:id="@+id/improve"
+        android:title="@string/improve" />
 </menu>

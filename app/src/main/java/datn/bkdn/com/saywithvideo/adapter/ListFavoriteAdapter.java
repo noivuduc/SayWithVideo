@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,19 +27,13 @@ import datn.bkdn.com.saywithvideo.lib.FirebaseRecyclerAdapter;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
-import io.realm.RealmResults;
-
-/**
- * Created by Admin on 4/7/2016.
- */
 
 public class ListFavoriteAdapter extends FirebaseRecyclerAdapter<ListFavoriteAdapter.SoundHolder, Audio> implements RealmChangeListener {
     public final Context mContext;
-    private final RealmResults<Sound> mSounds;
+    private OnItemClicked mItemClicked;
 
-    public ListFavoriteAdapter(Query query, @Nullable Query favorite, Class<Audio> itemClass, RealmResults<Sound> sounds, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
-        super(mContext,query, favorite, itemClass, items, keys);
-        this.mSounds = sounds;
+    public ListFavoriteAdapter(Query query, @Nullable Query favorite, boolean isOnline, Class<Audio> itemClass, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
+        super(mContext, query, isOnline, favorite, itemClass, items, keys);
         this.mContext = mContext;
 
     }
@@ -46,7 +41,7 @@ public class ListFavoriteAdapter extends FirebaseRecyclerAdapter<ListFavoriteAda
     @Override
     public SoundHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list_sound, parent, false);
-        return new SoundHolder(view,mContext);
+        return new SoundHolder(view, mContext);
     }
 
     @Override
@@ -105,13 +100,14 @@ public class ListFavoriteAdapter extends FirebaseRecyclerAdapter<ListFavoriteAda
         viewHolder.imgFavorite.setImageResource(model.isFavorite() ? R.mipmap.favorite_selected : R.mipmap.favorite_unselected);
         viewHolder.imgPlayPause.setImageResource(model.isPlaying() ? R.mipmap.ic_pause : R.mipmap.ic_play);
         viewHolder.tvSoundName.setText(model.getName());
-        viewHolder.tvSoundAuthor.setText(mContext.getString(R.string.upload_by)+" " + model.getAuthor());
+        String str = mContext.getResources().getString(R.string.upload_by) + "<b>"+model.getAuthor()+"</b>";
+        viewHolder.tvSoundAuthor.setText(Html.fromHtml(str));
     }
 
     /**
      * @param item     item exist
      * @param key      key of item
-     * @param position
+     * @param position position of item
      */
     @Override
     protected void itemExist(final Audio item, final String key, final int position) {
@@ -166,7 +162,6 @@ public class ListFavoriteAdapter extends FirebaseRecyclerAdapter<ListFavoriteAda
         }
     }
 
-
     @Override
     protected void itemChanged(final Audio oldItem, final Audio newItem, final String key, final int position) {
 
@@ -178,7 +173,7 @@ public class ListFavoriteAdapter extends FirebaseRecyclerAdapter<ListFavoriteAda
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-               RealmUtils.getRealmUtils(mContext).updateFavorite(mContext,key);
+                RealmUtils.getRealmUtils(mContext).updateFavorite(mContext, key);
                 return null;
             }
         }.execute();
@@ -190,22 +185,30 @@ public class ListFavoriteAdapter extends FirebaseRecyclerAdapter<ListFavoriteAda
     }
 
     @Override
+    protected void itemFavoriteRemoved(String key) {
+
+    }
+
+    @Override
     public void onChange(Object element) {
 
+    }
+
+    public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
+        this.mItemClicked = playButtonClicked;
+    }
+
+    private Sound convertAudio(Audio audio) {
+        return new Sound(audio.getId(), audio.getName(), audio.getAuthor(),
+                audio.isFavorite(), audio.getPlays(), audio.getDate_create(),
+                audio.getUser_id());
     }
 
     public interface OnItemClicked {
         void onClick(Audio audio, View v, int pos);
     }
 
-    private OnItemClicked mItemClicked;
-
-    public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
-        this.mItemClicked = playButtonClicked;
-    }
-
     public static class SoundHolder extends RecyclerView.ViewHolder {
-        View mView;
         private final TextView tvSoundAuthor;
         private final TextView tvSoundName;
         private final ImageView imgPlayPause;
@@ -215,6 +218,7 @@ public class ListFavoriteAdapter extends FirebaseRecyclerAdapter<ListFavoriteAda
         private final LinearLayout linearLayout;
         private final RelativeLayout rlOption;
         private final RelativeLayout rlFavorite;
+        View mView;
 
         public SoundHolder(View itemView, Context context) {
             super(itemView);
@@ -251,32 +255,6 @@ public class ListFavoriteAdapter extends FirebaseRecyclerAdapter<ListFavoriteAda
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
         }
-    }
-
-    protected void sortByPlays() {
-//        int size = getItemCount();
-//        for (int i = 0; i < size - 1; i++) {
-//            int plays1 = getItem(i).getPlays();
-//            for (int j = i + 1; j < size; j++) {
-//                int plays2 = getItem(j).getPlays();
-//                if (plays1 < plays2) {
-//                    //change position of audio
-//                    Audio audio = getItem(i);
-//                    getItems().add(i, getItem(j));
-//                    getItems().add(j, audio);
-//                    // change pos key
-//                    String key = getKeys().get(i);
-//                    getKeys().add(i, getKeys().get(j));
-//                    getKeys().add(j, key);
-//                }
-//            }
-//        }
-    }
-
-    private Sound convertAudio(Audio audio) {
-        return new Sound(audio.getId(), audio.getName(), audio.getAuthor(),
-                audio.isFavorite(), audio.getPlays(), audio.getDate_create(),
-                audio.getUser_id());
     }
 }
 

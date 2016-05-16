@@ -43,22 +43,7 @@ import java.util.ArrayList;
  */
 class FirebaseArray implements
         ChildEventListener,
-        ValueEventListener
-{
-    public interface OnChangedListener {
-        enum EventType { Added, Changed, Removed, Moved, Reset }
-        void onChanged(EventType type, int index, int oldIndex);
-    }
-
-    public interface OnErrorListener {
-        void onError(FirebaseError firebaseError);
-    }
-
-    public interface OnSyncStatusChangedListener {
-        enum EventType { UnSynced, Synced }
-        void onChanged(EventType type);
-    }
-
+        ValueEventListener {
     private Query mOriginalQuery;
     private Query mQuery;
     private OnChangedListener mOnChangedListener;
@@ -69,11 +54,9 @@ class FirebaseArray implements
     private int mCurrentSize;
     private boolean mSyncing;
     private boolean mOrderASC;
-
     public FirebaseArray(@NonNull Query query) {
         this(query, 0, true);
     }
-
     public FirebaseArray(@NonNull Query query, int pageSize, boolean orderASC) {
         mOriginalQuery = query;
         mSnapshots = new ArrayList<DataSnapshot>();
@@ -91,7 +74,7 @@ class FirebaseArray implements
     }
 
     public void more() {
-        if(mPageSize > 0 && !isSyncing()) {
+        if (mPageSize > 0 && !isSyncing()) {
             mCurrentSize += mPageSize;
             setup();
         }
@@ -106,21 +89,20 @@ class FirebaseArray implements
         return mSnapshots.size();
 
     }
+
     public DataSnapshot getItem(int index) {
         return mSnapshots.get(index);
     }
 
     private void setup() {
-        if(mQuery != null) {
+        if (mQuery != null) {
             cleanup();
         }
-        if(mPageSize == 0) {
+        if (mPageSize == 0) {
             mQuery = mOriginalQuery;
-        }
-        else if(mOrderASC == true){
+        } else if (mOrderASC == true) {
             mQuery = mOriginalQuery.limitToFirst(mCurrentSize);
-        }
-        else {
+        } else {
             mQuery = mOriginalQuery.limitToLast(mCurrentSize);
         }
         setSyncing(true);
@@ -145,37 +127,32 @@ class FirebaseArray implements
     }
 
     private void setSyncing(boolean syncing) {
-        if(syncing == mSyncing) {
+        if (syncing == mSyncing) {
             return;
         }
         this.mSyncing = syncing;
-        if(syncing) {
+        if (syncing) {
             notifyOnSyncChangedListeners(OnSyncStatusChangedListener.EventType.UnSynced);
-        }
-        else {
+        } else {
             notifyOnSyncChangedListeners(OnSyncStatusChangedListener.EventType.Synced);
         }
     }
 
-    // Start of ChildEventListener and ValueEventListener methods
-
     public void onChildAdded(DataSnapshot snapshot, String previousChildKey) {
         int index = (mOrderASC) ? 0 : getCount();
         if (previousChildKey != null) {
-            if(mOrderASC) {
+            if (mOrderASC) {
                 index = getIndexForKey(previousChildKey) + 1;
-            }
-            else {
+            } else {
                 index = getIndexForKey(previousChildKey);
             }
         }
-        if(mOrderASC &&
-                index < getCount()  &&
+        if (mOrderASC &&
+                index < getCount() &&
                 mSnapshots.get(index).getKey().equals(snapshot.getKey())) {
             return;
-        }
-        else if(!mOrderASC &&
-                index < getCount() + 1  &&
+        } else if (!mOrderASC &&
+                index < getCount() + 1 &&
                 index > 0 &&
                 mSnapshots.get(index - 1).getKey().equals(snapshot.getKey())) {
             return;
@@ -197,6 +174,8 @@ class FirebaseArray implements
         notifyChangedListeners(OnChangedListener.EventType.Removed, index);
     }
 
+    // Start of ChildEventListener and ValueEventListener methods
+
     public void onChildMoved(DataSnapshot snapshot, String previousChildKey) {
         int oldIndex = getIndexForKey(snapshot.getKey());
         mSnapshots.remove(oldIndex);
@@ -213,25 +192,28 @@ class FirebaseArray implements
         notifyOnErrorListeners(firebaseError);
     }
 
-    // End of ChildEventListener and ValueEventListener methods
-
     public void setOnChangedListener(OnChangedListener listener) {
         mOnChangedListener = listener;
     }
+
     protected void notifyChangedListeners(OnChangedListener.EventType type, int index) {
         notifyChangedListeners(type, index, -1);
     }
+
     protected void notifyChangedListeners(OnChangedListener.EventType type, int index, int oldIndex) {
         if (mOnChangedListener != null) {
             mOnChangedListener.onChanged(type, index, oldIndex);
         }
     }
 
+    // End of ChildEventListener and ValueEventListener methods
+
     public void setOnErrorListener(OnErrorListener listener) {
         mOnErrorListener = listener;
     }
+
     public void notifyOnErrorListeners(FirebaseError firebaseError) {
-        if(mOnErrorListener != null) {
+        if (mOnErrorListener != null) {
             mOnErrorListener.onError(firebaseError);
         }
     }
@@ -240,9 +222,26 @@ class FirebaseArray implements
         mOnSyncStatusListener = listener;
         notifyOnSyncChangedListeners(isSyncing() ? OnSyncStatusChangedListener.EventType.UnSynced : OnSyncStatusChangedListener.EventType.Synced);
     }
+
     protected void notifyOnSyncChangedListeners(OnSyncStatusChangedListener.EventType type) {
-        if(mOnSyncStatusListener != null) {
+        if (mOnSyncStatusListener != null) {
             mOnSyncStatusListener.onChanged(type);
         }
+    }
+
+    public interface OnChangedListener {
+        void onChanged(EventType type, int index, int oldIndex);
+
+        enum EventType {Added, Changed, Removed, Moved, Reset}
+    }
+
+    public interface OnErrorListener {
+        void onError(FirebaseError firebaseError);
+    }
+
+    public interface OnSyncStatusChangedListener {
+        void onChanged(EventType type);
+
+        enum EventType {UnSynced, Synced}
     }
 }

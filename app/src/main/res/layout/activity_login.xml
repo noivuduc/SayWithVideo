@@ -59,9 +59,9 @@
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@+id/imgClearEmail"
                 android:background="@null"
-                android:inputType="textEmailAddress"
                 android:gravity="center"
                 android:hint="@string/hint_enter_email"
+                android:inputType="textEmailAddress"
                 android:singleLine="true"
                 android:textSize="18sp" />
 

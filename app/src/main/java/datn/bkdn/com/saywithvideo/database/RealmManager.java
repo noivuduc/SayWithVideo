@@ -24,7 +24,7 @@ public class RealmManager {
                 .build();
     }
 
-    public static RealmConfiguration getDefaultConfig(Context context){
+    public static RealmConfiguration getDefaultConfig(Context context) {
         RealmConfiguration config = new RealmConfiguration.Builder(context)
                 .build();
         return config;

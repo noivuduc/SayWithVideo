@@ -61,7 +61,7 @@ public class RealmUtils {
         realm.close();
     }
 
-    public void deleteAllSound(Context context){
+    public void deleteAllSound(Context context) {
         realm = RealmManager.getRealm(context);
         realm.beginTransaction();
         realm.where(Sound.class).findAll().deleteAllFromRealm();

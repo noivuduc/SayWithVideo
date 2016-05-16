@@ -9,12 +9,7 @@ import android.os.Build;
 import android.util.Log;
 import android.util.Patterns;
 
-import com.google.gson.Gson;
-
 import java.util.regex.Pattern;
-
-import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
-import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 
 public class Utils {
     private static final String CURRENT_USER = "current_user";
@@ -22,15 +17,15 @@ public class Utils {
     private static final String CURRENT_USER_NAME = "name_key";
     private static final String CURRENT_USER_ID = "id_key";
 
-    public static final String getPrimaryEmail(Context context) {
-        if(Build.VERSION.SDK_INT>=23) {
+    public static String getPrimaryEmail(Context context) {
+        if (Build.VERSION.SDK_INT >= 23) {
             PermissionUtils.getrequestGetAccounts((Activity) context);
         }
         String possibleEmail = null;
         Pattern emailPattern = Patterns.EMAIL_ADDRESS;
         Account[] accounts = AccountManager.get(context).getAccounts();
-        Log.d("maill",accounts.length+"");
-        if(accounts.length>0) {
+        Log.d("maill", accounts.length + "");
+        if (accounts.length > 0) {
             if (emailPattern.matcher(accounts[0].name).matches()) {
                 possibleEmail = accounts[0].name;
             }
@@ -52,13 +47,6 @@ public class Utils {
             return true;
         }
         return false;
-    }
-
-    public static String getUserName(String id) {
-        String link = FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + id + ".json";
-        String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
-        FirebaseUser user = new Gson().fromJson(json, FirebaseUser.class);
-        return user.getName();
     }
 
     public static String getCurrentUserEmail(Context context) {

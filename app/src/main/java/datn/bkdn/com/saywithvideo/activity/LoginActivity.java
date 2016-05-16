@@ -99,7 +99,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                 @Override
                 public void onError(FacebookException error) {
-                    Toast.makeText(LoginActivity.this,getResources().getString( R.string.facebook_login_error), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, getResources().getString(R.string.facebook_login_error), Toast.LENGTH_SHORT).show();
                     mProgressDialog.dismiss();
                 }
             });
@@ -121,19 +121,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         edtEmail = (EditText) findViewById(R.id.edtEmail);
         edtPass = (EditText) findViewById(R.id.edtpass);
         tvLogin = (TextView) findViewById(R.id.tvLogin);
+        tvLogin.setTextColor(Color.WHITE);
         TextView tvRegister = (TextView) findViewById(R.id.tvregister);
         TextView tvForgot = (TextView) findViewById(R.id.tvForgot);
         clearEmail = (ImageView) findViewById(R.id.imgClearEmail);
         clearPass = (ImageView) findViewById(R.id.imgClearPass);
         TextView tvLoginFacebook = (TextView) findViewById(R.id.tvLoginFacebook);
-        mProgressDialog = new SweetAlertDialog(this,SweetAlertDialog.PROGRESS_TYPE);
+        tvLoginFacebook.setTextColor(Color.WHITE);
+        mProgressDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
         mProgressDialog.setTitleText(getResources().getString(R.string.please_wait));
         mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
         mProgressDialog.setCancelable(false);
 
         if (tvLogin != null) tvLogin.setOnClickListener(this);
         if (tvRegister != null) tvRegister.setOnClickListener(this);
-        if (tvLoginFacebook != null) tvLoginFacebook.setOnClickListener(this);
+        tvLoginFacebook.setOnClickListener(this);
         if (tvForgot != null) tvForgot.setOnClickListener(this);
         edtEmail.addTextChangedListener(new TextWatcher() {
             @Override
@@ -186,7 +188,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void setEmail() {
-        edtEmail.setText(Utils.getPrimaryEmail(this)==null? "" : Utils.getPrimaryEmail(this));
+        edtEmail.setText(Utils.getPrimaryEmail(this) == null ? "" : Utils.getPrimaryEmail(this));
     }
 
     private void showMesage() {

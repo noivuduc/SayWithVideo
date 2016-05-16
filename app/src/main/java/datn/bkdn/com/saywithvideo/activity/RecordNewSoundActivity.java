@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.skyfishjy.library.RippleBackground;
 
 import java.io.File;
+import java.util.Locale;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
@@ -20,13 +21,13 @@ import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 
 public class RecordNewSoundActivity extends Activity implements OnClickListener {
+    private static final int MAX_RECORD = 20;
     private static String mFileName = null;
     private RelativeLayout mRlRecord;
     private TextView mTvStart;
     private TextView mTvTime;
     private TextView mTvInfor;
-    private  RippleBackground rippleBackground;
-    private static final int MAX_RECORD = 20;
+    private RippleBackground rippleBackground;
     private long mRecordingLastUpdateTime;
     private double mRecordingTime;
     private boolean mRecordingKeepGoing;
@@ -43,7 +44,7 @@ public class RecordNewSoundActivity extends Activity implements OnClickListener 
 
     private void init() {
         mRlRecord = (RelativeLayout) findViewById(R.id.rlStartRecord);
-       rippleBackground =(RippleBackground)findViewById(R.id.content);
+        rippleBackground = (RippleBackground) findViewById(R.id.content);
         ViewGroup vgBack = (ViewGroup) findViewById(R.id.rlBack);
         mTvStart = (TextView) findViewById(R.id.tvStart);
         mTvTime = (TextView) findViewById(R.id.tvTime);
@@ -81,7 +82,7 @@ public class RecordNewSoundActivity extends Activity implements OnClickListener 
                                     if (sec >= MAX_RECORD) {
                                         mRecordingKeepGoing = false;
                                     }
-                                    mTvTime.setText(String.format("%d:%05.2f", min, time));
+                                    mTvTime.setText(String.format(Locale.getDefault(),"%d:%05.2f", min, time));
                                 }
                             });
                             mRecordingLastUpdateTime = now;

@@ -18,18 +18,6 @@ import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
 
 public class WaveformView extends View {
 
-    public interface WaveformListener {
-        void waveformTouchStart(float x);
-
-        void waveformTouchMove(float x);
-
-        void waveformTouchEnd();
-
-        void waveformFling(float x);
-
-        void waveformDraw();
-    }
-
     // Colors
     protected Paint mGridPaint;
     protected Paint mSelectedLinePaint;
@@ -38,7 +26,6 @@ public class WaveformView extends View {
     protected Paint mBorderLinePaint;
     protected Paint mPlaybackLinePaint;
     protected Paint mTimecodePaint;
-
     protected SoundFile mSoundFile;
     protected int[] mLenByZoomLevel;
     protected float[] mZoomFactorByZoomLevel;
@@ -54,14 +41,11 @@ public class WaveformView extends View {
     protected WaveformListener mListener;
     protected GestureDetector mGestureDetector;
     protected boolean mInitialized;
-
     protected float range;
     protected float scaleFactor;
     protected float minGain;
-
     protected NavigableMap<Double, Segment> segmentsMap;
     protected Segment nextSegment;
-
     public WaveformView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -171,9 +155,8 @@ public class WaveformView extends View {
 
     public int secondsToPixels(double seconds) {
         double z = mZoomFactorByZoomLevel[mZoomLevel];
-        return (int)(z * seconds * mSampleRate / mSamplesPerFrame + 0.5);
+        return (int) (z * seconds * mSampleRate / mSamplesPerFrame + 0.5);
     }
-
 
     public int pixelsToMillisecs(int pixels) {
         double z = mZoomFactorByZoomLevel[mZoomLevel];
@@ -512,6 +495,18 @@ public class WaveformView extends View {
             return getZoomedOutHeight(zoomLevel, i);
         }
         return getZoomedInHeight(zoomLevel, i);
+    }
+
+    public interface WaveformListener {
+        void waveformTouchStart(float x);
+
+        void waveformTouchMove(float x);
+
+        void waveformTouchEnd();
+
+        void waveformFling(float x);
+
+        void waveformDraw();
     }
 }
 

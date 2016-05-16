@@ -74,10 +74,15 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    /**
+     * Khởi tạo dữ liệu
+     * Bắt sự kiện cho adapter
+     */
     private void initAdapter() {
         Query query = mFirebase.orderByChild("user_id").equalTo(Utils.getCurrentUserID(this));
         getData();
-        mAdapter = new ListMySoundAdapter(this, query, Audio.class, mAdapterItems, mAdapterKeys);
+        boolean isOnline = Tools.isOnline(this);
+        mAdapter = new ListMySoundAdapter(this, query, Audio.class, isOnline, mAdapterItems, mAdapterKeys);
         mRecycle.setAdapter(mAdapter);
         mAdapter.setPlayButtonClicked(new ListMySoundAdapter.OnItemClicked() {
 
@@ -131,6 +136,10 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                                     protected void onPostExecute(String aVoid) {
                                         super.onPostExecute(aVoid);
                                         mFilePath = aVoid;
+                                        if (mFilePath == null) {
+                                            AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), SoundActivity.this);
+                                            return;
+                                        }
                                         sound.setLink_on_Disk(mFilePath);
                                         new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                         if (mCurrentPos == pos) {
@@ -209,6 +218,182 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         });
     }
 
+    /**
+     * Chạy file mp3
+     * @param path : Đường dẫn tới file mp3
+     */
+    public void playMp3(String path) {
+        if (mPlayer == null) {
+            mPlayer = new MediaPlayer();
+        }
+        try {
+            mPlayer.reset();
+            mPlayer.setDataSource(path);
+            mPlayer.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mPlayer.start();
+        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mAdapter.getItems().get(mCurrentPos).setIsPlaying(false);
+                mAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    /**
+     * Khởi tạo resource
+     */
+    private void init() {
+        Firebase.setAndroidContext(this);
+        mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
+        mRecycle = (RecyclerView) findViewById(R.id.recycleViewMySound);
+        rlBack = (RelativeLayout) findViewById(R.id.rlBack);
+        rlSort = (RelativeLayout) findViewById(R.id.rlSort);
+        imgSort = (ImageView) findViewById(R.id.imgSort);
+        tvSearch = (EditText) findViewById(R.id.edtSearch);
+        tvAddSound = (TextView) findViewById(R.id.tvAddsound);
+        mRecycle.setHasFixedSize(true);
+        mRecycle.setLayoutManager(new LinearLayoutManager(this));
+        setEvent();
+    }
+
+    /**
+     * bắt sự kiện cho các view
+     */
+    private void setEvent() {
+        rlBack.setOnClickListener(this);
+        rlSort.setOnClickListener(this);
+        tvAddSound.setOnClickListener(this);
+        tvSearch.setOnClickListener(this);
+    }
+
+    /**
+     * Tạo menu sắp xếp
+     * @param v : View hiện tại
+     */
+    private void createSortMenu(View v) {
+        PopupMenu menu = new PopupMenu(this, v);
+        menu.getMenuInflater().inflate(R.menu.sort_menu, menu.getMenu());
+        menu.setOnMenuItemClickListener(this);
+        menu.show();
+    }
+
+    private void createSoundMenu(View v, final Audio sound) {
+        PopupMenu menu = new PopupMenu(this, v);
+        menu.getMenuInflater().inflate(R.menu.sound_menu, menu.getMenu());
+        menu.setOnMenuItemClickListener(
+                new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.delete:
+                                new DecNoSoundUser().execute();
+                                new DeleteContentFirebase().execute(sound.getId());
+                                new DeleteFavoriteUserFirebase().execute(sound.getId());
+                                new DeleteSoundFirebase().execute(sound.getId());
+                                RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this, sound.getId());
+                                mAdapter.notifyDataSetChanged();
+                                break;
+                        }
+                        return false;
+                    }
+                }
+
+        );
+        menu.show();
+    }
+
+    private void finishActivity() {
+        Intent intent = new Intent(SoundActivity.this, CaptureVideoActivity.class);
+        intent.putExtra("FilePath", mFilePath);
+        startActivity(intent);
+        // this.finish();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mPlayer != null) {
+            if (mPlayer.isPlaying()) {
+                mPlayer.stop();
+            }
+        }
+    }
+
+    private void getData() {
+        if (mAdapterItems == null) {
+            mAdapterItems = new ArrayList<>();
+        }
+        if (mAdapterKeys == null) {
+            mAdapterKeys = new ArrayList<>();
+        }
+
+        String id = Utils.getCurrentUserID(this);
+        Realm realm = RealmManager.getRealm(this);
+        RealmResults<Sound> mSounds = realm.where(Sound.class).equalTo("idUser", id).findAll();
+        for (Sound s : mSounds) {
+            Audio audio = convertAudio(s);
+            mAdapterItems.add(audio);
+            mAdapterKeys.add(audio.getId());
+        }
+
+    }
+
+    private Audio convertAudio(Sound sound) {
+        return new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
+                sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.finish();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.rlBack:
+                this.finish();
+                break;
+            case R.id.rlSort:
+                createSortMenu(imgSort);
+                break;
+            case R.id.edtSearch:
+                tvSearch.setFocusable(true);
+                tvSearch.setFocusableInTouchMode(true);
+                break;
+            case R.id.tvAddsound:
+                startActivity(new Intent(SoundActivity.this, AddSoundActivity.class));
+                break;
+        }
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.byName:
+                // mSounds.sort("name", Sort.ASCENDING);
+                mAdapter.sortByName();
+                break;
+            case R.id.byDate:
+//                mSounds.sort("date_create", Sort.ASCENDING);
+//                adapter.notifyDataSetChanged();
+                mAdapter.sortByDateUpload();
+                break;
+            case R.id.byPlays:
+//                mSounds.sort("plays", Sort.ASCENDING);
+//                adapter.notifyDataSetChanged();
+                mAdapter.sortByPlays();
+                break;
+
+        }
+        return true;
+    }
+
     public class AsyncUpdatePath extends AsyncTask<String, Void, Void> {
 
         @Override
@@ -234,84 +419,6 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             return null;
         }
     }
-
-    public void playMp3(String path) {
-        if (mPlayer == null) {
-            mPlayer = new MediaPlayer();
-        }
-        try {
-            mPlayer.reset();
-            mPlayer.setDataSource(path);
-            mPlayer.prepare();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        mPlayer.start();
-        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                mAdapter.getItems().get(mCurrentPos).setIsPlaying(false);
-                mAdapter.notifyDataSetChanged();
-            }
-        });
-    }
-
-    private void init() {
-        Firebase.setAndroidContext(this);
-        mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
-        mRecycle = (RecyclerView) findViewById(R.id.recycleViewMySound);
-        rlBack = (RelativeLayout) findViewById(R.id.rlBack);
-        rlSort = (RelativeLayout) findViewById(R.id.rlSort);
-        imgSort = (ImageView) findViewById(R.id.imgSort);
-        tvSearch = (EditText) findViewById(R.id.edtSearch);
-        tvAddSound = (TextView) findViewById(R.id.tvAddsound);
-        mRecycle.setHasFixedSize(true);
-        mRecycle.setLayoutManager(new LinearLayoutManager(this));
-        setEvent();
-    }
-
-    private void setEvent() {
-        rlBack.setOnClickListener(this);
-        rlSort.setOnClickListener(this);
-        tvAddSound.setOnClickListener(this);
-        tvSearch.setOnClickListener(this);
-    }
-
-    private void createSortMenu(View v) {
-        PopupMenu menu = new PopupMenu(this, v);
-        menu.getMenuInflater().inflate(R.menu.sort_menu, menu.getMenu());
-        menu.setOnMenuItemClickListener(this);
-        menu.show();
-    }
-
-    private void createSoundMenu(View v, final Audio sound) {
-        PopupMenu menu = new PopupMenu(this, v);
-        menu.getMenuInflater().inflate(R.menu.sound_menu, menu.getMenu());
-        menu.setOnMenuItemClickListener(
-                new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.delete:
-                                new DecNoSoundUser().execute();
-                                new DeleteContentFirebase().execute(sound.getId());
-                                new DeleteFavoriteUserFirebase().execute(sound.getId());
-                                new DeleteSoundFirebase().execute(sound.getId());
-                                RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this, sound.getId());
-                                mAdapter.notifyDataSetChanged();
-                                break;
-
-
-                        }
-                        return false;
-                    }
-                }
-
-        );
-        menu.show();
-    }
-
-    private Firebase firebase = new Firebase(FirebaseConstant.BASE_URL);
 
     private class DeleteSoundFirebase extends AsyncTask<String, Void, Void> {
 
@@ -373,94 +480,5 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             });
             return null;
         }
-    }
-
-    private void finishActivity() {
-        Intent intent = new Intent(SoundActivity.this, CaptureVideoActivity.class);
-        intent.putExtra("FilePath", mFilePath);
-        startActivity(intent);
-        // this.finish();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mPlayer != null) {
-            if (mPlayer.isPlaying()) {
-                mPlayer.stop();
-            }
-        }
-    }
-
-    private void getData() {
-        if (mAdapterItems == null) {
-            mAdapterItems = new ArrayList<>();
-        }
-        if (mAdapterKeys == null) {
-            mAdapterKeys = new ArrayList<>();
-        }
-
-        String id = Utils.getCurrentUserID(this);
-        Realm realm = RealmManager.getRealm(this);
-        RealmResults<Sound> mSounds = realm.where(Sound.class).equalTo("idUser", id).findAll();
-        for (Sound s : mSounds) {
-            Audio audio = convertAudio(s);
-            mAdapterItems.add(audio);
-            mAdapterKeys.add(audio.getId());
-        }
-
-    }
-
-    private Audio convertAudio(Sound sound) {
-        return new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
-                sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        this.finish();
-    }
-
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.rlBack:
-                this.finish();
-                break;
-            case R.id.rlSort:
-                createSortMenu(imgSort);
-                break;
-            case R.id.edtSearch:
-                tvSearch.setFocusable(true);
-                tvSearch.setFocusableInTouchMode(true);
-                break;
-            case R.id.tvAddsound:
-                startActivity(new Intent(SoundActivity.this, AddSoundActivity.class));
-                break;
-        }
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.byName:
-                // mSounds.sort("name", Sort.ASCENDING);
-                mAdapter.sortByName();
-                break;
-            case R.id.byDate:
-//                mSounds.sort("date_create", Sort.ASCENDING);
-//                adapter.notifyDataSetChanged();
-                mAdapter.sortByDateUpload();
-                break;
-            case R.id.byPlays:
-//                mSounds.sort("plays", Sort.ASCENDING);
-//                adapter.notifyDataSetChanged();
-                mAdapter.sortByPlays();
-                break;
-
-        }
-        return true;
     }
 }

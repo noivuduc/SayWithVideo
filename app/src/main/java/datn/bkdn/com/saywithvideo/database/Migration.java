@@ -27,13 +27,13 @@ public class Migration implements RealmMigration {
                     .addField("pass", String.class)
                     .addField("email", String.class);
 
-        //create table Video
+            //create table Video
             schema.create("Video")
-                    .addField("id",String.class)
-                    .addField("name",String.class)
-                    .addField("time",String.class)
-                    .addField("path",String.class)
-                    .addField("userID",String.class);
+                    .addField("id", String.class)
+                    .addField("name", String.class)
+                    .addField("time", String.class)
+                    .addField("path", String.class)
+                    .addField("userID", String.class);
             oldVersion++;
         }
     }

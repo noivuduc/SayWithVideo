@@ -3,8 +3,9 @@ package datn.bkdn.com.saywithvideo.utils;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -29,30 +30,37 @@ public class AppTools {
         return format.format(date);
     }
 
-    public static String downloadAudio(String audioId, Activity activity){
+    public static String downloadAudio(String audioId, Activity activity) {
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             PermissionUtils.requestWriteExtenalStorage(activity);
-            return getContentAudio(audioId,activity);
+            return getContentAudio(audioId, activity);
         } else {
-            return getContentAudio(audioId,activity);
+            return getContentAudio(audioId, activity);
+        }
+    }
+
+    private static void setPermission(Activity context) {
+        if (Build.VERSION.SDK_INT >= 23) {
+            PermissionUtils.getrequestWriteExtenalStorage(context);
         }
     }
 
     public static String getContentAudio(String audioId, final Activity context) {
-        long start = System.currentTimeMillis();
+        setPermission(context);
         String link = FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_CONTENT_URL + "/" + audioId + ".json";
         String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);
         FireBaseContent c = new Gson().fromJson(json, FireBaseContent.class);
         String content = c.getContent();
+        if (content == null) {
+            return null;
+        }
         String folderPath = Constant.DIRECTORY_PATH + Constant.AUDIO;
         createFolder(folderPath);
-         String path_audio = folderPath + audioId + ".m4a";
+        String path_audio = folderPath + audioId + ".m4a";
         try {
 
             Base64.decodeToFile(content, path_audio);
-            long end = System.currentTimeMillis();
-            Log.d("timeExecute",""+(end - start)/1000);
             return path_audio;
         } catch (IOException e) {
             e.printStackTrace();
@@ -89,5 +97,9 @@ public class AppTools {
         } else {
             file.mkdirs();
         }
+    }
+
+    public static void showSnackBar(String message, Activity activity) {
+        Snackbar.make(activity.getCurrentFocus(), message, Snackbar.LENGTH_SHORT).show();
     }
 }

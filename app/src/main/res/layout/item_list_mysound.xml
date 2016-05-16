@@ -9,30 +9,30 @@
     <ImageView
         android:id="@+id/imgPlay"
         android:layout_width="50dp"
-        android:contentDescription="@string/add_name"
         android:layout_height="match_parent"
-        android:scaleType="centerInside"
         android:layout_centerVertical="true"
         android:layout_marginRight="5dp"
+        android:contentDescription="@string/add_name"
+        android:scaleType="centerInside"
         android:src="@mipmap/ic_play" />
+
     <ProgressBar
         android:id="@+id/progressPlay"
         android:layout_width="32dp"
-        android:visibility="invisible"
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
         android:layout_marginLeft="10dp"
-        />
+        android:visibility="invisible" />
 
     <LinearLayout
         android:id="@+id/llSoundInfor"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_vertical"
         android:layout_toLeftOf="@+id/ll"
         android:layout_toRightOf="@+id/imgPlay"
-        android:orientation="vertical"
         android:background="@drawable/selector_sound_info"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
         android:padding="10dp">
 
         <TextView
@@ -42,10 +42,12 @@
             android:text="Noi"
             android:textSize="14sp"
             android:textStyle="bold" />
+
         <RelativeLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
             <TextView
                 android:id="@+id/tvPlays"
                 android:layout_width="wrap_content"
@@ -53,6 +55,7 @@
                 android:layout_marginTop="7dp"
                 android:text="10 plays"
                 android:textSize="13sp" />
+
             <TextView
                 android:id="@+id/tvDate"
                 android:layout_width="wrap_content"
@@ -74,11 +77,12 @@
         android:orientation="horizontal">
 
         <RelativeLayout
-            android:background="@drawable/selector_sound_info"
             android:id="@+id/rlOption"
-            android:paddingLeft="6dp"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@drawable/selector_sound_info"
+            android:paddingLeft="6dp">
+
             <ImageView
                 android:id="@+id/imgMyOption"
                 android:layout_width="wrap_content"

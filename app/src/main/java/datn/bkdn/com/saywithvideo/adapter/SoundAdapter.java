@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,19 +27,14 @@ import datn.bkdn.com.saywithvideo.lib.FirebaseRecyclerAdapter;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
-import io.realm.RealmResults;
 
-/**
- * Created by Admin on 4/7/2016.
- */
 
 public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHolder, Audio> implements RealmChangeListener {
     public final Context mContext;
-    private final RealmResults<Sound> mSounds;
+    private OnItemClicked mItemClicked;
 
-    public SoundAdapter(Query query, @Nullable Query favorite, Class<Audio> itemClass, RealmResults<Sound> sounds, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
-        super(mContext,query, favorite, itemClass, items, keys);
-        this.mSounds = sounds;
+    public SoundAdapter(Query query, @Nullable Query favorite, boolean isOnline, Class<Audio> itemClass, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
+        super(mContext, query, isOnline, favorite, itemClass, items, keys);
         this.mContext = mContext;
 
     }
@@ -46,7 +42,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
     @Override
     public SoundHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list_sound, parent, false);
-        return new SoundHolder(view,mContext);
+        return new SoundHolder(view, mContext);
     }
 
     @Override
@@ -105,13 +101,14 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         viewHolder.imgFavorite.setImageResource(model.isFavorite() ? R.mipmap.favorite_selected : R.mipmap.favorite_unselected);
         viewHolder.imgPlayPause.setImageResource(model.isPlaying() ? R.mipmap.ic_pause : R.mipmap.ic_play);
         viewHolder.tvSoundName.setText(model.getName());
-        viewHolder.tvSoundAuthor.setText(mContext.getResources().getString(R.string.upload_by)+" " + model.getAuthor());
+        String str = mContext.getResources().getString(R.string.upload_by) + "<b><font size=12>"+model.getAuthor()+"</b>";
+        viewHolder.tvSoundAuthor.setText(Html.fromHtml(str));
     }
 
     /**
      * @param item     item exist
      * @param key      key of item
-     * @param position
+     * @param position Positon of item
      */
     @Override
     protected void itemExist(final Audio item, final String key, final int position) {
@@ -166,7 +163,6 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         }
     }
 
-
     @Override
     protected void itemChanged(final Audio oldItem, final Audio newItem, final String key, final int position) {
         if (datn.bkdn.com.saywithvideo.network.Tools.isOnline(mContext)) {
@@ -205,24 +201,33 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
 
     }
 
+    @Override
+    protected void itemFavoriteRemoved(String key) {
+        int pos = getKeys().indexOf(key);
+        getItem(pos).setFavorite(false);
+        notifyDataSetChanged();
+    }
 
     @Override
     public void onChange(Object element) {
 
     }
 
-    public interface OnItemClicked {
-        void onClick(Audio audio, View v, int pos);
-    }
-
-    private OnItemClicked mItemClicked;
-
     public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
         this.mItemClicked = playButtonClicked;
     }
 
+    private Sound convertAudio(Audio audio) {
+        return new Sound(audio.getId(), audio.getName(), audio.getAuthor(),
+                audio.isFavorite(), audio.getPlays(), audio.getDate_create(),
+                audio.getUser_id());
+    }
+
+    public interface OnItemClicked {
+        void onClick(Audio audio, View v, int pos);
+    }
+
     public static class SoundHolder extends RecyclerView.ViewHolder {
-        View mView;
         private final TextView tvSoundAuthor;
         private final TextView tvSoundName;
         private final ImageView imgPlayPause;
@@ -232,6 +237,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         private final LinearLayout linearLayout;
         private final RelativeLayout rlOption;
         private final RelativeLayout rlFavorite;
+        View mView;
 
         public SoundHolder(View itemView, Context context) {
             super(itemView);
@@ -268,13 +274,6 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
         }
-    }
-
-
-    private Sound convertAudio(Audio audio) {
-        return new Sound(audio.getId(), audio.getName(), audio.getAuthor(),
-                audio.isFavorite(), audio.getPlays(), audio.getDate_create(),
-                audio.getUser_id());
     }
 }
 

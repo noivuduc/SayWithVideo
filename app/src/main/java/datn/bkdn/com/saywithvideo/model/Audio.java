@@ -57,14 +57,6 @@ public class Audio {
         this.link_on_Disk = link_on_Disk;
     }
 
-    public void setPlaying(boolean playing) {
-        isPlaying = playing;
-    }
-
-    public void setFavorite(boolean favorite) {
-        isFavorite = favorite;
-    }
-
     public String getId() {
         return id;
     }
@@ -105,9 +97,12 @@ public class Audio {
         this.name = name;
     }
 
-
     public boolean isPlaying() {
         return isPlaying;
+    }
+
+    public void setPlaying(boolean playing) {
+        isPlaying = playing;
     }
 
     public void setIsPlaying(boolean isPlaying) {
@@ -116,6 +111,10 @@ public class Audio {
 
     public boolean isFavorite() {
         return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 
     public void setIsFavorite(boolean isFavorite) {

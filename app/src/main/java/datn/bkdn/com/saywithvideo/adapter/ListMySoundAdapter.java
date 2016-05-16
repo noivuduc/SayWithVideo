@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.lib.FirebaseRecyclerAdapter;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.utils.Utils;
@@ -30,29 +29,22 @@ import static java.util.Collections.sort;
  * Created by Admin on 4/10/2016.
  */
 public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapter.AudioViewholder, Audio> {
+    public OnItemClicked mItemClicked;
     private Context mContext;
 
-    public interface OnItemClicked {
-        void onClick(int pos, View v, Audio audio);
+    public ListMySoundAdapter(Context context, Query query, Class<Audio> itemClass, boolean isOnline, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys) {
+        super(context, query, isOnline, null, itemClass, items, keys);
+        this.mContext = context;
     }
-
-    public OnItemClicked mItemClicked;
 
     public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
         this.mItemClicked = playButtonClicked;
     }
 
-
-
-    public ListMySoundAdapter(Context context, Query query, Class<Audio> itemClass, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys) {
-        super(context,query,null, itemClass, items, keys);
-        this.mContext = context;
-    }
-
     @Override
     public AudioViewholder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list_mysound, parent, false);
-        return new AudioViewholder(view,mContext);
+        return new AudioViewholder(view, mContext);
     }
 
     @Override
@@ -109,7 +101,6 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
         item.setAuthor(author);
     }
 
-
     @Override
     protected void itemChanged(Audio oldItem, Audio newItem, String key, int position) {
     }
@@ -123,26 +114,9 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
 
     }
 
-    public static class AudioViewholder extends RecyclerView.ViewHolder {
-        private final TextView tvSoundName;
-        private final TextView tvPlays;
-        private final TextView tvDateOfCreate;
-        private final ImageView imgPlayPause;
-        private final LinearLayout linearLayout;
-        private final ProgressBar progressPlay;
-        private final RelativeLayout rlOption;
+    @Override
+    protected void itemFavoriteRemoved(String key) {
 
-        public AudioViewholder(View itemView, Context context) {
-            super(itemView);
-            tvSoundName = (TextView) itemView.findViewById(R.id.tvSoundName);
-            tvPlays = (TextView) itemView.findViewById(R.id.tvPlays);
-            tvDateOfCreate = (TextView) itemView.findViewById(R.id.tvDate);
-            imgPlayPause = (ImageView) itemView.findViewById(R.id.imgPlay);
-            linearLayout = (LinearLayout) itemView.findViewById(R.id.llSoundInfor);
-            rlOption = (RelativeLayout) itemView.findViewById(R.id.rlOption);
-            progressPlay = (ProgressBar) itemView.findViewById(R.id.progressPlay);
-            progressPlay.setIndeterminateDrawable(new FoldingCirclesDrawable.Builder(context).build());
-        }
     }
 
     public void sortByName() {
@@ -175,9 +149,30 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
         notifyDataSetChanged();
     }
 
-    private Sound convertAudio(Audio audio) {
-        return new Sound(audio.getId(), audio.getName(), audio.getAuthor(),
-                audio.isFavorite(), audio.getPlays(), audio.getDate_create(),
-                audio.getUser_id());
+    public interface OnItemClicked {
+        void onClick(int pos, View v, Audio audio);
     }
+
+    public static class AudioViewholder extends RecyclerView.ViewHolder {
+        private final TextView tvSoundName;
+        private final TextView tvPlays;
+        private final TextView tvDateOfCreate;
+        private final ImageView imgPlayPause;
+        private final LinearLayout linearLayout;
+        private final ProgressBar progressPlay;
+        private final RelativeLayout rlOption;
+
+        public AudioViewholder(View itemView, Context context) {
+            super(itemView);
+            tvSoundName = (TextView) itemView.findViewById(R.id.tvSoundName);
+            tvPlays = (TextView) itemView.findViewById(R.id.tvPlays);
+            tvDateOfCreate = (TextView) itemView.findViewById(R.id.tvDate);
+            imgPlayPause = (ImageView) itemView.findViewById(R.id.imgPlay);
+            linearLayout = (LinearLayout) itemView.findViewById(R.id.llSoundInfor);
+            rlOption = (RelativeLayout) itemView.findViewById(R.id.rlOption);
+            progressPlay = (ProgressBar) itemView.findViewById(R.id.progressPlay);
+            progressPlay.setIndeterminateDrawable(new FoldingCirclesDrawable.Builder(context).build());
+        }
+    }
+
 }

@@ -69,7 +69,7 @@
     <string name="btn_create_video">Create your video</string>
 
     <string name="login_with_facbook">Login with facebook</string>
-    <string name="upload_by">upload by </string>
+    <string name="upload_by">upload by&#160;</string>
 
     <string name="record_a_sound">Record a sound</string>
     <string name="import_a_sound">Import a sound</string>
@@ -108,5 +108,8 @@
 
     <string name="log_in">Login</string>
     <string name="register">Register</string>
+
+    <string name="come_in_soon">Coming soon</string>
+
 
 </resources>

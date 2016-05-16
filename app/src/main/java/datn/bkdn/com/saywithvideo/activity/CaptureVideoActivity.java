@@ -493,9 +493,16 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         complete();
     }
 
+    @Override
+    public void onBackPressed() {
+        handleRelease();
+        super.onBackPressed();
+    }
+
     private class MuxVideo extends AsyncTask<Void, Void, Void> {
 
         private ProgressDialog mProgressDialog;
+        private String outputPath;
 
         @Override
         protected void onPreExecute() {
@@ -535,8 +542,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             return null;
         }
 
-        private String outputPath;
-
         @Override
         protected void onPostExecute(Void aVoid) {
             File file = new File(mVideoOutPut);
@@ -550,11 +555,5 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             finish();
             mProgressDialog.dismiss();
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        handleRelease();
-        super.onBackPressed();
     }
 }

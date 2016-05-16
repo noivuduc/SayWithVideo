@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -53,6 +54,7 @@ public class UserProfileFragment extends Fragment implements View.OnClickListene
 
         mLlCreateDub = (LinearLayout) v.findViewById(R.id.llCreateDub);
         mTvCreateDub = (TextView) v.findViewById(R.id.tvCreateDub);
+        mTvCreateDub.setTextColor(Color.WHITE);
         ListView mLvMyVideo = (ListView) v.findViewById(R.id.lvMyDubs);
         userId = Utils.getCurrentUserID(getContext());
 

@@ -2,6 +2,7 @@ package datn.bkdn.com.saywithvideo.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -66,6 +67,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         edtName = (EditText) findViewById(R.id.edtName);
 
         tvregister = (TextView) findViewById(R.id.tvRegisterUser);
+        tvregister.setTextColor(Color.WHITE);
         TextView tvLogin = (TextView) findViewById(R.id.tvhaveaccount);
 
         clearEmail = (ImageView) findViewById(R.id.imgClearEmail);

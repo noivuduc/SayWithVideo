@@ -16,18 +16,14 @@ import datn.bkdn.com.saywithvideo.model.ImportSound;
 
 public class ListImportSoundAdapter extends ArrayAdapter<ImportSound> {
 
-    public interface OnItemClicked {
-        void onClick(int pos, View v);
-    }
-
     public OnItemClicked mItemClicked;
-
-    public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
-        this.mItemClicked = playButtonClicked;
-    }
 
     public ListImportSoundAdapter(Context context, List<ImportSound> sounds) {
         super(context, -1, sounds);
+    }
+
+    public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
+        this.mItemClicked = playButtonClicked;
     }
 
     @Override
@@ -60,6 +56,10 @@ public class ListImportSoundAdapter extends ArrayAdapter<ImportSound> {
         viewHolder.tvName.setText(sound.getName());
 
         return convertView;
+    }
+
+    public interface OnItemClicked {
+        void onClick(int pos, View v);
     }
 
     private class ViewHolder {
