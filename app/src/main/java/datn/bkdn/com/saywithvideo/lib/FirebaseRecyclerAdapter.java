@@ -45,6 +45,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
     private ArrayList<String> mKeys;
     private ArrayList<String> mFavorites;
     private Firebase mUserQuery;
+
     /**
      * @param query     The Firebase location to watch for data changes.
      *                  Can also be a slice of a location, using some combination of
@@ -58,6 +59,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
 
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
+            mQuery.addChildEventListener(mListener);
             for (DataSnapshot data : dataSnapshot.getChildren()) {
                 final String key = data.getKey();
                 if (mUserNames == null) {
@@ -77,6 +79,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
     private ChildEventListener mListenner = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            Log.d("FirebaseAdapter", "onChildAdded.Favorite");
             if (mFavorites == null) {
                 mFavorites = new ArrayList<>();
             }
@@ -259,12 +262,12 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
             query.addListenerForSingleValueEvent(valueEventListener);
         }
         mUserQuery = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL);
+        mUserQuery.setPriority(0);
         mUserQuery.addListenerForSingleValueEvent(mUserListener);
 
         if (mQuery != null) {
             mQuery.addChildEventListener(mListenner);
         }
-        query.addChildEventListener(mListener);
     }
 
     @Override

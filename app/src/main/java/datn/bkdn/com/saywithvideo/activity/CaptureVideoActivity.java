@@ -369,6 +369,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         super.onResume();
     }
 
+
     public void chooseCamera() {
         if (mCameraFront) {
             int cameraId = findBackFacingCamera();

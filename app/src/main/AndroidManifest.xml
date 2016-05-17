@@ -24,6 +24,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
         tools:replace="android:icon">
+
+
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait" />

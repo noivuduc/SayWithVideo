@@ -1,12 +1,17 @@
 package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -31,6 +36,8 @@ import com.firebase.client.ValueEventListener;
 
 import org.json.JSONObject;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -56,7 +63,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         if (Tools.isOnline(this)) {
             Firebase.setAndroidContext(this);
             FacebookSdk.sdkInitialize(getBaseContext());
@@ -112,6 +118,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
         init();
     }
+
+
 
     private boolean checkCurrentUser() {
         return Utils.getCurrentUserEmail(this).equals("null");
@@ -306,7 +314,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onResume() {
         super.onResume();
-        AppEventsLogger.activateApp(getApplication());
+        //AppEventsLogger.activateApp(getApplication());
     }
 
     @Override
