@@ -220,7 +220,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
     private Sound convertAudio(Audio audio) {
         return new Sound(audio.getId(), audio.getName(), audio.getAuthor(),
                 audio.isFavorite(), audio.getPlays(), audio.getDate_create(),
-                audio.getUser_id());
+                audio.getUser_id(),audio.getUrl());
     }
 
     public interface OnItemClicked {

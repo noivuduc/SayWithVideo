@@ -1,11 +1,11 @@
 package datn.bkdn.com.saywithvideo.activity;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,10 +22,17 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.ListMySoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
@@ -56,7 +63,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private ArrayList<String> mAdapterKeys;
     private int mCurrentPos = -1;
     private Firebase mFirebase;
-    private ProgressDialog mProgressDialog;
+    private SweetAlertDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,27 +126,16 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                                 /**
                                  * download sound
                                  */
-                                new AsyncTask<Void, String, String>() {
+                                sound.setLoadAudio(true);
+                                mAdapter.notifyDataSetChanged();
+                                FirebaseStorage storage = FirebaseStorage.getInstance();
+                                StorageReference reference = storage.getReferenceFromUrl(FirebaseConstant.STORAGE_BUCKET).child("audios/" + sound.getUrl());
+                                final File file = AppTools.getFile();
+                                FileDownloadTask downloadTask = reference.getFile(file);
+                                downloadTask.addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                                     @Override
-                                    protected void onPreExecute() {
-                                        super.onPreExecute();
-                                        sound.setLoadAudio(true);
-                                        mAdapter.notifyDataSetChanged();
-                                    }
-
-                                    @Override
-                                    protected String doInBackground(Void... params) {
-                                        return AppTools.downloadAudio(audioId, SoundActivity.this);
-                                    }
-
-                                    @Override
-                                    protected void onPostExecute(String aVoid) {
-                                        super.onPostExecute(aVoid);
-                                        mFilePath = aVoid;
-                                        if (mFilePath == null) {
-                                            AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), SoundActivity.this);
-                                            return;
-                                        }
+                                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                        mFilePath = file.getPath();
                                         sound.setLink_on_Disk(mFilePath);
                                         new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                         if (mCurrentPos == pos) {
@@ -148,9 +144,15 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                                             playMp3(mFilePath);
                                         }
                                         mAdapter.notifyDataSetChanged();
-
                                     }
-                                }.execute();
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), SoundActivity.this);
+                                        sound.setLoadAudio(false);
+                                        mAdapter.notifyDataSetChanged();
+                                    }
+                                });
 
                             } else {
                                 mFilePath = sound.getLink_on_Disk();
@@ -182,31 +184,26 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                                 showMessage();
                                 break;
                             }
-                            new AsyncTask<Void, Void, String>() {
+                            showProgressDialog();
+                            FirebaseStorage storage = FirebaseStorage.getInstance();
+                            StorageReference reference = storage.getReferenceFromUrl(FirebaseConstant.STORAGE_BUCKET).child("audios/" + sound.getUrl());
+                            final File file = AppTools.getFile();
+                            reference.getFile(file).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                                 @Override
-                                protected void onPreExecute() {
-                                    super.onPreExecute();
-                                    if (mProgressDialog == null) {
-                                        mProgressDialog = new ProgressDialog(SoundActivity.this);
-                                    }
-                                    mProgressDialog.show();
-                                }
-
-                                @Override
-                                protected String doInBackground(Void... params) {
-                                    return AppTools.downloadAudio(audioId, SoundActivity.this);
-                                }
-
-                                @Override
-                                protected void onPostExecute(String aVoid) {
-                                    super.onPostExecute(aVoid);
-                                    mProgressDialog.dismiss();
-                                    mFilePath = aVoid;
+                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                    dimissProgressDialog();
+                                    mFilePath = file.getPath();
                                     sound.setLink_on_Disk(mFilePath);
                                     new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                     finishActivity();
                                 }
-                            }.execute();
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), SoundActivity.this);
+                                    dimissProgressDialog();
+                                }
+                            });
                         }
 
                         break;
@@ -242,7 +239,19 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             }
         });
     }
+    private void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new SweetAlertDialog(SoundActivity.this, SweetAlertDialog.PROGRESS_TYPE);
+            mProgressDialog.setTitleText(getResources().getString(R.string.please_wait));
+            mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+            mProgressDialog.setCancelable(false);
+        }
+        mProgressDialog.show();
+    }
 
+    private void dimissProgressDialog() {
+        mProgressDialog.dismiss();
+    }
     /**
      * Khởi tạo resource
      */
@@ -293,7 +302,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                         switch (item.getItemId()) {
                             case R.id.delete:
                                 new DecNoSoundUser().execute();
-                                new DeleteContentFirebase().execute(sound.getId());
+                                new DeleteContentFirebase().execute(sound.getUrl());
                                 new DeleteFavoriteUserFirebase().execute(sound.getId());
                                 new DeleteSoundFirebase().execute(sound.getId());
                                 RealmUtils.getRealmUtils(SoundActivity.this).deleteSound(SoundActivity.this, sound.getId());
@@ -345,7 +354,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private Audio convertAudio(Sound sound) {
-        return new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
+        return new Audio(sound.getLinkDown(),sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
                 sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
     }
 
@@ -436,8 +445,9 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
         @Override
         protected Void doInBackground(String... params) {
-            Firebase firebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_CONTENT_URL);
-            firebase.child(params[0]).removeValue();
+           FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference reference = storage.getReferenceFromUrl(FirebaseConstant.STORAGE_BUCKET);
+            reference.child("audios/"+params[0]).delete();
             return null;
         }
     }

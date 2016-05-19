@@ -1,11 +1,11 @@
 package datn.bkdn.com.saywithvideo.activity;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,10 +20,17 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.adapter.ListFavoriteAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
@@ -52,7 +59,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     private Firebase mFirebaseFavorite;
     private ImageView mImgSort;
     private int mCurrentPos = -1;
-    private ProgressDialog mProgressDialog;
+    private SweetAlertDialog mProgressDialog;
     private RealmResults<Sound> mSounds;
     private Intent mIntentUnFavorite;
 
@@ -83,7 +90,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private Audio convertAudio(Sound sound) {
-        return new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
+        return new Audio(sound.getLinkDown(), sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
                 sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
     }
 
@@ -172,28 +179,16 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                                 /**
                                  * download sound
                                  */
-                                new AsyncTask<Void, String, String>() {
+                                sound.setLoadAudio(true);
+                                mAdapter.notifyDataSetChanged();
+                                FirebaseStorage storage = FirebaseStorage.getInstance();
+                                StorageReference reference = storage.getReferenceFromUrl(FirebaseConstant.STORAGE_BUCKET).child("audios/" + sound.getUrl());
+                                final File file = AppTools.getFile();
+                                FileDownloadTask downloadTask = reference.getFile(file);
+                                downloadTask.addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                                     @Override
-                                    protected void onPreExecute() {
-                                        super.onPreExecute();
-                                        sound.setLoadAudio(true);
-                                        mAdapter.notifyDataSetChanged();
-                                    }
-
-                                    @Override
-                                    protected String doInBackground(Void... params) {
-                                        return AppTools.downloadAudio(audioId, FavoriteActivity.this);
-
-                                    }
-
-                                    @Override
-                                    protected void onPostExecute(String aVoid) {
-                                        super.onPostExecute(aVoid);
-                                        mFilePath = aVoid;
-                                        if (mFilePath == null) {
-                                            AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), FavoriteActivity.this);
-                                            return;
-                                        }
+                                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                        mFilePath = file.getPath();
                                         sound.setLink_on_Disk(mFilePath);
                                         new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                         if (mCurrentPos == pos) {
@@ -202,9 +197,15 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                                             playMp3(mFilePath);
                                         }
                                         mAdapter.notifyDataSetChanged();
-
                                     }
-                                }.execute();
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), FavoriteActivity.this);
+                                        sound.setLoadAudio(false);
+                                        mAdapter.notifyDataSetChanged();
+                                    }
+                                });
 
                             } else {
                                 mFilePath = sound.getLink_on_Disk();
@@ -285,35 +286,26 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
                                 AppTools.showSnackBar(getResources().getString(R.string.internet_connection), FavoriteActivity.this);
                                 break;
                             }
-                            new AsyncTask<Void, Void, String>() {
+                            showProgressDialog();
+                            FirebaseStorage storage = FirebaseStorage.getInstance();
+                            StorageReference reference = storage.getReferenceFromUrl(FirebaseConstant.STORAGE_BUCKET).child("audios/" + sound.getUrl());
+                            final File file = AppTools.getFile();
+                            reference.getFile(file).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                                 @Override
-                                protected void onPreExecute() {
-                                    super.onPreExecute();
-                                    if (mProgressDialog == null) {
-                                        mProgressDialog = new ProgressDialog(FavoriteActivity.this);
-                                    }
-                                    mProgressDialog.show();
-                                }
-
-                                @Override
-                                protected String doInBackground(Void... params) {
-                                    return AppTools.downloadAudio(audioId, FavoriteActivity.this);
-                                }
-
-                                @Override
-                                protected void onPostExecute(String aVoid) {
-                                    super.onPostExecute(aVoid);
-                                    mProgressDialog.dismiss();
-                                    mFilePath = aVoid;
-                                    if (mFilePath == null) {
-                                        AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), FavoriteActivity.this);
-                                        return;
-                                    }
+                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                    dimissProgressDialog();
+                                    mFilePath = file.getPath();
                                     sound.setLink_on_Disk(mFilePath);
                                     new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                     finishActivity();
                                 }
-                            }.execute();
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), FavoriteActivity.this);
+                                    dimissProgressDialog();
+                                }
+                            });
                         }
 
                         break;
@@ -326,6 +318,20 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         });
 
         mLvSound.setAdapter(mAdapter);
+    }
+
+    private void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new SweetAlertDialog(FavoriteActivity.this, SweetAlertDialog.PROGRESS_TYPE);
+            mProgressDialog.setTitleText(getResources().getString(R.string.please_wait));
+            mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+            mProgressDialog.setCancelable(false);
+        }
+        mProgressDialog.show();
+    }
+
+    private void dimissProgressDialog() {
+        mProgressDialog.dismiss();
     }
 
     @Override

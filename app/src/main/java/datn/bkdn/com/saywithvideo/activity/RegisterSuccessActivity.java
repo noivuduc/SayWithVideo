@@ -1,6 +1,7 @@
 package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -19,6 +20,7 @@ public class RegisterSuccessActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_register_success);
         TextView tvContinue = (TextView) findViewById(R.id.tvContinue);
+        tvContinue.setTextColor(Color.WHITE);
         if (tvContinue != null)
             tvContinue.setOnClickListener(new View.OnClickListener() {
                 @Override

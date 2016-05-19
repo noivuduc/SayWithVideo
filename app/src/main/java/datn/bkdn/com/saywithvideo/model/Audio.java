@@ -11,6 +11,7 @@ public class Audio {
     private String name;
     private String author;
     private int plays;
+    private String url;
     private boolean isLoadFavorite;
     private boolean isLoadAudio;
     private String user_id;
@@ -22,7 +23,7 @@ public class Audio {
     public Audio() {
     }
 
-    public Audio(String date_create, String name, String author, int plays, String user_id, String id, String link_on_Disk, boolean isFavorite) {
+    public Audio(String url,String date_create, String name, String author, int plays, String user_id, String id, String link_on_Disk, boolean isFavorite) {
         this.date_create = date_create;
         this.name = name;
         this.author = author;
@@ -31,6 +32,15 @@ public class Audio {
         this.id = id;
         this.link_on_Disk = link_on_Disk;
         this.isFavorite = isFavorite;
+        this.url = url;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public boolean isLoadAudio() {

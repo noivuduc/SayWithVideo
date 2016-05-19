@@ -72,6 +72,19 @@ public class AppTools {
 
     }
 
+    public static File getFile(){
+        File file=null;
+        String folderPath = Constant.DIRECTORY_PATH + Constant.AUDIO;
+        AppTools.createFolder(folderPath);
+        File myFile = new File(folderPath);
+        try {
+            file = File.createTempFile("AUDIO_",".m4a",myFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
+
     public static FirebaseUser getInfoUser(String id) {
         String link = FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + id + ".json";
         String json = datn.bkdn.com.saywithvideo.network.Tools.getJson(link);

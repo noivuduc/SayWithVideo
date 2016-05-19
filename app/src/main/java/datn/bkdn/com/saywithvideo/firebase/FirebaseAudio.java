@@ -4,13 +4,15 @@ public class FirebaseAudio {
     private String name;
     private String user_id;
     private String date_create;
+    private String url;
     private int plays;
 
-    public FirebaseAudio(String name, String user_id, String date_create, int plays) {
+    public FirebaseAudio(String name, String user_id, String date_create, int plays, String url) {
         this.name = name;
         this.user_id = user_id;
         this.date_create = date_create;
         this.plays = plays;
+        this.url = url;
     }
 
     public FirebaseAudio() {
@@ -46,5 +48,13 @@ public class FirebaseAudio {
 
     public void setPlays(int plays) {
         this.plays = plays;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

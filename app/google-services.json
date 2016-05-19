@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "747963934738",
+    "firebase_url": "https://saywithvideo.firebaseio.com",
+    "project_id": "saywithvideo",
+    "storage_bucket": "saywithvideo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747963934738:android:d9a510daea1758ed",
+        "android_client_info": {
+          "package_name": "datn.bkdn.com.saywithvideo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "747963934738-pvgc4e50vm0g1lbn9upedv4ab5q53l2a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSsl2QFI23zR53fV_LpjR8zJfTOREsXBI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

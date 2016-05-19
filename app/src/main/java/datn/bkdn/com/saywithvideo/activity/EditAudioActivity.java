@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,13 +23,15 @@ import android.widget.Toast;
 
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.utilities.Base64;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -57,6 +60,7 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
     private TextView mTvEnd;
     private ProgressDialog mProgressDialog;
     private String fileName;
+    private String audioName;
     private WaveformView mWaveformView;
     private MarkerView mStartMarker;
     private MarkerView mEndMarker;
@@ -347,31 +351,33 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 //        return bytes;
 //    }
 
-    private void createSound(String name) {
+    private void uploadFile(final String name){
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef =storage.getReferenceFromUrl(FirebaseConstant.STORAGE_BUCKET);
+        Uri file = Uri.fromFile(new File(mOutputPath));
+        StorageReference store = storageRef.child("audios/"+file.getLastPathSegment());
+        store.putFile(file).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                //Uri uri = taskSnapshot.getDownloadUrl();
+                createSound(name,audioName);
+            }
+        });
+    }
+
+    private void createSound(String name,String url) {
         Date date = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
         final String id = Utils.getCurrentUserID(EditAudioActivity.this);
 
         //  send to server
-        FirebaseAudio mAudio = new FirebaseAudio(name, id, ft.format(date), 0);
+        FirebaseAudio mAudio = new FirebaseAudio(name, id, ft.format(date), 0,url);
         Firebase firebase = mFirebase.child(FirebaseConstant.AUDIO_URL).push();
-
         firebase.setValue(mAudio, new Firebase.CompletionListener() {
             @Override
             public void onComplete(FirebaseError firebaseError, Firebase firebase) {
                 if (firebaseError != null) {
                     Toast.makeText(getBaseContext(), getResources().getString(R.string.audio_coundnt_save), Toast.LENGTH_SHORT).show();
-                } else {
-                    String audio_id = firebase.getKey();
-                    try {
-                        String audioContent = Base64.encodeFromFile(mOutputPath);
-//                        String audioContent = Base64.encodeToString(fileToByte(mOutputPath), Base64.DEFAULT);
-                        HashMap<String, String> hashMap = new HashMap<>();
-                        hashMap.put("content", audioContent);
-                        mFirebase.child(FirebaseConstant.AUDIO_CONTENT_URL).child(audio_id).setValue(hashMap);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         });
@@ -863,7 +869,8 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
         protected Void doInBackground(Void... params) {
             String folderPath = Constant.DIRECTORY_PATH + Constant.AUDIO;
             AppTools.createFolder(folderPath);
-            mOutputPath = folderPath + "AUDIO_" + AppTools.getDate() + ".m4a";
+            audioName = "AUDIO_" + AppTools.getDate() + ".m4a";
+            mOutputPath = folderPath + audioName;
             try {
                 SoundFile soundFile = SoundFile.create(mFilename, null);
                 if (soundFile != null) {
@@ -883,9 +890,10 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
                 File file = new File(mFilename);
                 file.deleteOnExit();
             }
-            createSound(fileName);
-            finish();
             mProgressBar.dismiss();
+            uploadFile(fileName);
+            finish();
+
         }
     }
 }

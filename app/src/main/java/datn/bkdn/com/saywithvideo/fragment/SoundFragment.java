@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,7 +20,13 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +55,7 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
     private MediaPlayer mPlayer;
     private RecyclerView mLvSound;
     private Firebase mFirebase;
+    File file = null;
     private String mFilePath;
     private ArrayList<Audio> mAdapterItems;
     private ArrayList<String> mAdapterKeys;
@@ -73,7 +81,7 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
     }
 
     private Audio convertAudio(Sound sound) {
-        return new Audio(sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
+        return new Audio(sound.getLinkDown(), sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
                 sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
     }
 
@@ -115,7 +123,6 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
      * Khởi tạo dữ liệu,
      * đăng ký sự kiện cho adapter
      * <p/>
-     * WARNING: Đừng đọc nó vì bạn sẽ tẩu hỏa nhập ma đó,
      */
     private void init() {
         mLvSound.setHasFixedSize(true);
@@ -160,30 +167,16 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
                                 /**
                                  * download sound
                                  */
-
-                                new AsyncTask<Void, String, String>() {
+                                sound.setLoadAudio(true);
+                                mAdapter.notifyDataSetChanged();
+                                FirebaseStorage storage = FirebaseStorage.getInstance();
+                                StorageReference reference = storage.getReferenceFromUrl(FirebaseConstant.STORAGE_BUCKET).child("audios/" + sound.getUrl());
+                                file = AppTools.getFile();
+                                FileDownloadTask downloadTask = reference.getFile(file);
+                                downloadTask.addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                                     @Override
-                                    protected void onPreExecute() {
-                                        super.onPreExecute();
-                                        sound.setLoadAudio(true);
-                                        mAdapter.notifyDataSetChanged();
-                                    }
-
-                                    @Override
-                                    protected String doInBackground(Void... params) {
-                                        return AppTools.downloadAudio(audioId, getActivity());
-
-                                    }
-
-                                    @Override
-                                    protected void onPostExecute(String aVoid) {
-                                        super.onPostExecute(aVoid);
-                                        mFilePath = aVoid;
-                                        if (mFilePath == null) {
-                                            AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), getActivity());
-                                            return;
-                                        }
-
+                                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                        mFilePath = file.getPath();
                                         sound.setLink_on_Disk(mFilePath);
                                         new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                         if (mCurrentPos == pos) {
@@ -192,10 +185,15 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
                                             playMp3(mFilePath);
                                         }
                                         mAdapter.notifyDataSetChanged();
-
                                     }
-                                }.execute();
-
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), getActivity());
+                                        sound.setLoadAudio(false);
+                                        mAdapter.notifyDataSetChanged();
+                                    }
+                                });
 
                             } else {
                                 mFilePath = sound.getLink_on_Disk();
@@ -274,38 +272,26 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
                                 AppTools.showSnackBar(getResources().getString(R.string.internet_connection), getActivity());
                                 break;
                             }
-                            new AsyncTask<Void, Void, String>() {
+                            showProgressDialog();
+                            FirebaseStorage storage = FirebaseStorage.getInstance();
+                            StorageReference reference = storage.getReferenceFromUrl(FirebaseConstant.STORAGE_BUCKET).child("audios/" + sound.getUrl());
+                            file = AppTools.getFile();
+                            reference.getFile(file).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                                 @Override
-                                protected void onPreExecute() {
-                                    super.onPreExecute();
-                                    if (mProgressDialog == null) {
-                                        mProgressDialog = new SweetAlertDialog(getActivity(), SweetAlertDialog.PROGRESS_TYPE);
-                                        mProgressDialog.setTitleText(getResources().getString(R.string.please_wait));
-                                        mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-                                        mProgressDialog.setCancelable(false);
-                                    }
-                                    mProgressDialog.show();
-                                }
-
-                                @Override
-                                protected String doInBackground(Void... params) {
-                                    return AppTools.downloadAudio(audioId, getActivity());
-                                }
-
-                                @Override
-                                protected void onPostExecute(String aVoid) {
-                                    super.onPostExecute(aVoid);
-                                    mProgressDialog.dismiss();
-                                    mFilePath = aVoid;
-                                    if (mFilePath == null) {
-                                        AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), getActivity());
-                                        return;
-                                    }
+                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                    dimissProgressDialog();
+                                    mFilePath = file.getPath();
                                     sound.setLink_on_Disk(mFilePath);
                                     new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                     finishActivity();
                                 }
-                            }.execute();
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), getActivity());
+                                    dimissProgressDialog();
+                                }
+                            });
                         }
 
                         break;
@@ -316,6 +302,20 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
             }
         });
         mLvSound.setAdapter(mAdapter);
+    }
+
+    private void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new SweetAlertDialog(getActivity(), SweetAlertDialog.PROGRESS_TYPE);
+            mProgressDialog.setTitleText(getResources().getString(R.string.please_wait));
+            mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+            mProgressDialog.setCancelable(false);
+        }
+        mProgressDialog.show();
+    }
+
+    private void dimissProgressDialog() {
+        mProgressDialog.dismiss();
     }
 
     private void finishActivity() {
@@ -419,5 +419,6 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
             return null;
         }
     }
+
 
 }

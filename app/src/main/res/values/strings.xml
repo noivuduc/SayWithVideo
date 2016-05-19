@@ -114,6 +114,9 @@
     <string name="title_favorite">My Favorites</string>
     <string name="title_mysound">My Sounds</string>
 
+    <string name="uploading">Uploading</string>
+    <string name="show_video">Show video</string>
+
 
 
 </resources>

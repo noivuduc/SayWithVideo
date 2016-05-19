@@ -113,4 +113,9 @@
 
     <string name="title_favorite">Yêu thích của tôi</string>
     <string name="title_mysound">Âm thanh của tôi</string>
+    <string name="uploading">Đang tải dữ liệu lên</string>
+
+    <string name="show_video">Xem trước video</string>
+
+
 </resources>
