@@ -81,7 +81,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
         edtEmail.setText(Utils.getPrimaryEmail(this));
         tvregister.setOnClickListener(this);
-        if (tvLogin != null) tvLogin.setOnClickListener(this);
+        if (tvLogin != null) {
+            tvLogin.setTextColor(Color.argb(0xff, 0x44, 0xc9, 0xe7));
+            tvLogin.setOnClickListener(this);
+        }
 
         clearEmail.setOnClickListener(this);
         clearName.setOnClickListener(this);

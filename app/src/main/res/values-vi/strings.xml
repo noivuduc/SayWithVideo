@@ -33,9 +33,9 @@
 
     <string name="hint_enter_email">Nhập vào email</string>
     <string name="hint_enter_password">Nhập vào mật khẩu</string>
-    <string name="dont_have_account">Chưa có tài khoản Dubsmash? Đăng ký</string>
+    <string name="dont_have_account">Chưa có tài khoản Ape-voice? Đăng ký</string>
     <string name="forgot_password">Quên mật khẩu</string>
-    <string name="login_app_text">Đăng nhập vào Dubsmash</string>
+    <string name="login_app_text">Đăng nhập vào Ape-voice</string>
     <string name="sound_text">Âm thanh của tôi</string>
     <string name="favorite_text">Yêu thích của tôi</string>
     <string name="title_my_profile">Thông tin</string>
@@ -49,14 +49,14 @@
     <string name="hint_record_sound">Nhấn \'Bắt đầu\' để ghi âm</string>
     <string name="text_start_record">Bắt đầu</string>
 
-    <string name="title_register">Đăng ký tài khoản Dubsmash</string>
+    <string name="title_register">Đăng ký tài khoản Ape-voice</string>
     <string name="hint_enter_yourname">Nhập tên của bạn</string>
     <string name="hint_register_new_account">Nhập tên, email và password vào các ô bên dưới để đăng ký</string>
     <string name="already_have_an_account">Tôi đã có tài khoản. Đăng nhập bây giờ</string>
     <string name="register_successfully">Chúc mừng bạn đã đăng ký thành công!</string>
     <string name="hint_continue">Nhấn \'Tiếp theo\' để bắt đầu sử dụng</string>
     <string name="reset_password">Khôi phục mật khẩu</string>
-    <string name="hint_reset_password">Điền vào email của bạn vào ô dưới đây.b</string>
+    <string name="hint_reset_password">Điền vào email của bạn vào ô dưới đây.</string>
     <string name="hint_email">Email</string>
 
     <string name="login_fail">Email hoặc mật khẩu không đúng!</string>
@@ -116,6 +116,7 @@
     <string name="uploading">Đang tải dữ liệu lên</string>
 
     <string name="show_video">Xem trước video</string>
+    <string name="move_select_range">Gợi ý: Di chuyển các nút để chọn phạm vi</string>
 
 
 </resources>

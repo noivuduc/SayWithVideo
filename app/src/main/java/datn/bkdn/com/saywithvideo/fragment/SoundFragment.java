@@ -57,6 +57,7 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
     private Firebase mFirebase;
     File file = null;
     private String mFilePath;
+    private String mFileName;
     private ArrayList<Audio> mAdapterItems;
     private ArrayList<String> mAdapterKeys;
     private SoundAdapter mAdapter;
@@ -266,6 +267,7 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
 
                         if ((sound.getLink_on_Disk()) != null) {
                             mFilePath = sound.getLink_on_Disk();
+                            mFileName = sound.getName();
                             finishActivity();
                         } else {
                             if (!Tools.isOnline(getContext())) {
@@ -281,6 +283,7 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
                                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                                     dimissProgressDialog();
                                     mFilePath = file.getPath();
+                                    mFileName = sound.getName();
                                     sound.setLink_on_Disk(mFilePath);
                                     new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
                                     finishActivity();
@@ -321,6 +324,7 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
     private void finishActivity() {
         Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
         intent.putExtra("FilePath", mFilePath);
+        intent.putExtra("FileName", mFileName);
         startActivity(intent);
     }
 

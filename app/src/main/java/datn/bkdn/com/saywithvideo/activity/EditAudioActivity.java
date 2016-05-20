@@ -351,27 +351,27 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 //        return bytes;
 //    }
 
-    private void uploadFile(final String name){
+    private void uploadFile(final String name) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef =storage.getReferenceFromUrl(FirebaseConstant.STORAGE_BUCKET);
+        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseConstant.STORAGE_BUCKET);
         Uri file = Uri.fromFile(new File(mOutputPath));
-        StorageReference store = storageRef.child("audios/"+file.getLastPathSegment());
+        StorageReference store = storageRef.child("audios/" + file.getLastPathSegment());
         store.putFile(file).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 //Uri uri = taskSnapshot.getDownloadUrl();
-                createSound(name,audioName);
+                createSound(name, audioName);
             }
         });
     }
 
-    private void createSound(String name,String url) {
+    private void createSound(String name, String url) {
         Date date = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
         final String id = Utils.getCurrentUserID(EditAudioActivity.this);
 
         //  send to server
-        FirebaseAudio mAudio = new FirebaseAudio(name, id, ft.format(date), 0,url);
+        FirebaseAudio mAudio = new FirebaseAudio(name, id, ft.format(date), 0, url);
         Firebase firebase = mFirebase.child(FirebaseConstant.AUDIO_URL).push();
         firebase.setValue(mAudio, new Firebase.CompletionListener() {
             @Override
@@ -706,10 +706,10 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 
     private void enableDisableButtons() {
         if (mIsPlaying) {
-            mImgPlay.setImageResource(android.R.drawable.ic_media_pause);
+            mImgPlay.setImageResource(R.mipmap.ic_pause);
             mImgPlay.setContentDescription(getResources().getText(R.string.stop));
         } else {
-            mImgPlay.setImageResource(android.R.drawable.ic_media_play);
+            mImgPlay.setImageResource(R.mipmap.ic_play);
             mImgPlay.setContentDescription(getResources().getText(R.string.play));
         }
     }

@@ -1,17 +1,12 @@
 package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -25,7 +20,6 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.firebase.client.AuthData;
@@ -36,8 +30,6 @@ import com.firebase.client.ValueEventListener;
 
 import org.json.JSONObject;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -120,7 +112,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
-
     private boolean checkCurrentUser() {
         return Utils.getCurrentUserEmail(this).equals("null");
     }
@@ -142,9 +133,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mProgressDialog.setCancelable(false);
 
         if (tvLogin != null) tvLogin.setOnClickListener(this);
-        if (tvRegister != null) tvRegister.setOnClickListener(this);
+        if (tvRegister != null) {
+            tvRegister.setTextColor(Color.argb(0xff, 0x44, 0xc9, 0xe7));
+            tvRegister.setOnClickListener(this);
+        }
         tvLoginFacebook.setOnClickListener(this);
-        if (tvForgot != null) tvForgot.setOnClickListener(this);
+        if (tvForgot != null) {
+            tvForgot.setTextColor(Color.argb(0xff, 0x44, 0xc9, 0xe7));
+            tvForgot.setOnClickListener(this);
+        }
         edtEmail.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
