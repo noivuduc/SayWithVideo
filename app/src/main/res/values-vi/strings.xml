@@ -117,5 +117,8 @@
 
     <string name="show_video">Xem trước video</string>
 
+    <string name="alert_group_title">Chọn một nhóm</string>
+
+
 
 </resources>

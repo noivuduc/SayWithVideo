@@ -4,7 +4,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import datn.bkdn.com.saywithvideo.fragment.SoundFragment;
+import datn.bkdn.com.saywithvideo.fragment.GroupFragment;
 import datn.bkdn.com.saywithvideo.fragment.UserProfileFragment;
 
 public class MainPagerAdapter extends FragmentPagerAdapter {
@@ -24,7 +24,7 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return SoundFragment.newInstance();
+                return GroupFragment.newInstance();
             case 1:
                 return UserProfileFragment.newInstance();
         }

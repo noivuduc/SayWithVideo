@@ -1,4 +1,4 @@
-package datn.bkdn.com.saywithvideo.fragment;
+package datn.bkdn.com.saywithvideo.activity;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -7,18 +7,20 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -34,12 +36,12 @@ import java.util.Map;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import datn.bkdn.com.saywithvideo.R;
-import datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity;
 import datn.bkdn.com.saywithvideo.adapter.SoundAdapter;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
 import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseGroup;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.network.Tools;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
@@ -50,10 +52,11 @@ import io.realm.RealmResults;
 /**
  *
  */
-public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
+public class GroupActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener ,View.OnClickListener{
     private int mCurrentPos = -1;
     private MediaPlayer mPlayer;
     private RecyclerView mLvSound;
+    private HashMap<String,String> mUrls;
     private Firebase mFirebase;
     File file = null;
     private String mFilePath;
@@ -61,28 +64,28 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
     private ArrayList<String> mAdapterKeys;
     private SoundAdapter mAdapter;
     private SweetAlertDialog mProgressDialog;
-
-    public static SoundFragment newInstance() {
-
-        Bundle args = new Bundle();
-
-        SoundFragment fragment = new SoundFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Nullable
+    private TextView mTitle;
+    private ImageView mImageBack;
+    private String mGroupId;
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.from(getContext()).inflate(R.layout.fragment_sound, container, false);
-        mLvSound = (RecyclerView) v.findViewById(R.id.lvSound);
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sound_group);
+        mLvSound = (RecyclerView) findViewById(R.id.lvSound);
+        mTitle = (TextView) findViewById(R.id.tvTitle);
+        mImageBack = (ImageView) findViewById(R.id.imgBack);
+        mImageBack.setOnClickListener(this);
+        ArrayList<String> groups = getIntent().getStringArrayListExtra("data");
+        mTitle.setTextColor(Color.WHITE);
+        mTitle.setText(groups.get(1));
+        mGroupId = groups.get(0);
+        Log.d("idss",mGroupId);
         init();
-        return v;
     }
 
     private Audio convertAudio(Sound sound) {
         return new Audio(sound.getLinkDown(), sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
-                sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
+                sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite(),sound.getGroup_id());
     }
 
     private void initData() {
@@ -91,6 +94,9 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
         }
         if (mAdapterKeys == null) {
             mAdapterKeys = new ArrayList<>();
+        }
+        if (mUrls == null){
+            mUrls = new HashMap<>();
         }
         new GetData().execute();
     }
@@ -101,19 +107,19 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
         switch (item.getItemId()) {
             case R.id.addToSoundBoard:
                 //TODO: Do somethings
-                AppTools.showSnackBar(getString(R.string.come_in_soon), getActivity());
+                AppTools.showSnackBar(getString(R.string.come_in_soon), GroupActivity.this);
                 break;
             case R.id.shareIT:
                 //TODO: Do somethings
-                AppTools.showSnackBar(getString(R.string.come_in_soon), getActivity());
+                AppTools.showSnackBar(getString(R.string.come_in_soon), GroupActivity.this);
                 break;
             case R.id.report:
                 //TODO: Do somethings
-                AppTools.showSnackBar(getString(R.string.come_in_soon), getActivity());
+                AppTools.showSnackBar(getString(R.string.come_in_soon), GroupActivity.this);
                 break;
             case R.id.improve:
                 //TODO: Do somethings
-                AppTools.showSnackBar(getString(R.string.come_in_soon), getActivity());
+                AppTools.showSnackBar(getString(R.string.come_in_soon), GroupActivity.this);
                 break;
         }
         return false;
@@ -125,14 +131,23 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
      * <p/>
      */
     private void init() {
+        //addGroup();
         mLvSound.setHasFixedSize(true);
-        mLvSound.setLayoutManager(new LinearLayoutManager(getContext()));
-        Firebase.setAndroidContext(getContext());
+        mLvSound.setLayoutManager(new LinearLayoutManager(GroupActivity.this));
+        Firebase.setAndroidContext(GroupActivity.this);
         mFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.AUDIO_URL);
-        final Firebase fFavorite = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(getContext()) + "/favorite/");
-        boolean isOnline = Tools.isOnline(getActivity());
+        Query q = mFirebase.orderByChild("group_id").equalTo(mGroupId);
+        final Firebase fFavorite = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(GroupActivity.this) + "/favorite/");
+        boolean isOnline = Tools.isOnline(GroupActivity.this);
         initData();
-        mAdapter = new SoundAdapter(mFirebase, fFavorite, isOnline, Audio.class, mAdapterItems, mAdapterKeys, getContext());
+        if(isOnline){
+            mAdapter = new SoundAdapter(q,mUrls, fFavorite, true, Audio.class, null, null, GroupActivity.this);
+            RealmUtils.getRealmUtils(GroupActivity.this).deleteAllSound(GroupActivity.this);
+        }else
+        {
+            mAdapter = new SoundAdapter(q,null, fFavorite, false, Audio.class, mAdapterItems, mAdapterKeys, GroupActivity.this);
+        }
+
         mAdapter.setPlayButtonClicked(new SoundAdapter.OnItemClicked() {
             @Override
             public void onClick(final Audio sound, View v, final int pos) {
@@ -160,8 +175,8 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
                             mAdapter.notifyDataSetChanged();
                         } else {
                             if (sound.getLink_on_Disk() == null) {
-                                if (!Tools.isOnline(getContext())) {
-                                    AppTools.showSnackBar(getString(R.string.internet_connection), getActivity());
+                                if (!Tools.isOnline(GroupActivity.this)) {
+                                    AppTools.showSnackBar(getString(R.string.internet_connection), GroupActivity.this);
                                     break;
                                 }
                                 /**
@@ -189,7 +204,7 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                        AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), getActivity());
+                                        AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), GroupActivity.this);
                                         sound.setLoadAudio(false);
                                         mAdapter.notifyDataSetChanged();
                                     }
@@ -211,12 +226,12 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
                         try {
                             final String id = sound.getId();
                             sound.setIsFavorite(!sound.isFavorite());
-                            final Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(getContext()) + "/favorite");
+                            final Firebase favoriteFirebase = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + "/" + Utils.getCurrentUserID(GroupActivity.this) + "/favorite");
                             new AsyncTask<Void, Void, Void>() {
 
                                 @Override
                                 protected Void doInBackground(Void... params) {
-                                    RealmUtils.getRealmUtils(getContext()).updateFavorite(getContext(), audioId);
+                                    RealmUtils.getRealmUtils(GroupActivity.this).updateFavorite(GroupActivity.this, audioId);
                                     favoriteFirebase.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -268,8 +283,8 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
                             mFilePath = sound.getLink_on_Disk();
                             finishActivity();
                         } else {
-                            if (!Tools.isOnline(getContext())) {
-                                AppTools.showSnackBar(getResources().getString(R.string.internet_connection), getActivity());
+                            if (!Tools.isOnline(GroupActivity.this)) {
+                                AppTools.showSnackBar(getResources().getString(R.string.internet_connection), GroupActivity.this);
                                 break;
                             }
                             showProgressDialog();
@@ -288,7 +303,7 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), getActivity());
+                                    AppTools.showSnackBar(getResources().getString(R.string.resource_not_found), GroupActivity.this);
                                     dimissProgressDialog();
                                 }
                             });
@@ -304,9 +319,32 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
         mLvSound.setAdapter(mAdapter);
     }
 
+    private void addGroup(){
+        Firebase firebase = new Firebase(FirebaseConstant.BASE_URL+FirebaseConstant.GROUP_URL);
+        FirebaseGroup funny = new FirebaseGroup("Hài hước");
+        FirebaseGroup love = new FirebaseGroup("Tình yêu");
+        FirebaseGroup angry = new FirebaseGroup("Giận dữ");
+        FirebaseGroup sad = new FirebaseGroup("Buồn");
+        FirebaseGroup laugh = new FirebaseGroup("Cười");
+        FirebaseGroup cry = new FirebaseGroup("Khóc");
+
+      ArrayList<FirebaseGroup> firebaseGroups = new ArrayList<>();
+        firebaseGroups.add(funny);
+        firebaseGroups.add(love);
+        firebaseGroups.add(angry);
+        firebaseGroups.add(sad);
+        firebaseGroups.add(laugh);
+        firebaseGroups.add(cry);
+        for (FirebaseGroup g: firebaseGroups
+             ) {
+           Firebase f= firebase.push();
+           f.setValue(g);
+        }
+    }
+
     private void showProgressDialog() {
         if (mProgressDialog == null) {
-            mProgressDialog = new SweetAlertDialog(getActivity(), SweetAlertDialog.PROGRESS_TYPE);
+            mProgressDialog = new SweetAlertDialog(GroupActivity.this, SweetAlertDialog.PROGRESS_TYPE);
             mProgressDialog.setTitleText(getResources().getString(R.string.please_wait));
             mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
             mProgressDialog.setCancelable(false);
@@ -319,7 +357,7 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
     }
 
     private void finishActivity() {
-        Intent intent = new Intent(getContext(), CaptureVideoActivity.class);
+        Intent intent = new Intent(GroupActivity.this, CaptureVideoActivity.class);
         intent.putExtra("FilePath", mFilePath);
         startActivity(intent);
     }
@@ -357,10 +395,20 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
     }
 
     private void createPopupMenu(View v) {
-        PopupMenu menu = new PopupMenu(getContext(), v);
+        PopupMenu menu = new PopupMenu(GroupActivity.this, v);
         menu.getMenuInflater().inflate(R.menu.popup_menu, menu.getMenu());
         menu.setOnMenuItemClickListener(this);
         menu.show();
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.imgBack:
+                this.finish();
+                break;
+        }
 
     }
 
@@ -368,12 +416,13 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
 
         @Override
         protected ArrayList<Audio> doInBackground(Void... params) {
-            Realm realm = RealmManager.getRealm(getContext());
+            Realm realm = RealmManager.getRealm(GroupActivity.this);
             RealmResults<Sound> mSounds = realm.where(Sound.class).findAll();
             ArrayList<Audio> sounds = new ArrayList<>();
             for (Sound sound : mSounds) {
                 Audio audio = convertAudio(sound);
                 sounds.add(audio);
+                mUrls.put(audio.getId(),audio.getLink_on_Disk());
             }
             return sounds;
         }
@@ -395,7 +444,7 @@ public class SoundFragment extends Fragment implements PopupMenu.OnMenuItemClick
 
         @Override
         protected Void doInBackground(String... params) {
-            Realm realm = RealmManager.getRealm(getContext());
+            Realm realm = RealmManager.getRealm(GroupActivity.this);
             realm.beginTransaction();
             Sound sound = realm.where(Sound.class).equalTo("id", params[0]).findFirst();
             sound.setLinkOnDisk(params[1]);

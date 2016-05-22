@@ -27,28 +27,31 @@
 
 
         <activity
-            android:name=".activity.MainActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.SoundActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.SoundActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.FavoriteActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.FavoriteActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.CaptureVideoActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.CaptureVideoActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.AddSoundActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.AddSoundActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.RecordNewSoundActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.RecordNewSoundActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.EditAudioActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.EditAudioActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.LoginActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.GroupActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="datn.bkdn.com.saywithvideo.activity.LoginActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -57,16 +60,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.RegisterActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.RegisterActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.RegisterSuccessActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.RegisterSuccessActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.ShowVideoActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.ShowVideoActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.ShareActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.ShareActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
@@ -84,10 +87,10 @@
             android:value="@string/facebook_app_id" />
 
         <activity
-            android:name=".activity.ImportSoundActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.ImportSoundActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.ResetPasswordActivity"
+            android:name="datn.bkdn.com.saywithvideo.activity.ResetPasswordActivity"
             android:screenOrientation="portrait" />
     </application>
 

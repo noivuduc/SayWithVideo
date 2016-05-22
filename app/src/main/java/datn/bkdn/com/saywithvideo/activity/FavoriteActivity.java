@@ -91,7 +91,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
 
     private Audio convertAudio(Sound sound) {
         return new Audio(sound.getLinkDown(), sound.getDateOfCreate(), sound.getName(), sound.getAuthor(),
-                sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite());
+                sound.getPlays(), sound.getIdUser(), sound.getId(), sound.getLinkOnDisk(), sound.isFavorite(),sound.getGroup_id());
     }
 
     @Override

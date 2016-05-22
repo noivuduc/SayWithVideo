@@ -117,6 +117,8 @@
     <string name="uploading">Uploading</string>
     <string name="show_video">Show video</string>
 
+    <string name="alert_group_title">Select type</string>
+
 
 
 </resources>

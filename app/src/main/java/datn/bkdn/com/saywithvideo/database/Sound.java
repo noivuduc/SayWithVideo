@@ -11,6 +11,7 @@ public class Sound extends RealmObject {
     private boolean isPlaying;
     private boolean isFavorite;
     private int plays;
+    private String group_id;
     private String linkDown;
     private String linkOnDisk;
     private String dateOfCreate;
@@ -59,6 +60,14 @@ public class Sound extends RealmObject {
         this.linkDown = linkDown;
         this.linkOnDisk = linkOnDisk;
         this.dateOfCreate = dateOfCreate;
+    }
+
+    public String getGroup_id() {
+        return group_id;
+    }
+
+    public void setGroup_id(String group_id) {
+        this.group_id = group_id;
     }
 
     public String getIdUser() {

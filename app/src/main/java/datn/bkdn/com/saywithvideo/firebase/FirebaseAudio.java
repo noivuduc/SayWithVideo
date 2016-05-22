@@ -5,6 +5,7 @@ public class FirebaseAudio {
     private String user_id;
     private String date_create;
     private String url;
+    private String group_id;
     private int plays;
 
     public FirebaseAudio(String name, String user_id, String date_create, int plays, String url) {
@@ -15,7 +16,25 @@ public class FirebaseAudio {
         this.url = url;
     }
 
+    public FirebaseAudio(String name, String user_id, String date_create, String url, String group_id, int plays) {
+        this.name = name;
+        this.user_id = user_id;
+        this.date_create = date_create;
+        this.url = url;
+        this.group_id = group_id;
+        this.plays = plays;
+    }
+
     public FirebaseAudio() {
+    }
+
+
+    public String getGroup_id() {
+        return group_id;
+    }
+
+    public void setGroup_id(String group_id) {
+        this.group_id = group_id;
     }
 
     public String getName() {

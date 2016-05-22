@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -31,6 +32,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -38,13 +40,17 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.custom.MarkerView;
 import datn.bkdn.com.saywithvideo.custom.WaveformView;
+import datn.bkdn.com.saywithvideo.database.Group;
+import datn.bkdn.com.saywithvideo.database.RealmUtils;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseAudio;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseConstant;
+import datn.bkdn.com.saywithvideo.firebase.FirebaseGroup;
 import datn.bkdn.com.saywithvideo.firebase.FirebaseUser;
 import datn.bkdn.com.saywithvideo.soundfile.SoundFile;
 import datn.bkdn.com.saywithvideo.utils.AppTools;
 import datn.bkdn.com.saywithvideo.utils.Constant;
 import datn.bkdn.com.saywithvideo.utils.Utils;
+import io.realm.RealmResults;
 
 public class EditAudioActivity extends Activity implements MarkerView.MarkerListener,
         WaveformView.WaveformListener, View.OnClickListener {
@@ -78,6 +84,8 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
     private int mPlayStartMsec;
     private int mPlayEndMsec;
     private Handler mHandler;
+    private String mGroupId;
+    private ArrayList<FirebaseGroup> mGroups;
     private final Runnable mTimerRunnable = new Runnable() {
         public void run() {
             if (mStartPos != mLastDisplayedStartPos) {
@@ -351,27 +359,27 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 //        return bytes;
 //    }
 
-    private void uploadFile(final String name){
+    private void uploadFile(final String name) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef =storage.getReferenceFromUrl(FirebaseConstant.STORAGE_BUCKET);
+        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseConstant.STORAGE_BUCKET);
         Uri file = Uri.fromFile(new File(mOutputPath));
-        StorageReference store = storageRef.child("audios/"+file.getLastPathSegment());
+        StorageReference store = storageRef.child("audios/" + file.getLastPathSegment());
         store.putFile(file).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 //Uri uri = taskSnapshot.getDownloadUrl();
-                createSound(name,audioName);
+                createSound(name, audioName);
             }
         });
     }
 
-    private void createSound(String name,String url) {
+    private void createSound(String name, String url) {
         Date date = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
         final String id = Utils.getCurrentUserID(EditAudioActivity.this);
 
         //  send to server
-        FirebaseAudio mAudio = new FirebaseAudio(name, id, ft.format(date), 0,url);
+        FirebaseAudio mAudio = new FirebaseAudio(name, id, ft.format(date),url,mGroupId,0);
         Firebase firebase = mFirebase.child(FirebaseConstant.AUDIO_URL).push();
         firebase.setValue(mAudio, new Firebase.CompletionListener() {
             @Override
@@ -384,6 +392,53 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 
         FirebaseUser f = AppTools.getInfoUser(id);
         mFirebase.child(FirebaseConstant.USER_URL).child(id).child("no_sound").setValue((f.getNo_sound() + 1) + "");
+    }
+
+    private void getData() {
+        new AsyncTask<Void, Void, ArrayList<FirebaseGroup>>() {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+
+            }
+
+            @Override
+            protected ArrayList<FirebaseGroup> doInBackground(Void... params) {
+                ArrayList<FirebaseGroup> mGroups = new ArrayList<>();
+                RealmResults<Group> groups = RealmUtils.getRealmUtils(EditAudioActivity.this).getGroup(EditAudioActivity.this);
+                for (Group g : groups) {
+                    FirebaseGroup group = new FirebaseGroup(g.getName(), g.getId());
+                    mGroups.add(group);
+                }
+                return mGroups;
+            }
+
+            @Override
+            protected void onPostExecute(ArrayList<FirebaseGroup> aVoid) {
+                super.onPostExecute(aVoid);
+                mGroups = aVoid;
+                String[] group = new String[mGroups.size()];
+                for (int i = 0; i < mGroups.size(); i++) {
+                    group[i] = mGroups.get(i).getName();
+                }
+                createGroupDialog(group);
+            }
+        }.execute();
+    }
+
+    private void createGroupDialog(final String[] groups) {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(EditAudioActivity.this);
+        alert.setTitle(getString(R.string.alert_group_title));
+        alert.setItems(groups, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mGroupId = mGroups.get(which).getId();
+                dialog.dismiss();
+                new EditAudio().execute();
+            }
+        });
+        AlertDialog dialog = alert.create();
+        dialog.show();
     }
 
     private void createDialog() {
@@ -400,8 +455,9 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
             public void onClick(View v) {
                 fileName = edtName.getText().toString();
                 dialog.dismiss();
-                new EditAudio().execute();
+                getData();
             }
+
         });
 
         tvCancel.setOnClickListener(new View.OnClickListener() {

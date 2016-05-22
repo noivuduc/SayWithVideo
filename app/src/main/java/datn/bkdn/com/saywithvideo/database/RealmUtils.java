@@ -99,6 +99,26 @@ public class RealmUtils {
         realm.close();
     }
 
+    public void addGroup(Context context, Group group){
+        realm = RealmManager.getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealm(group);
+        realm.commitTransaction();
+    }
+
+    public RealmResults<Group> getGroup(Context context) {
+        realm = RealmManager.getRealm(context);
+        return realm.where(Group.class).findAll();
+
+    }
+
+    public void deleteGroup(final Context context) {
+        realm = RealmManager.getRealm(context);
+        realm.beginTransaction();
+        realm.where(Group.class).findAll().deleteAllFromRealm();
+        realm.commitTransaction();
+    }
+
     public boolean checkExistSound(Context mContext, String key) {
         realm = RealmManager.getRealm(mContext);
         RealmResults<Sound> sounds = realm.where(Sound.class).equalTo("id", key).findAll();

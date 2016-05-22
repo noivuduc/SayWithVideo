@@ -18,6 +18,7 @@ import com.firebase.client.Query;
 import com.jpardogo.android.googleprogressbar.library.FoldingCirclesDrawable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
@@ -32,11 +33,11 @@ import io.realm.RealmChangeListener;
 public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHolder, Audio> implements RealmChangeListener {
     public final Context mContext;
     private OnItemClicked mItemClicked;
-
-    public SoundAdapter(Query query, @Nullable Query favorite, boolean isOnline, Class<Audio> itemClass, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
+    private HashMap<String,String> mUrls;
+    public SoundAdapter(Query query, @Nullable HashMap<String,String> urls, @Nullable Query favorite, boolean isOnline, Class<Audio> itemClass, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
         super(mContext, query, isOnline, favorite, itemClass, items, keys);
         this.mContext = mContext;
-
+        this.mUrls = urls;
     }
 
     @Override
@@ -144,6 +145,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
     @Override
     protected void itemAdded(final Audio item, final String key, final int position) {
         item.setId(key);
+        item.setLink_on_Disk(getLink(key));
         if (getUsernames() != null)
             if (getUsernames().containsKey(item.getUser_id())) {
                 item.setAuthor(getUsernames().get(item.getUser_id()));
@@ -256,6 +258,14 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
         }
 
 
+    }
+
+    private String getLink(String key){
+        if(mUrls != null){
+            if(mUrls.containsKey(key))
+            return mUrls.get(key);
+        }
+        return null;
     }
 
     private class AsyncAddSound extends AsyncTask<Sound, Void, Void> {
