@@ -112,7 +112,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
-
     private boolean checkCurrentUser() {
         return Utils.getCurrentUserEmail(this).equals("null");
     }
@@ -134,9 +133,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mProgressDialog.setCancelable(false);
 
         if (tvLogin != null) tvLogin.setOnClickListener(this);
-        if (tvRegister != null) tvRegister.setOnClickListener(this);
+        if (tvRegister != null) {
+            tvRegister.setTextColor(Color.argb(0xff, 0x44, 0xc9, 0xe7));
+            tvRegister.setOnClickListener(this);
+        }
         tvLoginFacebook.setOnClickListener(this);
-        if (tvForgot != null) tvForgot.setOnClickListener(this);
+        if (tvForgot != null) {
+            tvForgot.setTextColor(Color.argb(0xff, 0x44, 0xc9, 0xe7));
+            tvForgot.setOnClickListener(this);
+        }
         edtEmail.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

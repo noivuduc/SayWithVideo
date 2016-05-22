@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fff"
     android:orientation="vertical">
 
     <LinearLayout
@@ -28,7 +29,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#f1ce08"
+            android:background="#000077"
             android:gravity="center_vertical"
             android:text="@string/select_range"
             android:textColor="#fff"
@@ -49,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
-            android:text="Hint: Move handles to select range"
+            android:text="@string/move_select_range"
             android:textColor="#cac9c9"
             android:textSize="13sp" />
 
@@ -89,18 +90,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/rl"
-            android:background="#c7c3c3"
+            android:background="#fff"
             android:gravity="center_horizontal"
             android:padding="5dp"
             android:text="123"
-            android:textColor="#fff" />
+            android:textColor="#000" />
 
         <RelativeLayout
             android:id="@+id/rl2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvInfor"
-            android:background="#c7c3c3"
+            android:background="#fff"
             android:gravity="center_horizontal"
             android:padding="5dp">
 
@@ -110,7 +111,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:text="Start:"
-                android:textColor="#fff"
+                android:textColor="#000"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -132,7 +133,7 @@
                 android:layout_marginLeft="30dp"
                 android:layout_toRightOf="@+id/tvStart"
                 android:text="End:"
-                android:textColor="#fff"
+                android:textColor="#000"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -153,7 +154,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/rl2"
-            android:background="#c7c3c3">
+            android:background="#fff">
 
             <ImageButton
                 android:id="@+id/imgPlay"
@@ -162,7 +163,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:padding="10dp"
-                android:src="@android:drawable/ic_media_play" />
+                android:src="@mipmap/ic_play" />
         </RelativeLayout>
     </RelativeLayout>
 

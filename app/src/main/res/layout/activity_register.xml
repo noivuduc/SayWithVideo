@@ -132,7 +132,7 @@
             android:text="@string/already_have_an_account"
             android:textColor="#44c9e7"
             android:textSize="13sp"
-            android:textStyle="bold" />
+            android:textStyle="italic" />
     </LinearLayout>
 
     <ScrollView

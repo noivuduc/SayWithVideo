@@ -1,6 +1,7 @@
 package datn.bkdn.com.saywithvideo.activity;
 
 import android.app.ProgressDialog;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -73,6 +74,7 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
         mTvResetPassword = (TextView) findViewById(R.id.tvResetPassword);
         mImgClearEmail = (ImageView) findViewById(R.id.imgClearEmail);
 
+        mTvResetPassword.setTextColor(Color.WHITE);
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage(getResources().getString(R.string.please_wait));
         mProgressDialog.setIndeterminate(true);

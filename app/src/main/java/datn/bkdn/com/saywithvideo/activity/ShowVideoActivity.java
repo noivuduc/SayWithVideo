@@ -36,9 +36,11 @@ public class ShowVideoActivity extends AppCompatActivity implements View.OnClick
         RelativeLayout mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         TextureView mTextureView = (TextureView) findViewById(R.id.playback_video);
         TextView mTvShare = (TextView) findViewById(R.id.tvShare);
+        TextView mTvTitle = (TextView) findViewById(R.id.tvTitle);
         mTvShare.setTextColor(Color.WHITE);
+        mTvTitle.setTextColor(Color.WHITE);
         if (mRlBack != null) mRlBack.setOnClickListener(this);
-        if (mTvShare != null) mTvShare.setOnClickListener(this);
+        mTvShare.setOnClickListener(this);
         if (mTextureView != null) mTextureView.setSurfaceTextureListener(this);
     }
 

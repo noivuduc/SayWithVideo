@@ -114,7 +114,8 @@
                 android:gravity="center"
                 android:text="@string/forgot_password"
                 android:textColor="#44c9e7"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:textStyle="italic" />
         </RelativeLayout>
 
     </RelativeLayout>

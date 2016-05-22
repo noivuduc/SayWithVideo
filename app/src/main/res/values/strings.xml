@@ -24,12 +24,12 @@
     <string name="cant_change_password">Can\'t change your password</string>
     <string name="share_via_messenger">Messenger</string>
 
-    <string name="hint_login">Please enter your Dubsmash username or email and password below</string>
+    <string name="hint_login">Please enter your Ape-voice username or email and password below</string>
     <string name="hint_enter_email">Enter your email</string>
     <string name="hint_enter_password">Enter your password</string>
     <string name="dont_have_account">I don\'t have any account. Register?</string>
     <string name="forgot_password">Forgot?</string>
-    <string name="login_app_text">Login to Dubsmash</string>
+    <string name="login_app_text">Login to Ape-voice</string>
     <string name="sound_text">Sounds</string>
     <string name="favorite_text">Favorites</string>
     <string name="title_my_profile">My profile</string>
@@ -43,15 +43,15 @@
     <string name="hint_record_sound">Tab \'Start\' to record your sound</string>
     <string name="text_start_record">Start</string>
 
-    <string name="title_register">Register to Dubsmash</string>
+    <string name="title_register">Register to Ape-voice</string>
     <string name="hint_enter_yourname">Enter your name</string>
-    <string name="hint_register_new_account">Please enter your Dubsmash username or email and password below</string>
+    <string name="hint_register_new_account">Please enter your Ape-voice username or email and password below</string>
     <string name="already_have_an_account">Already have an account. Login now?</string>
     <string name="register_successfully">Register successfully</string>
     <string name="hint_continue">Press \'Continue\' to start using app</string>
     <string name="select_next">Next</string>
     <string name="reset_password">Reset Password</string>
-    <string name="hint_reset_password">Please enter the email address of your Dubsmash account below</string>
+    <string name="hint_reset_password">Please enter the email address of your Ape-voice account below</string>
     <string name="hint_email">Email</string>
     <string name="add_sound">Add Sound</string>
 
@@ -116,6 +116,7 @@
 
     <string name="uploading">Uploading</string>
     <string name="show_video">Show video</string>
+    <string name="move_select_range">Hint: Move handles to select range</string>
 
     <string name="alert_group_title">Select type</string>
 

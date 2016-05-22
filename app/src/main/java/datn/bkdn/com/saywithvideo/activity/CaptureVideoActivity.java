@@ -81,7 +81,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void init() {
-        if(Build.VERSION.SDK_INT >=23){
+        if (Build.VERSION.SDK_INT >= 23) {
             PermissionUtils.getRequestCamera(this);
         }
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -106,6 +106,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
 
     private void initData() {
         mFileName = getIntent().getStringExtra("FileName");
+        Log.d("Tien", mFileName);
         mFilePath = getIntent().getStringExtra("FilePath");
         mMaxPos = 0;
         mStartPos = 0;
