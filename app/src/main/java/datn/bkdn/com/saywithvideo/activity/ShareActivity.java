@@ -1,5 +1,6 @@
 package datn.bkdn.com.saywithvideo.activity;
 
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -29,9 +30,11 @@ public class ShareActivity extends AppCompatActivity implements View.OnClickList
     private void init() {
         mFilePath = getIntent().getStringExtra("filePath");
         TextView mLlMessenger = (TextView) findViewById(R.id.llMessenger);
+        TextView mTvShareVideo = (TextView) findViewById(R.id.tvShareVideo);
         if (mLlMessenger != null) mLlMessenger.setOnClickListener(this);
         ViewGroup mRlBack = (ViewGroup) findViewById(R.id.rlBack);
         if (mRlBack != null) mRlBack.setOnClickListener(this);
+        mTvShareVideo.setTextColor(Color.WHITE);
     }
 
 

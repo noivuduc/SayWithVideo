@@ -515,7 +515,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
             super.onPreExecute();
             mProgressDialog = new ProgressDialog(CaptureVideoActivity.this);
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            mProgressDialog.setTitle("Muxing...");
+            mProgressDialog.setTitle(getResources().getString(R.string.muxing));
             mProgressDialog.setCancelable(false);
             mProgressDialog.show();
         }

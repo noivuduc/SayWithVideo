@@ -35,11 +35,12 @@
             android:paddingRight="10dp">
 
             <TextView
+                android:id="@+id/tvShareVideo"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@null"
                 android:gravity="center_vertical"
-                android:text="Share your dub"
+                android:text="@string/share_your_video"
                 android:textColor="#fff"
                 android:textSize="16sp"
                 android:textStyle="bold" />
