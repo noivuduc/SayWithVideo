@@ -19,6 +19,7 @@ import datn.bkdn.com.saywithvideo.firebase.FirebaseGroup;
  */
 public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>{
     private ArrayList<FirebaseGroup> mFirebaseGroups;
+    private int[] mIcons = {R.mipmap.ic_funny,R.mipmap.ic_love,R.mipmap.ic_angry,R.mipmap.ic_sad,R.mipmap.ic_laugh,R.mipmap.ic_cry };
     public interface GroupItemClicked{
         void onClick(int pos);
     }
@@ -44,7 +45,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
         FirebaseGroup firebaseGroup = mFirebaseGroups.get(position);
         holder.tvGroupname.setText(firebaseGroup.getName());
         holder.tvGroupname.setTextColor(Color.BLUE);
-
+        holder.imgIcon.setImageResource(mIcons[position]);
         holder.rlGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
