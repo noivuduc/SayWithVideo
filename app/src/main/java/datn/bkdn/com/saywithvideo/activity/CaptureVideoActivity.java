@@ -336,12 +336,17 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void releaseMediaRecorder() {
-        if (mMediaRecorder != null) {
-            mMediaRecorder.stop();
-            mMediaRecorder.release();
-            mMediaRecorder = null;
-            mCamera.lock();
-        }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mMediaRecorder != null) {
+                    mMediaRecorder.stop();
+                    mMediaRecorder.release();
+                    mMediaRecorder = null;
+                    mCamera.lock();
+                }
+            }
+        }, 100);
     }
 
     private void releaseCamera() {
@@ -489,8 +494,8 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         Log.d("Tien", "onCompletion");
         mIsPlaying = false;
         mMediaPlayer.release();
-        releaseMediaRecorder();
         mWaveformView.setPlayback(-1);
+        releaseMediaRecorder();
         new MuxVideo().execute();
     }
 

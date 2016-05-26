@@ -2,10 +2,14 @@ package datn.bkdn.com.saywithvideo.database;
 
 import io.realm.RealmObject;
 
+<<<<<<< Updated upstream
 /**
  * Created by Admin on 5/22/2016.
  */
 public class Group extends RealmObject{
+=======
+public class Group extends RealmObject {
+>>>>>>> Stashed changes
     private String id;
     private String name;
 
