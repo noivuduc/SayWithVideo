@@ -64,6 +64,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     private RealmResults<Sound> mSounds;
     private Intent mIntentUnFavorite;
     private HashMap<String,String> mUrls;
+    private String mFileName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -285,6 +286,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
 
                         if ((sound.getLink_on_Disk()) != null) {
                             mFilePath = sound.getLink_on_Disk();
+                            mFileName = sound.getName();
                             finishActivity();
                         } else {
                             if (!Tools.isOnline(FavoriteActivity.this)) {
@@ -357,13 +359,17 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void finishActivity() {
-        this.finish();
+        Intent intent = new Intent(FavoriteActivity.this, CaptureVideoActivity.class);
+        intent.putExtra("FilePath", mFilePath);
+        intent.putExtra("FileName", mFileName);
+        startActivity(intent);
+
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        finishActivity();
+        this.finish();
     }
 
     @Override

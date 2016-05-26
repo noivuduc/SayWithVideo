@@ -106,7 +106,6 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
 
     private void initData() {
         mFileName = getIntent().getStringExtra("FileName");
-        Log.d("Tien", mFileName);
         mFilePath = getIntent().getStringExtra("FilePath");
         mMaxPos = 0;
         mStartPos = 0;

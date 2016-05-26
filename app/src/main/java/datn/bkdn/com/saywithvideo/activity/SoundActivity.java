@@ -64,6 +64,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private ArrayList<String> mAdapterKeys;
     private int mCurrentPos = -1;
     private Firebase mFirebase;
+    private String mFileName;
     private HashMap<String,String> mUrls;
     private SweetAlertDialog mProgressDialog;
 
@@ -180,6 +181,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
 
                         if ((sound.getLink_on_Disk()) != null) {
                             mFilePath = sound.getLink_on_Disk();
+                            mFileName = sound.getName();
                             finishActivity();
                         } else {
                             if (!Tools.isOnline(SoundActivity.this)) {
@@ -322,6 +324,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private void finishActivity() {
         Intent intent = new Intent(SoundActivity.this, CaptureVideoActivity.class);
         intent.putExtra("FilePath", mFilePath);
+        intent.putExtra("FileName", mFileName);
         startActivity(intent);
         // this.finish();
     }
