@@ -417,6 +417,7 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
             protected void onPostExecute(ArrayList<FirebaseGroup> aVoid) {
                 super.onPostExecute(aVoid);
                 mGroups = aVoid;
+                Log.d("sizess",mGroups.size()+"");
                 String[] group = new String[mGroups.size()];
                 for (int i = 0; i < mGroups.size(); i++) {
                     group[i] = mGroups.get(i).getName();
