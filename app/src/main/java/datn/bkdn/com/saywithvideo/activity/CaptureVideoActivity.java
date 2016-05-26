@@ -236,15 +236,20 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
 
     protected synchronized void handleRelease() {
         releasePlayer();
-        releaseMediaRecorder();
-        try {
-            File file = new File(mVideoOutPut);
-            file.deleteOnExit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        mWaveformView.setPlayback(-1);
-        mIsPlaying = false;
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mWaveformView.setPlayback(-1);
+                releaseMediaRecorder();
+                try {
+                    File file = new File(mVideoOutPut);
+                    file.delete();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                mIsPlaying = false;
+            }
+        }, 100);
     }
 
     protected void setOffsetGoalNoUpdate(int offset) {
@@ -305,6 +310,30 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
 
+    private CamcorderProfile getCamcorderProfile() {
+        int currentVersion = Build.VERSION.SDK_INT;
+        int w = getResources().getDisplayMetrics().widthPixels;
+        CamcorderProfile result = null;
+        if (currentVersion >= 21) {
+            if (w >= 1080) {
+                result = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH_SPEED_1080P);
+            } else if (w >= 720) {
+                result = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH_SPEED_720P);
+            } else if (w >= 480) {
+                result = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH_SPEED_480P);
+            }
+        } else {
+            if (w >= 1080) {
+                result = CamcorderProfile.get(CamcorderProfile.QUALITY_1080P);
+            } else if (w >= 720) {
+                result = CamcorderProfile.get(CamcorderProfile.QUALITY_720P);
+            } else if (w >= 480) {
+                result = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
+            }
+        }
+        return result;
+    }
+
     private boolean prepareMediaRecorder() {
         mMediaRecorder = new MediaRecorder();
         mCamera.unlock();
@@ -313,7 +342,8 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
-        CamcorderProfile cpHigh = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+        CamcorderProfile cpHigh = getCamcorderProfile();
+        Log.d("Tien", cpHigh.videoFrameWidth + "");
         mMediaRecorder.setVideoSize(cpHigh.videoFrameWidth, cpHigh.videoFrameHeight);
         mMediaRecorder.setVideoFrameRate(cpHigh.videoFrameRate);
         mMediaRecorder.setVideoEncodingBitRate(cpHigh.videoBitRate);
@@ -336,17 +366,12 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void releaseMediaRecorder() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (mMediaRecorder != null) {
-                    mMediaRecorder.stop();
-                    mMediaRecorder.release();
-                    mMediaRecorder = null;
-                    mCamera.lock();
-                }
-            }
-        }, 100);
+        if (mMediaRecorder != null) {
+            mMediaRecorder.stop();
+            mMediaRecorder.release();
+            mMediaRecorder = null;
+            mCamera.lock();
+        }
     }
 
     private void releaseCamera() {
@@ -454,8 +479,8 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
                     Toast.makeText(CaptureVideoActivity.this, "Fail in prepareMediaRecorder()!\n - Ended -", Toast.LENGTH_LONG).show();
                     finish();
                 }
-                onPlay(mStartPos);
                 mMediaRecorder.start();
+                onPlay(mStartPos);
                 break;
         }
     }
