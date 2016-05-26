@@ -65,14 +65,14 @@ public class ListFavoriteAdapter extends FirebaseRecyclerAdapter<ListFavoriteAda
                 }
             }
         });
-        viewHolder.rlOption.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mItemClicked != null) {
-                    mItemClicked.onClick(model, v, pos);
-                }
-            }
-        });
+//        viewHolder.rlOption.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (mItemClicked != null) {
+//                    mItemClicked.onClick(model, v, pos);
+//                }
+//            }
+//        });
         viewHolder.linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
