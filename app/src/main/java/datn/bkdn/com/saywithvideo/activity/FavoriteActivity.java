@@ -29,6 +29,7 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import datn.bkdn.com.saywithvideo.R;
@@ -62,6 +63,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
     private SweetAlertDialog mProgressDialog;
     private RealmResults<Sound> mSounds;
     private Intent mIntentUnFavorite;
+    private HashMap<String,String> mUrls;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,13 +81,16 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         if (mAdapterKeys == null) {
             mAdapterKeys = new ArrayList<>();
         }
-
+        if(mUrls == null){
+            mUrls = new HashMap<>();
+        }
         realm = RealmManager.getRealm(this);
         mSounds = realm.where(Sound.class).equalTo("isFavorite", true).findAll();
         for (Sound s : mSounds) {
             Audio audio = convertAudio(s);
             mAdapterItems.add(audio);
             mAdapterKeys.add(audio.getId());
+            mUrls.put(audio.getId(),audio.getLink_on_Disk());
         }
     }
 
@@ -129,7 +134,7 @@ public class FavoriteActivity extends AppCompatActivity implements View.OnClickL
         initData();
         boolean isOnline = Tools.isOnline(this);
         mFirebaseFavorite = new Firebase(FirebaseConstant.BASE_URL + FirebaseConstant.USER_URL + Utils.getCurrentUserID(this) + "/favorite");
-        mAdapter = new ListFavoriteAdapter(mFirebaseFavorite, null, isOnline, Audio.class, mAdapterItems, mAdapterKeys, this);
+        mAdapter = new ListFavoriteAdapter(mFirebaseFavorite, null, isOnline, Audio.class,mUrls, mAdapterItems, mAdapterKeys, this);
         mLvSound = (RecyclerView) findViewById(R.id.lvSoundFavorite);
         mRlBack = (RelativeLayout) findViewById(R.id.rlBack);
         mRlSort = (RelativeLayout) findViewById(R.id.rlSort);
