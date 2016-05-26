@@ -34,6 +34,7 @@ public class SoundAdapter extends FirebaseRecyclerAdapter<SoundAdapter.SoundHold
     public final Context mContext;
     private OnItemClicked mItemClicked;
     private HashMap<String,String> mUrls;
+
     public SoundAdapter(Query query, @Nullable HashMap<String,String> urls, @Nullable Query favorite, boolean isOnline, Class<Audio> itemClass, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
         super(mContext, query, isOnline, favorite, itemClass, items, keys);
         this.mContext = mContext;

@@ -154,11 +154,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/rl2"
-            android:background="#fff">
+            >
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/imgPlay"
-                style="@android:style/MediaButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"

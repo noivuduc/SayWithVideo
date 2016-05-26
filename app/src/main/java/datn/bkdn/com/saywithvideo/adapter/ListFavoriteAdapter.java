@@ -18,6 +18,7 @@ import com.firebase.client.Query;
 import com.jpardogo.android.googleprogressbar.library.FoldingCirclesDrawable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import datn.bkdn.com.saywithvideo.R;
 import datn.bkdn.com.saywithvideo.database.RealmManager;
@@ -31,11 +32,20 @@ import io.realm.RealmChangeListener;
 public class ListFavoriteAdapter extends FirebaseRecyclerAdapter<ListFavoriteAdapter.SoundHolder, Audio> implements RealmChangeListener {
     public final Context mContext;
     private OnItemClicked mItemClicked;
+    private HashMap<String,String> mUrls;
 
-    public ListFavoriteAdapter(Query query, @Nullable Query favorite, boolean isOnline, Class<Audio> itemClass, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
+    public ListFavoriteAdapter(Query query, @Nullable Query favorite, boolean isOnline, Class<Audio> itemClass, @Nullable HashMap<String,String> mUrls,@Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys, Context mContext) {
         super(mContext, query, isOnline, favorite, itemClass, items, keys);
         this.mContext = mContext;
+        this.mUrls = mUrls;
+    }
 
+    private String getLink(String key){
+        if(mUrls != null){
+            if(mUrls.containsKey(key))
+                return mUrls.get(key);
+        }
+        return null;
     }
 
     @Override
@@ -143,6 +153,7 @@ public class ListFavoriteAdapter extends FirebaseRecyclerAdapter<ListFavoriteAda
     @Override
     protected void itemAdded(final Audio item, final String key, final int position) {
         item.setId(key);
+        item.setLink_on_Disk(getLink(key));
         if (getUsernames() != null)
             if (getUsernames().containsKey(item.getUser_id())) {
                 item.setAuthor(getUsernames().get(item.getUser_id()));

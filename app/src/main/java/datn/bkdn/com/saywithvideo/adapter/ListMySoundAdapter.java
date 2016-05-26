@@ -1,6 +1,7 @@
 package datn.bkdn.com.saywithvideo.adapter;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,11 +18,16 @@ import com.jpardogo.android.googleprogressbar.library.FoldingCirclesDrawable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 
 import datn.bkdn.com.saywithvideo.R;
+import datn.bkdn.com.saywithvideo.database.RealmManager;
+import datn.bkdn.com.saywithvideo.database.RealmUtils;
+import datn.bkdn.com.saywithvideo.database.Sound;
 import datn.bkdn.com.saywithvideo.lib.FirebaseRecyclerAdapter;
 import datn.bkdn.com.saywithvideo.model.Audio;
 import datn.bkdn.com.saywithvideo.utils.Utils;
+import io.realm.Realm;
 
 import static java.util.Collections.sort;
 
@@ -31,10 +37,12 @@ import static java.util.Collections.sort;
 public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapter.AudioViewholder, Audio> {
     public OnItemClicked mItemClicked;
     private Context mContext;
+    private HashMap<String,String> mUrls;
 
-    public ListMySoundAdapter(Context context, Query query, Class<Audio> itemClass, boolean isOnline, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys) {
+    public ListMySoundAdapter(Context context, Query query, Class<Audio> itemClass, boolean isOnline,@Nullable HashMap<String,String> mUrls, @Nullable ArrayList<Audio> items, @Nullable ArrayList<String> keys) {
         super(context, query, isOnline, null, itemClass, items, keys);
         this.mContext = context;
+        this.mUrls = mUrls;
     }
 
     public void setPlayButtonClicked(OnItemClicked playButtonClicked) {
@@ -94,11 +102,24 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
 
     }
 
+    private String getLink(String key){
+        if(mUrls != null){
+            if(mUrls.containsKey(key))
+                return mUrls.get(key);
+        }
+        return null;
+    }
+
     @Override
     protected void itemAdded(Audio item, String key, int position) {
         String author = Utils.getCurrentUserName(mContext);
         item.setId(key);
+        item.setLink_on_Disk(getLink(key));
         item.setAuthor(author);
+        final Sound sound = convertAudio(item);
+        if (!RealmUtils.getRealmUtils(mContext).checkExistSound(mContext, key)) {
+            new AsyncAddSound().execute(sound);
+        }
     }
 
     @Override
@@ -175,4 +196,27 @@ public class ListMySoundAdapter extends FirebaseRecyclerAdapter<ListMySoundAdapt
         }
     }
 
+    private Sound convertAudio(Audio audio) {
+        return new Sound(audio.getId(), audio.getName(), audio.getAuthor(),
+                audio.isFavorite(), audio.getPlays(), audio.getDate_create(),
+                audio.getUser_id(),audio.getUrl(),audio.getGroup_id());
+    }
+
+    private class AsyncAddSound extends AsyncTask<Sound, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Sound... sound) {
+            Realm realm = RealmManager.getRealm(mContext);
+            realm.beginTransaction();
+            realm.copyToRealm(sound[0]);
+            realm.commitTransaction();
+            realm.close();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
+    }
 }

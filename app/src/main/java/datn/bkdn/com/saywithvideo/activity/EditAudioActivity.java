@@ -763,10 +763,10 @@ public class EditAudioActivity extends Activity implements MarkerView.MarkerList
 
     private void enableDisableButtons() {
         if (mIsPlaying) {
-            mImgPlay.setImageResource(android.R.drawable.ic_media_pause);
+            mImgPlay.setImageResource(R.mipmap.ic_pause);
             mImgPlay.setContentDescription(getResources().getText(R.string.stop));
         } else {
-            mImgPlay.setImageResource(android.R.drawable.ic_media_play);
+            mImgPlay.setImageResource(R.mipmap.ic_play);
             mImgPlay.setContentDescription(getResources().getText(R.string.play));
         }
     }

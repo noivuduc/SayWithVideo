@@ -31,6 +31,7 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import datn.bkdn.com.saywithvideo.R;
@@ -63,6 +64,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
     private ArrayList<String> mAdapterKeys;
     private int mCurrentPos = -1;
     private Firebase mFirebase;
+    private HashMap<String,String> mUrls;
     private SweetAlertDialog mProgressDialog;
 
     @Override
@@ -89,7 +91,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
         Query query = mFirebase.orderByChild("user_id").equalTo(Utils.getCurrentUserID(this));
         getData();
         boolean isOnline = Tools.isOnline(this);
-        mAdapter = new ListMySoundAdapter(this, query, Audio.class, isOnline, mAdapterItems, mAdapterKeys);
+        mAdapter = new ListMySoundAdapter(this, query, Audio.class, isOnline,mUrls, mAdapterItems, mAdapterKeys);
         mRecycle.setAdapter(mAdapter);
         mAdapter.setPlayButtonClicked(new ListMySoundAdapter.OnItemClicked() {
 
@@ -137,7 +139,7 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
                                     public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                                         mFilePath = file.getPath();
                                         sound.setLink_on_Disk(mFilePath);
-                                        new AsyncUpdatePath().execute(sound.getId(), sound.getLink_on_Disk());
+                                        new AsyncUpdatePath().execute(sound.getId(), mFilePath);
                                         if (mCurrentPos == pos) {
                                             sound.setLoadAudio(false);
                                             sound.setIsPlaying(!sound.isPlaying());
@@ -342,12 +344,16 @@ public class SoundActivity extends AppCompatActivity implements View.OnClickList
             mAdapterKeys = new ArrayList<>();
         }
 
+        if(mUrls == null){
+            mUrls = new HashMap<>();
+        }
         String id = Utils.getCurrentUserID(this);
         Realm realm = RealmManager.getRealm(this);
         RealmResults<Sound> mSounds = realm.where(Sound.class).equalTo("idUser", id).findAll();
         for (Sound s : mSounds) {
             Audio audio = convertAudio(s);
             mAdapterItems.add(audio);
+            mUrls.put(audio.getId(),audio.getLink_on_Disk());
             mAdapterKeys.add(audio.getId());
         }
 
