@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -80,7 +79,6 @@ public class GroupActivity extends AppCompatActivity implements PopupMenu.OnMenu
         mTitle.setTextColor(Color.WHITE);
         mTitle.setText(groups.get(1));
         mGroupId = groups.get(0);
-        Log.d("idss",mGroupId);
         init();
     }
 
@@ -421,7 +419,7 @@ public class GroupActivity extends AppCompatActivity implements PopupMenu.OnMenu
         @Override
         protected ArrayList<Audio> doInBackground(Void... params) {
             Realm realm = RealmManager.getRealm(GroupActivity.this);
-            RealmResults<Sound> mSounds = realm.where(Sound.class).findAll();
+            RealmResults<Sound> mSounds = realm.where(Sound.class).equalTo("group_id",mGroupId).findAll();
             ArrayList<Audio> sounds = new ArrayList<>();
             for (Sound sound : mSounds) {
                 Audio audio = convertAudio(sound);
