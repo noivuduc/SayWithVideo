@@ -117,4 +117,7 @@
 
     <string name="show_video">Xem trước video</string>
     <string name="move_select_range">Gợi ý: Di chuyển các nút để chọn phạm vi</string>
+    <string name="muxing">Đang xử lý...</string>
+    <string name="alert_group_title">Chọn phân loại</string>
+    <string name="share_your_video">Chia sẻ video của bạn</string>
 </resources>

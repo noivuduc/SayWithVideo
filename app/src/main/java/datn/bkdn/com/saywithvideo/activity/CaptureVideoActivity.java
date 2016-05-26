@@ -580,7 +580,7 @@ public class CaptureVideoActivity extends AppCompatActivity implements View.OnCl
         @Override
         protected void onPostExecute(Void aVoid) {
             File file = new File(mVideoOutPut);
-            file.deleteOnExit();
+            file.delete();
             String userId = Utils.getCurrentUserID(CaptureVideoActivity.this);
             RealmUtils.getRealmUtils(CaptureVideoActivity.this).addVideo(CaptureVideoActivity.this, mFileName, outputPath, userId);
             sendBroadcast(new Intent("AddVideo"));
